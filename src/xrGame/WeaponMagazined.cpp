@@ -43,10 +43,15 @@ CWeaponMagazined::CWeaponMagazined(ESoundTypes eSoundType) : CWeapon()
 	m_bFireSingleShot			= false;
 	m_iShotNum					= 0;
 	m_fOldBulletSpeed			= 0;
+
+	bullet_cnt					= 0;
+
 	m_iQueueSize				= WEAPON_ININITE_QUEUE;
 	m_bLockType					= false;
 	m_bNeedBulletInGun			= false;
 	m_bHasDifferentFireModes	= false;
+
+	bHasBulletsToHide			= false;
 }
 
 CWeaponMagazined::~CWeaponMagazined()
@@ -132,6 +137,20 @@ void CWeaponMagazined::Load	(LPCSTR section)
 
 	m_iBaseDispersionedBulletsCount = READ_IF_EXISTS(pSettings, r_u8, section, "base_dispersioned_bullets_count", 0);
 	m_fBaseDispersionedBulletsSpeed = READ_IF_EXISTS(pSettings, r_float, section, "base_dispersioned_bullets_speed", m_fStartBulletSpeed);
+
+	if (pSettings->line_exist(section, "bullet_bones"))
+	{
+		bHasBulletsToHide = true;
+		LPCSTR str = pSettings->r_string(section, "bullet_bones");
+		for (int i = 0, count = _GetItemCount(str); i < count; ++i)
+		{
+			string128 bullet_bone_name;
+			_GetItem(str, i, bullet_bone_name);
+			bullets_bones.push_back(bullet_bone_name);
+			bullet_cnt++;
+		}
+
+	}
 
 	if (pSettings->line_exist(section, "fire_modes"))
 	{
@@ -223,6 +242,23 @@ void CWeaponMagazined::Reload()
 void CWeaponMagazined::OnMotionMark(u32 state, const motion_marks& M)
 {
 	inherited::OnMotionMark(state, M);
+	if (state == eReload)
+	{
+		u8 ammo_type = m_ammoType;
+		int ae = CheckAmmoBeforeReload(ammo_type);
+
+		if (ammo_type == m_ammoType)
+		{
+			Msg("Ammo elapsed: %d", iAmmoElapsed);
+			ae += iAmmoElapsed;
+		}
+
+		last_hide_bullet = ae >= bullet_cnt ? bullet_cnt : bullet_cnt - ae - 1;
+
+		Msg("Next reload: count %d with type %d", ae, ammo_type);
+
+		HUD_VisualBulletUpdate();
+	}
 }
 
 bool CWeaponMagazined::TryReload() 
@@ -300,6 +336,9 @@ void CWeaponMagazined::OnMagazineEmpty()
 
 void CWeaponMagazined::UnloadMagazine(bool spawn_ammo)
 {
+	last_hide_bullet = -1;
+	HUD_VisualBulletUpdate();
+
 	xr_map<LPCSTR, u16> l_ammo;
 
 	while(!m_magazine.empty())
@@ -340,6 +379,48 @@ void CWeaponMagazined::UnloadMagazine(bool spawn_ammo)
 		}
 		if(l_it->second && !unlimited_ammo()) SpawnAmmo(l_it->second, l_it->first);
 	}
+}
+int CWeaponMagazined::CheckAmmoBeforeReload(u8 &v_ammoType)
+{
+	if (m_set_next_ammoType_on_reload != undefined_ammo_type)
+		v_ammoType = m_set_next_ammoType_on_reload;
+
+	Msg("Ammo type in next reload : %d", m_set_next_ammoType_on_reload);
+
+	if (m_ammoTypes.size() <= v_ammoType)
+	{
+		Msg("Ammo type is wrong : %d", v_ammoType);
+		return 0;
+	}
+
+	LPCSTR tmp_sect_name = m_ammoTypes[v_ammoType].c_str();
+
+	if (!tmp_sect_name)
+	{
+		Msg("Sect name is wrong");
+		return 0;
+	}
+
+	CWeaponAmmo* ammo = smart_cast<CWeaponAmmo*>(m_pInventory->GetAny(tmp_sect_name));
+
+	if (!ammo && !m_bLockType)
+	{
+		for (u8 i = 0; i < u8(m_ammoTypes.size()); ++i)
+		{
+			//проверить патроны всех подходящих типов
+			ammo = smart_cast<CWeaponAmmo*>(m_pInventory->GetAny(m_ammoTypes[i].c_str()));
+			if (ammo)
+			{
+				v_ammoType = i;
+				break;
+			}
+		}
+	}
+
+	Msg("Ammo type %d", v_ammoType);
+
+	return GetAmmoCount(v_ammoType);
+
 }
 
 void CWeaponMagazined::ReloadMagazine() 
@@ -445,6 +526,8 @@ void CWeaponMagazined::OnStateSwitch	(u32 S)
 			}
 		}
 	}
+
+	HUD_VisualBulletUpdate();
 
 	inherited::OnStateSwitch(S);
 	CInventoryOwner* owner = smart_cast<CInventoryOwner*>(this->H_Parent());
@@ -661,6 +744,8 @@ void CWeaponMagazined::OnShot()
 	// Animation
 	PlayAnimShoot				();
 	
+	HUD_VisualBulletUpdate		();
+
 	// Shell Drop
 	Fvector vel; 
 	PHGetLinearVell				(vel);
@@ -1229,6 +1314,8 @@ void CWeaponMagazined::PlayAnimShow()
 {
 	VERIFY(GetState()==eShowing);
 
+	HUD_VisualBulletUpdate();
+
 	if (iAmmoElapsed == 0 && psWpnAnimsFlag.test(ANM_SHOW_EMPTY))
 		PlayHUDMotion("anm_show_empty", FALSE, this, GetState());
 	else
@@ -1305,6 +1392,8 @@ void CWeaponMagazined::PlayAnimIdle()
 void CWeaponMagazined::PlayAnimShoot()
 {
 	VERIFY(GetState()==eFire);
+
+	//HUD_VisualBulletUpdate();
 
 	if (IsZoomed() && psWpnAnimsFlag.test(ANM_SHOT_AIM) && IsScopeAttached())
 		PlayHUDMotion("anm_shots_when_aim", FALSE, this, GetState());
@@ -1449,6 +1538,15 @@ bool CWeaponMagazined::GetBriefInfo(II_BriefInfo& info)
 	xr_sprintf(int_str, "%d", ae);
 	info.cur_ammo = int_str;
 	info.fire_mode._set("");
+
+	if (bHasBulletsToHide)
+	{
+		last_hide_bullet = ae >= bullet_cnt ? bullet_cnt : bullet_cnt - ae - 1;
+
+		if (ae == 0) last_hide_bullet = -1;
+
+		//HUD_VisualBulletUpdate();
+	}
 
 	if (HasFireModes())
 	{
