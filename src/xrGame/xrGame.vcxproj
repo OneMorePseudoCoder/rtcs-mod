@@ -4230,6 +4230,9 @@
       <PrecompiledHeaderFile>pch_script.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
+    <ClCompile Include="weapon_ammo_dump_impl.cpp" />
+    <ClCompile Include="weapon_dump_impl.cpp" />
+    <ClCompile Include="Weapon_Extended.cpp" />
     <ClCompile Include="Wound.cpp" />
     <ClCompile Include="xrClientsPool.cpp" />
     <ClCompile Include="xrGame.cpp" />

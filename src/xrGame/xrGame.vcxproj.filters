@@ -10108,8 +10108,8 @@
     <ClCompile Include="game_sv_base.cpp">
       <Filter>Core\Server\Games\server\base</Filter>
     </ClCompile>
-    <ClCompile Include="bone_groups.cpp">
-      <Filter>Core\Server\Games\client</Filter>
+    <ClCompile Include="Weapon_Extended.cpp">
+      <Filter>Core\Client\Objects\items &amp; weapons\Weapons\Custom Weapon\Automatic</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
