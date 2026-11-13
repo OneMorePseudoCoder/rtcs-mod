@@ -1,6 +1,5 @@
 #include "stdafx.h"
 #include "xr_effgamma.h"
-//#include "device.h"
 
 #if defined(USE_DX10) || defined(USE_DX11)
 
@@ -19,6 +18,7 @@ void CGammaControl::Update()
 			GenLUT( GC, G );
 			pOutput->SetGammaControl(&G);
 		}
+		_RELEASE(pOutput);
 	}
 }
 

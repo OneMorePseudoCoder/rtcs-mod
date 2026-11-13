@@ -55,14 +55,15 @@ stalker_movement_manager_smart_cover::~stalker_movement_manager_smart_cover	()
 	xr_delete						(m_target_selector);
 }
 
-void stalker_movement_manager_smart_cover::reinit	()
+void stalker_movement_manager_smart_cover::reinit()
 {
-	inherited::reinit				();
+	inherited::reinit();
 
-	m_animation_selector			= xr_new<animation_selector_type>(&object());
-	m_animation_selector->setup		(&object(), m_property_storage);
+	xr_delete(m_animation_selector);
+	m_animation_selector = xr_new<animation_selector_type>(&object());
+	m_animation_selector->setup(&object(), m_property_storage);
 
-	m_target.construct				(this);
+	m_target.construct(this);
 }
 
 void stalker_movement_manager_smart_cover::update	(u32 time_delta)
