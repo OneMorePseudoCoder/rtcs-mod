@@ -5,10 +5,9 @@
 
 using dx10StateUtils::operator==;
 
-dx10SamplerStateCache	SSManager;
+dx10SamplerStateCache SSManager;
 
-dx10SamplerStateCache::dx10SamplerStateCache():
-	m_uiMaxAnisotropy(1)
+dx10SamplerStateCache::dx10SamplerStateCache() : m_uiMaxAnisotropy(1)
 {
 	static const int iMaxRSStates = 10;
 	m_StateArray.reserve(iMaxRSStates);
@@ -32,9 +31,9 @@ dx10SamplerStateCache::SHandle dx10SamplerStateCache::GetState( D3D_SAMPLER_DESC
 
 	u32 crc = dx10StateUtils::GetHash(desc);
 
-	hResult = FindState( desc, crc);
+	hResult = FindState(desc, crc);
 
-	if ( hResult == hInvalidHandle )
+	if (hResult == hInvalidHandle)
 	{
 		StateRecord rec;
 		rec.m_crc = crc;
@@ -168,20 +167,19 @@ void dx10SamplerStateCache::CSApplySamplers(HArray &samplers)
 }
 #endif
 
-
-void dx10SamplerStateCache::SetMaxAnisotropy( UINT uiMaxAniso)
+void dx10SamplerStateCache::SetMaxAnisotropy(u32 uiMaxAniso)
 {
-	clamp( uiMaxAniso, (u32)1, (u32)16);
+	clamp(uiMaxAniso, (u32)1, (u32)16);
 
-	if (m_uiMaxAnisotropy==uiMaxAniso)
+	if (m_uiMaxAnisotropy == uiMaxAniso)
 		return;
 
 	m_uiMaxAnisotropy = uiMaxAniso;
 
-	for ( u32 i=0; i<m_StateArray.size(); ++i)
+	for (u32 i = 0; i < m_StateArray.size(); ++i)
 	{
 		StateRecord	&rec = m_StateArray[i];
-		StateDecs	desc;
+		StateDecs desc;
 
 		rec.m_pState->GetDesc(&desc);
 
@@ -190,6 +188,29 @@ void dx10SamplerStateCache::SetMaxAnisotropy( UINT uiMaxAniso)
 		//	Reason: all checks for aniso applicability are done
 		//	in ValidateState.
 		desc.MaxAnisotropy = m_uiMaxAnisotropy;
+		dx10StateUtils::ValidateState(desc);
+
+		//	This can cause fragmentation if called too often
+		rec.m_pState->Release();
+		CreateState(desc, &rec.m_pState);
+	}
+}
+
+void dx10SamplerStateCache::SetMipLODBias(float uiMipLODBias)
+{
+	if (m_uiMipLODBias == uiMipLODBias)
+		return;
+
+	m_uiMipLODBias = uiMipLODBias;
+
+	for (u32 i = 0; i < m_StateArray.size(); ++i)
+	{
+		StateRecord	&rec = m_StateArray[i];
+		StateDecs desc;
+
+		rec.m_pState->GetDesc(&desc);
+
+		desc.MipLODBias = m_uiMipLODBias;
 		dx10StateUtils::ValidateState(desc);
 
 		//	This can cause fragmentation if called too often
