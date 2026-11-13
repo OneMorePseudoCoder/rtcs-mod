@@ -1536,10 +1536,12 @@ bool CWeapon::GrenadeLauncherAttachable()
 {
 	return (ALife::eAddonAttachable == m_eGrenadeLauncherStatus);
 }
+
 bool CWeapon::ScopeAttachable()
 {
 	return (ALife::eAddonAttachable == m_eScopeStatus);
 }
+
 bool CWeapon::SilencerAttachable()
 {
 	return (ALife::eAddonAttachable == m_eSilencerStatus);
@@ -1551,9 +1553,8 @@ shared_str wpn_grenade_launcher = "wpn_launcher";
 
 void CWeapon::UpdateHUDAddonsVisibility()
 {//actor only
-	if (!GetHUDmode())										return;
-
-	//.	return;
+	if (!GetHUDmode())
+		return;
 
 	u16 bone_id = HudItemData()->m_model->LL_BoneID(wpn_scope);
 
@@ -1598,6 +1599,7 @@ void CWeapon::UpdateHUDAddonsVisibility()
 
 	UpdateAddonsHudParams();
 }
+
 void CWeapon::HUD_VisualBulletUpdate(bool force, int force_idx)
 {
 	if (!bHasBulletsToHide) 
@@ -1622,9 +1624,10 @@ void CWeapon::HUD_VisualBulletUpdate(bool force, int force_idx)
 
 void CWeapon::UpdateAddonsVisibility()
 {
-	IKinematics* pWeaponVisual = smart_cast<IKinematics*>(Visual()); R_ASSERT(pWeaponVisual);
+	IKinematics* pWeaponVisual = smart_cast<IKinematics*>(Visual());
+	R_ASSERT(pWeaponVisual);
 
-	u16  bone_id;
+	u16 bone_id;
 	UpdateHUDAddonsVisibility();
 
 	pWeaponVisual->CalculateBones_Invalidate();
@@ -1634,37 +1637,39 @@ void CWeapon::UpdateAddonsVisibility()
 	{
 		if (IsScopeAttached())
 		{
-			if (!pWeaponVisual->LL_GetBoneVisible(bone_id) && bone_id != BI_NONE)
+			if (bone_id != BI_NONE && !pWeaponVisual->LL_GetBoneVisible(bone_id))
 				pWeaponVisual->LL_SetBoneVisible(bone_id, TRUE, TRUE);
 		}
-		else {
-			if (pWeaponVisual->LL_GetBoneVisible(bone_id) && bone_id != BI_NONE)
+		else 
+		{
+			if (bone_id != BI_NONE && pWeaponVisual->LL_GetBoneVisible(bone_id))
 				pWeaponVisual->LL_SetBoneVisible(bone_id, FALSE, TRUE);
 		}
 	}
-	if (m_eScopeStatus == ALife::eAddonDisabled && bone_id != BI_NONE &&
-		pWeaponVisual->LL_GetBoneVisible(bone_id))
+
+	if (bone_id != BI_NONE && m_eScopeStatus == ALife::eAddonDisabled && pWeaponVisual->LL_GetBoneVisible(bone_id))
 	{
 		pWeaponVisual->LL_SetBoneVisible(bone_id, FALSE, TRUE);
-		//		Log("scope", pWeaponVisual->LL_GetBoneVisible		(bone_id));
 	}
+
 	bone_id = pWeaponVisual->LL_BoneID(wpn_silencer);
 	if (SilencerAttachable())
 	{
-		if (IsSilencerAttached()) {
+		if (IsSilencerAttached()) 
+		{
 			if (!pWeaponVisual->LL_GetBoneVisible(bone_id))
 				pWeaponVisual->LL_SetBoneVisible(bone_id, TRUE, TRUE);
 		}
-		else {
+		else 
+		{
 			if (pWeaponVisual->LL_GetBoneVisible(bone_id))
 				pWeaponVisual->LL_SetBoneVisible(bone_id, FALSE, TRUE);
 		}
 	}
-	if (m_eSilencerStatus == ALife::eAddonDisabled && bone_id != BI_NONE &&
-		pWeaponVisual->LL_GetBoneVisible(bone_id))
+
+	if (bone_id != BI_NONE && m_eSilencerStatus == ALife::eAddonDisabled && pWeaponVisual->LL_GetBoneVisible(bone_id))
 	{
 		pWeaponVisual->LL_SetBoneVisible(bone_id, FALSE, TRUE);
-		//		Log("silencer", pWeaponVisual->LL_GetBoneVisible	(bone_id));
 	}
 
 	bone_id = pWeaponVisual->LL_BoneID(wpn_grenade_launcher);
@@ -1675,18 +1680,17 @@ void CWeapon::UpdateAddonsVisibility()
 			if (!pWeaponVisual->LL_GetBoneVisible(bone_id))
 				pWeaponVisual->LL_SetBoneVisible(bone_id, TRUE, TRUE);
 		}
-		else {
+		else 
+		{
 			if (pWeaponVisual->LL_GetBoneVisible(bone_id))
 				pWeaponVisual->LL_SetBoneVisible(bone_id, FALSE, TRUE);
 		}
 	}
-	if (m_eGrenadeLauncherStatus == ALife::eAddonDisabled && bone_id != BI_NONE &&
-		pWeaponVisual->LL_GetBoneVisible(bone_id))
+
+	if (bone_id != BI_NONE && m_eGrenadeLauncherStatus == ALife::eAddonDisabled && pWeaponVisual->LL_GetBoneVisible(bone_id))
 	{
 		pWeaponVisual->LL_SetBoneVisible(bone_id, FALSE, TRUE);
-		//		Log("gl", pWeaponVisual->LL_GetBoneVisible			(bone_id));
 	}
-
 
 	pWeaponVisual->CalculateBones_Invalidate();
 	pWeaponVisual->CalculateBones(TRUE);
