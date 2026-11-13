@@ -2,7 +2,6 @@
 #include "Actor_Flags.h"
 #include "hudmanager.h"
 #ifdef DEBUG
-
 #	include "PHDebug.h"
 #endif // DEBUG
 #include "alife_space.h"
@@ -38,7 +37,6 @@
 #include "ai_space.h"
 #include "trade.h"
 #include "inventory.h"
-//#include "Physics.h"
 #include "level.h"
 #include "GamePersistent.h"
 #include "game_cl_base.h"
@@ -47,7 +45,6 @@
 #include "string_table.h"
 #include "usablescriptobject.h"
 #include "../xrEngine/cl_intersect.h"
-//#include "ExtendedGeom.h"
 #include "alife_registry_wrappers.h"
 #include "../Include/xrRender/Kinematics.h"
 #include "artefact.h"
@@ -183,8 +180,6 @@ CActor::CActor() : CEntityAlive(),current_ik_cam_shift(0)
 
 	m_fSprintFactor			= 4.f;
 
-	//hFriendlyIndicator.create(FVF::F_LIT,RCache.Vertex.Buffer(),RCache.QuadIB);
-
 	m_pUsableObject			= NULL;
 
 
@@ -208,6 +203,8 @@ CActor::CActor() : CEntityAlive(),current_ik_cam_shift(0)
 	m_disabled_hitmarks		= false;
 	m_inventory_disabled	= false;
 
+    // Alex ADD: for smooth crouch fix
+    CurrentHeight = -1.f;
 }
 
 
