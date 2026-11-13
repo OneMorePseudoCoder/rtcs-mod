@@ -79,7 +79,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <EnableFiberSafeOptimizations>true</EnableFiberSafeOptimizations>
-      <AdditionalIncludeDirectories>.;$(SolutionDir)3rd party\luajit-2\src\;$(SolutionDir)3rd party\luabind\;$(xrSdkDir)include;$(XRAY_16X_LIBS)OpenAutomate\inc;$(XRAY_16X_LIBS)nvapi;$(DXSDK_DIR)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;$(SolutionDir)3rd party\luajit-2\src\;$(SolutionDir)3rd party\luabind\;$(xrSdkDir)include;$(XRAY_16X_LIBS)OpenAutomate\inc;$(XRAY_16X_LIBS)nvapi;$(DXSDK_DIR)Include;..\xrRenderPC_R2;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;DEBUG;_WINDOWS;_USRDLL;XRRENDER_R2_EXPORTS;_SECURE_SCL=0;USE_RESOURCE_DEBUGGER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>Sync</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -488,7 +488,7 @@
     <ClCompile Include="..\xrRender\Light_Render_Direct.cpp" />
     <ClCompile Include="..\xrRender\Light_Render_Direct_ComputeXFS.cpp" />
     <ClCompile Include="..\xrRender\light_smapvis.cpp" />
-    <ClCompile Include="light_vis.cpp" />
+    <ClCompile Include="..\xrRender\light_vis.cpp" />
     <ClCompile Include="r2.cpp" />
     <ClCompile Include="r2_blenders.cpp" />
     <ClCompile Include="r2_loader.cpp" />
@@ -512,7 +512,7 @@
     <ClCompile Include="r2_rendertarget_phase_smap_D.cpp" />
     <ClCompile Include="r2_rendertarget_phase_smap_S.cpp" />
     <ClCompile Include="r2_rendertarget_phase_ssao.cpp" />
-    <ClCompile Include="r2_R_calculate.cpp" />
+    <ClCompile Include="..\xrRender\r__R_calculate.cpp" />
     <ClCompile Include="r2_R_lights.cpp" />
     <ClCompile Include="r2_R_render.cpp" />
     <ClCompile Include="r2_R_sun.cpp" />

@@ -14,9 +14,6 @@
 #include "../xrRender/dxRenderDeviceRender.h"
 #include "../xrRender/dxWallMarkArray.h"
 #include "../xrRender/dxUIShader.h"
-//#include "../../xrServerEntities/smart_cast.h"
-
-
  
 using	namespace		R_dsgraph;
 
@@ -93,9 +90,7 @@ void					CRender::create					()
 	Models						= xr_new<CModelPool>		();
 	L_Dynamic					= xr_new<CLightR_Manager>	();
 	PSLibrary.OnCreate			();
-//.	HWOCC.occq_create			(occq_size);
 
-	xrRender_apply_tf			();
 	::PortalTraverser.initialize();
 }
 
@@ -103,7 +98,6 @@ void					CRender::destroy				()
 {
 	m_bMakeAsyncSS				= false;
 	::PortalTraverser.destroy	();
-//.	HWOCC.occq_destroy			();
 	PSLibrary.OnDestroy			();
 	
 	xr_delete					(L_Dynamic);
@@ -125,13 +119,10 @@ void					CRender::reset_begin			()
 		xr_delete(Details);
 	}
 	xr_delete					(Target);
-//.	HWOCC.occq_destroy			();
 }
 
 void					CRender::reset_end				()
 {
-	xrRender_apply_tf			();
-//.	HWOCC.occq_create			(occq_size);
 	Target						=	xr_new<CRenderTarget>	();
 	if (L_Projector)			L_Projector->invalidate		();
 
@@ -357,8 +348,8 @@ void CRender::Calculate				()
 	g_fSCREEN						=	float(T->get_width()*T->get_height())*fov_factor*(EPS_S+ps_r__LOD);
 	r_ssaDISCARD					=	_sqr(ps_r__ssaDISCARD)		/g_fSCREEN;
 	r_ssaDONTSORT					=	_sqr(ps_r__ssaDONTSORT/3)	/g_fSCREEN;
-	r_ssaLOD_A						=	_sqr(ps_r1_ssaLOD_A/3)		/g_fSCREEN;
-	r_ssaLOD_B						=	_sqr(ps_r1_ssaLOD_B/3)		/g_fSCREEN;
+	r_ssaLOD_A						=	_sqr(ps_r__ssaLOD_A/3)		/g_fSCREEN;
+	r_ssaLOD_B						=	_sqr(ps_r__ssaLOD_B/3)		/g_fSCREEN;
 	r_ssaGLOD_start					=	_sqr(ps_r__GLOD_ssa_start/3)/g_fSCREEN;
 	r_ssaGLOD_end					=	_sqr(ps_r__GLOD_ssa_end/3)	/g_fSCREEN;
 	r_ssaHZBvsTEX					=	_sqr(ps_r__ssaHZBvsTEX/3)	/g_fSCREEN;

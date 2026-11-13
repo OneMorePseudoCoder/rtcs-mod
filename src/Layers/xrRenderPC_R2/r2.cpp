@@ -10,7 +10,6 @@
 #include "../xrRender/dxRenderDeviceRender.h"
 #include "../xrRender/dxWallMarkArray.h"
 #include "../xrRender/dxUIShader.h"
-//#include "../../xrServerEntities/smart_cast.h"
 
 CRender										RImplementation;
 
@@ -275,26 +274,18 @@ void					CRender::create					()
 	PSLibrary.OnCreate			();
 	HWOCC.occq_create			(occq_size);
 
-	//rmNormal					();
 	marker						= 0;
-	//R_CHK						(HW.pDevice->CreateQuery(D3DQUERYTYPE_EVENT,&q_sync_point[0]));
-	//R_CHK						(HW.pDevice->CreateQuery(D3DQUERYTYPE_EVENT,&q_sync_point[1]));
 	ZeroMemory(q_sync_point, sizeof(q_sync_point));
 	for (u32 i=0; i<HW.Caps.iGPUNum; ++i)
 		R_CHK						(HW.pDevice->CreateQuery(D3DQUERYTYPE_EVENT,&q_sync_point[i]));
 
-	xrRender_apply_tf			();
 	::PortalTraverser.initialize();
 }
-
-
 
 void					CRender::destroy				()
 {
 	m_bMakeAsyncSS				= false;
 	::PortalTraverser.destroy	();
-	//_RELEASE					(q_sync_point[1]);
-	//_RELEASE					(q_sync_point[0]);
 	for (u32 i=0; i<HW.Caps.iGPUNum; ++i)
 		_RELEASE(q_sync_point[i]);
 	HWOCC.occq_destroy			();
@@ -333,16 +324,12 @@ void CRender::reset_begin()
 
 	xr_delete					(Target);
 	HWOCC.occq_destroy			();
-	//_RELEASE					(q_sync_point[1]);
-	//_RELEASE					(q_sync_point[0]);
 	for (u32 i=0; i<HW.Caps.iGPUNum; ++i)
 		_RELEASE(q_sync_point[i]);
 }
 
 void CRender::reset_end()
 {
-	//R_CHK						(HW.pDevice->CreateQuery(D3DQUERYTYPE_EVENT,&q_sync_point[0]));
-	//R_CHK						(HW.pDevice->CreateQuery(D3DQUERYTYPE_EVENT,&q_sync_point[1]));
 	for (u32 i=0; i<HW.Caps.iGPUNum; ++i)
 		R_CHK					(HW.pDevice->CreateQuery(D3DQUERYTYPE_EVENT,&q_sync_point[i]));
 	HWOCC.occq_create			(occq_size);
@@ -357,34 +344,24 @@ void CRender::reset_end()
 	}
 	//-AVO
 
-	xrRender_apply_tf			();
-
 	// Set this flag true to skip the first render frame,
 	// that some data is not ready in the first frame (for example device camera position)
 	m_bFirstFrameAfterReset = true;
 }
-/*
+
 void CRender::OnFrame()
 {
-	Models->DeleteQueue			();
-	if (ps_r2_ls_flags.test(R2FLAG_EXP_MT_CALC))	{
-		Device.seqParallel.insert	(Device.seqParallel.begin(),
-			fastdelegate::FastDelegate0<>(&HOM,&CHOM::MT_RENDER));
-	}
-}*/
-void CRender::OnFrame()
-{
-	Models->DeleteQueue			();
+	Models->DeleteQueue();
 
 	if (Details != nullptr)
 	{
 		Details->StartCalcAsync();
 	}
 
-	if (ps_r2_ls_flags.test(R2FLAG_EXP_MT_CALC))	{
+	if (ps_r2_ls_flags.test(R2FLAG_EXP_MT_CALC))	
+	{
 		// MT-HOM (@front)
-		Device.seqParallel.insert	(Device.seqParallel.begin(),
-			fastdelegate::FastDelegate0<>(&HOM,&CHOM::MT_RENDER));
+		Device.seqParallel.insert(Device.seqParallel.begin(), fastdelegate::FastDelegate0<>(&HOM,&CHOM::MT_RENDER));
 	}
 }
 

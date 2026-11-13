@@ -23,7 +23,8 @@ void	fill_render_mode_list() {}
 void	free_render_mode_list() {}
 #endif
 
-CHW			HW;
+CHW HW;
+D3DCAPS9 caps;
 
 #ifdef DEBUG
 IDirect3DStateBlock9*	dwDebugSB = 0;
@@ -107,26 +108,17 @@ void CHW::Reset(HWND hwnd)
 #endif
 }
 
-//xr_token*				vid_mode_token = NULL;
-//extern xr_token*		vid_mode_token;
+
 #include "../../Include/xrAPI/xrAPI.h"
-//xr_token*				vid_quality_token = NULL;
 
 void CHW::CreateD3D()
 {
-	//#ifndef DEDICATED_SERVER
-	//	LPCSTR		_name			= "d3d9.dll";
-	//#else
-	//	LPCSTR		_name			= "xrd3d9-null.dll";
-	//#endif
-
 	LPCSTR		_name = "xrd3d9-null.dll";
 
 #ifndef _EDITOR
 	if (!g_dedicated_server)
 #endif    
 		_name = "d3d9.dll";
-
 
 	hD3D = LoadLibrary(_name);
 	R_ASSERT2(hD3D, "Can't find 'd3d9.dll'\nPlease install latest version of DirectX before running this program");
@@ -432,9 +424,11 @@ void		CHW::CreateDevice(HWND m_hWnd, bool move_window)
 #ifdef DEBUG
 	R_CHK(pDevice->CreateStateBlock(D3DSBT_ALL, &dwDebugSB));
 #endif
+	CHK_DX(pDevice->GetDeviceCaps(&caps));
 	R_CHK(pDevice->GetRenderTarget(0, &pBaseRT));
 	R_CHK(pDevice->GetDepthStencilSurface(&pBaseZB));
 	u32	memory = pDevice->GetAvailableTextureMem();
+	Msg("*   Max texture size: [%d]x[%d]", caps.MaxTextureWidth, caps.MaxTextureHeight);
 	Msg("*     Texture memory: %d M", memory / (1024 * 1024));
 	Msg("*          DDI-level: %2.1f", float(D3DXGetDriverLevel(pDevice)) / 100.f);
 #ifndef _EDITOR
@@ -445,7 +439,6 @@ void		CHW::CreateDevice(HWND m_hWnd, bool move_window)
 
 u32	CHW::selectPresentInterval()
 {
-	D3DCAPS9	caps;
 	pD3D->GetDeviceCaps(DevAdapter, DevT, &caps);
 
 	if (!psDeviceFlags.test(rsVSync))
@@ -508,7 +501,6 @@ u32 CHW::selectGPU()
 	if (Caps.bForceGPU_SW)
 		return D3DCREATE_SOFTWARE_VERTEXPROCESSING;
 
-	D3DCAPS9	caps;
 	pD3D->GetDeviceCaps(DevAdapter, DevT, &caps);
 
 	if (caps.DevCaps&D3DDEVCAPS_HWTRANSFORMANDLIGHT)
@@ -525,7 +517,8 @@ u32 CHW::selectGPU()
 
 u32 CHW::selectRefresh(u32 dwWidth, u32 dwHeight, D3DFORMAT fmt)
 {
-	if (psDeviceFlags.is(rsRefresh60hz))	return D3DPRESENT_RATE_DEFAULT;
+	if (psDeviceFlags.is(rsRefresh60hz))
+		return D3DPRESENT_RATE_DEFAULT;
 	else
 	{
 		u32 selected = D3DPRESENT_RATE_DEFAULT;
@@ -615,13 +608,9 @@ void	CHW::updateWindowProps(HWND m_hWnd)
 	{
 		ShowCursor(FALSE);
 		SetForegroundWindow(m_hWnd);
-		//RECT winRect;
-		//GetWindowRect(m_hWnd, &winRect);
-		//ClipCursor(&winRect);
 	}
 #endif
 }
-
 
 struct _uniq_mode
 {
@@ -631,80 +620,6 @@ struct _uniq_mode
 };
 
 #ifndef _EDITOR
-
-/*
-void free_render_mode_list()
-{
-	for( int i=0; vid_quality_token[i].name; i++ )
-	{
-		xr_free					(vid_quality_token[i].name);
-	}
-	xr_free						(vid_quality_token);
-	vid_quality_token			= NULL;
-}
-*/
-/*
-void	fill_render_mode_list()
-{
-	if(vid_quality_token != NULL)		return;
-
-	D3DCAPS9					caps;
-	CHW							_HW;
-	_HW.CreateD3D				();
-	_HW.pD3D->GetDeviceCaps		(D3DADAPTER_DEFAULT,D3DDEVTYPE_HAL,&caps);
-	_HW.DestroyD3D				();
-	u16		ps_ver_major		= u16 ( u32(u32(caps.PixelShaderVersion)&u32(0xf << 8ul))>>8 );
-
-	xr_vector<LPCSTR>			_tmp;
-	u32 i						= 0;
-	for(; i<5; ++i)
-	{
-		bool bBreakLoop = false;
-		switch (i)
-		{
-		case 3:		//"renderer_r2.5"
-			if (ps_ver_major < 3)
-				bBreakLoop = true;
-			break;
-		case 4:		//"renderer_r_dx10"
-			bBreakLoop = true;
-			break;
-		default:	;
-		}
-
-		if (bBreakLoop) break;
-
-		_tmp.push_back				(NULL);
-		LPCSTR val					= NULL;
-		switch (i)
-		{
-			case 0: val ="renderer_r1";			break;
-			case 1: val ="renderer_r2a";		break;
-			case 2: val ="renderer_r2";			break;
-			case 3: val ="renderer_r2.5";		break;
-			case 4: val ="renderer_r_dx10";		break; //  -)
-		}
-		_tmp.back()					= xr_strdup(val);
-	}
-	u32 _cnt								= _tmp.size()+1;
-	vid_quality_token						= xr_alloc<xr_token>(_cnt);
-
-	vid_quality_token[_cnt-1].id			= -1;
-	vid_quality_token[_cnt-1].name			= NULL;
-
-#ifdef DEBUG
-	Msg("Available render modes[%d]:",_tmp.size());
-#endif // DEBUG
-	for(u32 i=0; i<_tmp.size();++i)
-	{
-		vid_quality_token[i].id				= i;
-		vid_quality_token[i].name			= _tmp[i];
-#ifdef DEBUG
-		Msg							("[%s]",_tmp[i]);
-#endif // DEBUG
-	}
-}
-*/
 void free_vid_mode_list()
 {
 	for (int i = 0; vid_mode_token[i].name; i++)
