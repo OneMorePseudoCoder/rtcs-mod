@@ -30,15 +30,14 @@ void	CRenderTarget::u_setrt			(const ref_rt& _1, const ref_rt& _2, const ref_rt&
 	{
 		dwWidth = _1->RTWidth();
 		dwHeight = _1->RTHeight();
-
 	}
 	else
 	{
 		D3D_DEPTH_STENCIL_VIEW_DESC	desc;
 		zb->GetDesc(&desc);
 
-      if( !RImplementation.o.dx10_msaa )
-         VERIFY(desc.ViewDimension==D3D_DSV_DIMENSION_TEXTURE2D);
+		if (!RImplementation.o.dx10_msaa)
+			VERIFY(desc.ViewDimension == D3D_DSV_DIMENSION_TEXTURE2D);
 
 		ID3DResource *pRes;
 
@@ -318,6 +317,11 @@ CRenderTarget::CRenderTarget		()
 	{
 		b_bloom_msaa			= xr_new<CBlender_bloom_build_msaa>		();
 		b_postprocess_msaa	= xr_new<CBlender_postprocess_msaa>	();
+	}
+	else
+	{
+		b_bloom_msaa = nullptr;
+		b_postprocess_msaa = nullptr;
 	}
 	b_luminance				= xr_new<CBlender_luminance>		();
 	b_combine				= xr_new<CBlender_combine>			();

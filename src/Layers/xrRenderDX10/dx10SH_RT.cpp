@@ -15,8 +15,6 @@ CRT::CRT			()
 #ifdef USE_DX11
 	pUAView			= NULL;
 #endif
-	//dwWidth		= 0;
-	//dwHeight		= 0;
 	rtWidth			= 0;
 	rtHeight		= 0;
 	fmt				= D3DFMT_UNKNOWN;
@@ -221,11 +219,13 @@ void CRT::create	(LPCSTR Name, u32 w, u32 h,	D3DFORMAT f, u32 SampleCount )
 
 void CRT::destroy		()
 {
-	if (pTexture._get())	{
-		//pTexture->surface_set	(0);
+	if (pTexture._get())	
+	{
 		pTexture->surface_null();
-		pTexture				= NULL;
+		pTexture.destroy();
+		pTexture = nullptr;
 	}
+
 	for (auto it = viewPortStuff.begin(); it != viewPortStuff.end(); it++)
 	{
 		_RELEASE(it->second.renderTargetInstance);
