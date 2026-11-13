@@ -28,18 +28,18 @@ static const float	s_fJumpGroundTime	= 0.1f;	// для снятия флажка
 
 IC static void generate_orthonormal_basis1(const Fvector& dir,Fvector& updir, Fvector& right)
 {
-
-	right.crossproduct(dir,updir); //. <->
+	right.crossproduct(dir,updir);
 	right.normalize();
 	updir.crossproduct(right,dir);
 }
 
-
 void CActor::g_cl_ValidateMState(float dt, u32 mstate_wf)
 {
 	// Lookout
-	if (mstate_wf&mcLookout)	mstate_real		|= mstate_wf&mcLookout;
-	else						mstate_real		&= ~mcLookout;
+	if (mstate_wf&mcLookout)
+		mstate_real		|= mstate_wf&mcLookout;
+	else
+		mstate_real		&= ~mcLookout;
 	
 	if (mstate_real&(mcJump|mcFall|mcLanding|mcLanding2))
 		mstate_real		&= ~mcLookout;
@@ -331,6 +331,9 @@ void CActor::g_cl_CheckControls(u32 mstate_wf, Fvector &vControlAccel, float &Ju
 
 #define ACTOR_ANIM_SECT "actor_animation"
 
+// Alex ADD: smooth crouch fix
+float cam_LookoutSpeed = 2.f;
+
 #define ACTOR_LLOOKOUT_ANGLE	PI_DIV_4
 #define ACTOR_RLOOKOUT_ANGLE	PI_DIV_4
 
@@ -382,8 +385,6 @@ void CActor::g_Orientate	(u32 mstate_rl, float dt)
 	XFORM().set		(mXFORM);
 	VERIFY(_valid(XFORM()));
 
-	//-------------------------------------------------
-
 	float tgt_roll		=	0.f;
 	if (mstate_rl&mcLookout)
 	{
@@ -392,17 +393,18 @@ void CActor::g_Orientate	(u32 mstate_rl, float dt)
 		if( (mstate_rl&mcLLookout) && (mstate_rl&mcRLookout) )
 			tgt_roll	= 0.0f;
 	}
-	if (!fsimilar(tgt_roll,r_torso_tgt_roll,EPS)){
-		angle_lerp		(r_torso_tgt_roll,tgt_roll,PI_MUL_2,dt);
-		r_torso_tgt_roll= angle_normalize_signed(r_torso_tgt_roll);
+	if (!fsimilar(tgt_roll, r_torso_tgt_roll, EPS))
+	{
+        r_torso_tgt_roll = angle_inertion_var(r_torso_tgt_roll, tgt_roll, 0.f, CurrentHeight * PI_MUL_2 * cam_LookoutSpeed, PI_DIV_2, dt);
+		r_torso_tgt_roll = angle_normalize_signed(r_torso_tgt_roll);
 	}
 }
+
 bool CActor::g_LadderOrient()
 {
 	Fvector leader_norm;
 	character_physics_support()->movement()->GroundNormal(leader_norm);
 	if(_abs(leader_norm.y)>M_SQRT1_2) return false;
-	//leader_norm.y=0.f;
 	float mag=leader_norm.magnitude();
 	if(mag<EPS_L) return false;
 	leader_norm.div(mag);
@@ -412,28 +414,8 @@ bool CActor::g_LadderOrient()
 	M.j.set(0.f,1.f,0.f);
 	generate_orthonormal_basis1(M.k,M.j,M.i);
 	M.i.invert();
-	//M.j.invert();
-
-
-	//Fquaternion q1,q2,q3;
-	//q1.set(XFORM());
-	//q2.set(M);
-	//q3.slerp(q1,q2,dt);
-	//Fvector angles1,angles2,angles3;
-	//XFORM().getHPB(angles1.x,angles1.y,angles1.z);
-	//M.getHPB(angles2.x,angles2.y,angles2.z);
-	////angle_lerp(angles3.x,angles1.x,angles2.x,dt);
-	////angle_lerp(angles3.y,angles1.y,angles2.y,dt);
-	////angle_lerp(angles3.z,angles1.z,angles2.z,dt);
-
-	//angles3.lerp(angles1,angles2,dt);
-	////angle_lerp(angles3.y,angles1.y,angles2.y,dt);
-	////angle_lerp(angles3.z,angles1.z,angles2.z,dt);
-	//angle_lerp(angles3.x,angles1.x,angles2.x,dt);
-	//XFORM().setHPB(angles3.x,angles3.y,angles3.z);
 	Fvector position;
 	position.set(Position());
-	//XFORM().rotation(q3);
 	VERIFY2(_valid(M),"Invalide matrix in g_LadderOrient");
 	XFORM().set(M);
 	VERIFY2(_valid(position),"Invalide position in g_LadderOrient");
@@ -597,7 +579,6 @@ void CActor::StopAnyMove()
 		g_player_hud->OnMovementChanged((EMoveCommand)0);
 	}
 }
-
 
 bool CActor::is_jump()
 {

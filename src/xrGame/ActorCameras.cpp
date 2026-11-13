@@ -16,7 +16,6 @@
 #include "level.h"
 #include "../xrEngine/cl_intersect.h"
 
-//#include "elevatorstate.h"
 #include "CharacterPhysicsSupport.h"
 #include "EffectorShot.h"
 
@@ -210,6 +209,7 @@ IC void get_cam_oob( Fvector	&bc, Fvector &bd, Fmatrix33	&mat, const Fmatrix &xf
 	// query
 	xf.get_CD			(bc,bd)		;
 }
+
 IC void get_cam_oob(  Fvector &bd, Fmatrix	&mat, const Fmatrix &xform, const SRotation &r_torso, float alpha, float radius, float c )
 {
 	
@@ -223,59 +223,54 @@ IC void get_cam_oob(  Fvector &bd, Fmatrix	&mat, const Fmatrix &xform, const SRo
 	mat.c.set( bc );
 
 }
+
 void	CActor::cam_Lookout	( const Fmatrix &xform, float camera_height )
 {
-		if (!fis_zero(r_torso_tgt_roll))
+	if (!fis_zero(r_torso_tgt_roll))
+	{
+	
+		float w,h;
+		float c				= viewport_near(w,h); w/=2.f;h/=2.f;
+		float alpha			= r_torso_tgt_roll/2.f;
+		float radius		= camera_height*0.5f;
+		// init valid angle
+		float valid_angle	= alpha;
+		Fvector				bc,bd;
+		Fmatrix33			mat;
+		get_cam_oob( bc, bd, mat, xform, r_torso, alpha, radius, c );
+
+		//if (tri_count)		
 		{
-		
-			float w,h;
-			float c				= viewport_near(w,h); w/=2.f;h/=2.f;
-			float alpha			= r_torso_tgt_roll/2.f;
-			float radius		= camera_height*0.5f;
-			// init valid angle
-			float valid_angle	= alpha;
-			Fvector				bc,bd;
-			Fmatrix33			mat;
-			get_cam_oob( bc, bd, mat, xform, r_torso, alpha, radius, c );
-
-			/*
-			xrXRC				xrc			;
-			xrc.box_options		(0)			;
-			xrc.box_query		(Level().ObjectSpace.GetStaticModel(), bc, bd)		;
-			u32 tri_count		= xrc.r_count();
-
-			*/
-			//if (tri_count)		
+			float da		= 0.f;
+			BOOL bIntersect	= FALSE;
+			Fvector	ext		= {w,h,VIEWPORT_NEAR/2};
+			Fvector				pt;
+			calc_gl_point	( pt, xform, radius, alpha );
+			if ( test_point( pt, mat, ext, this  ) )
 			{
-				float da		= 0.f;
-				BOOL bIntersect	= FALSE;
-				Fvector	ext		= {w,h,VIEWPORT_NEAR/2};
-				Fvector				pt;
-				calc_gl_point	( pt, xform, radius, alpha );
-				if ( test_point( pt, mat, ext, this  ) )
+				da			= PI/1000.f;
+				if (!fis_zero(r_torso.roll))
+					da		*= r_torso.roll/_abs(r_torso.roll);
+				for (float angle=0.f; _abs(angle)<_abs(alpha); angle+=da)
 				{
-					da			= PI/1000.f;
-					if (!fis_zero(r_torso.roll))
-						da		*= r_torso.roll/_abs(r_torso.roll);
-					for (float angle=0.f; _abs(angle)<_abs(alpha); angle+=da)
-					{
-						Fvector				pt;
-						calc_gl_point( pt, xform, radius, angle );
-						if (test_point( pt, mat,ext, this )) 
-							{ bIntersect=TRUE; break; } 
-					}
-					valid_angle	= bIntersect?angle:alpha;
-				} 
-			}
-			r_torso.roll		= valid_angle*2.f;
-			r_torso_tgt_roll	= r_torso.roll;
+					Fvector				pt;
+					calc_gl_point( pt, xform, radius, angle );
+					if (test_point( pt, mat,ext, this )) 
+						{ bIntersect=TRUE; break; } 
+				}
+				valid_angle	= bIntersect?angle:alpha;
+			} 
 		}
-		else
-		{	
-			r_torso_tgt_roll = 0.f;
-			r_torso.roll = 0.f;
-		}
+		r_torso.roll		= valid_angle*2.f;
+		r_torso_tgt_roll	= r_torso.roll;
+	}
+	else
+	{	
+		r_torso_tgt_roll = 0.f;
+		r_torso.roll = 0.f;
+	}
 }
+
 #ifdef	DEBUG
 BOOL ik_cam_shift = true;
 float ik_cam_shift_tolerance = 0.2f;
@@ -288,7 +283,8 @@ static const float	ik_cam_shift_speed = 0.01f;
 
 void CActor::cam_Update(float dt, float fFOV)
 {
-	if(m_holder)		return;
+	if(m_holder)
+		return;
 
 	// HUD FOV Update --#SM+#--
 	if (this == Level().CurrentControlEntity())
@@ -303,7 +299,9 @@ void CActor::cam_Update(float dt, float fFOV)
 
 	if( (mstate_real & mcClimb) && (cam_active!=eacFreeLook) )
 		camUpdateLadder(dt);
+
 	on_weapon_shot_update();
+
 	float y_shift =0;
 	
 	if( GamePersistent().GameType() != eGameIDSingle && ik_cam_shift && character_physics_support() && character_physics_support()->ik_controller() )
@@ -324,7 +322,16 @@ void CActor::cam_Update(float dt, float fFOV)
 	} else
 		current_ik_cam_shift = 0;
 
-	Fvector point		= {0,CameraHeight() + current_ik_cam_shift,0}; 
+	// Alex ADD: smooth crouch fix
+	constexpr const float HeightInterpolationSpeed = 4.f;
+
+    if (CurrentHeight < 0.0f)
+        CurrentHeight = CameraHeight();
+
+	if (CurrentHeight != CameraHeight())
+		CurrentHeight = (CurrentHeight * (1.0f - HeightInterpolationSpeed * dt)) + (CameraHeight() * HeightInterpolationSpeed * dt);
+
+	Fvector point = { 0, CurrentHeight, 0 };
 	Fvector dangle		= {0,0,0};
 	Fmatrix				xform;
 	xform.setXYZ		(0,r_torso.yaw,0);
