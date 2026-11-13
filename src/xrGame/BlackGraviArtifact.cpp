@@ -15,7 +15,7 @@
 #include "explosive.h"
 #include "../xrphysics/IPHWorld.h"
 #include "CharacterPhysicsSupport.h"
-//extern CPHWorld*	ph_world;
+
 CBlackGraviArtefact::CBlackGraviArtefact(void) 
 {
 	m_fImpulseThreshold = 10.f;
@@ -30,8 +30,6 @@ CBlackGraviArtefact::~CBlackGraviArtefact(void)
 	m_GameObjectList.clear();
 }
 
-
-
 void CBlackGraviArtefact::Load(LPCSTR section) 
 {
 	inherited::Load(section);
@@ -44,15 +42,12 @@ void CBlackGraviArtefact::Load(LPCSTR section)
 
 BOOL CBlackGraviArtefact::net_Spawn(CSE_Abstract* DC)
 {
-	if(!inherited::net_Spawn(DC)) return FALSE;
-
-
+	if (!inherited::net_Spawn(DC))
+		return FALSE;
 
 	CParticlesObject* pStaticPG;
 	pStaticPG = CParticlesObject::Create("anomaly\\galantine",FALSE);
 	Fmatrix pos;
-	//pos.rotateY(1.57);
-	//pos.mulA(pos);
 	pos.scale(0.7f,0.7f,0.7f);
 	pos.translate_over(XFORM().c);
 	
@@ -61,38 +56,26 @@ BOOL CBlackGraviArtefact::net_Spawn(CSE_Abstract* DC)
 	pStaticPG->UpdateParent(pos, vel); 
 	pStaticPG->Play(false);
 
-
-
 	return TRUE;
 }
-struct SRP
-{
-	const CPhysicsShellHolder* obj;
-		SRP(const CPhysicsShellHolder* O)
-		{
-			obj=O;
-		}
-	bool operator	() (CPhysicsShellHolder* O) const
-	{
-		return obj==O;
-	}
-};
+
 void CBlackGraviArtefact::net_Relcase(CObject* O)
 {
 	inherited::net_Relcase(O);
 	//for vector
-	GAME_OBJECT_LIST_it I=std::remove_if(m_GameObjectList.begin(),m_GameObjectList.end(),SRP(smart_cast<CPhysicsShellHolder*>(O)));
-	m_GameObjectList.erase(I,m_GameObjectList.end());
-	//for list
-	//m_GameObjectList.remove_if(SRP(smart_cast<CPhysicsShellHolder*>(O)));
+	GAME_OBJECT_LIST_it I = std::remove_if(m_GameObjectList.begin(), m_GameObjectList.end(), [O](const CPhysicsShellHolder* obj) {return obj == O; });
+	m_GameObjectList.erase(I, m_GameObjectList.end());
 }
+
 void CBlackGraviArtefact::UpdateCLChild() 
 {
 	VERIFY(!physics_world()->Processing());
-	inherited::UpdateCLChild	();
+	inherited::UpdateCLChild();
 
-	if (getVisible() && m_pPhysicsShell) {
-		if (m_bStrike) {
+	if (getVisible() && m_pPhysicsShell) 
+	{
+		if (m_bStrike) 
+		{
 			Fvector	P; 
 			P.set(Position());
 			feel_touch_update(P,m_fRadius);
@@ -104,23 +87,19 @@ void CBlackGraviArtefact::UpdateCLChild()
 			Fmatrix pos; 
 			pos.set(XFORM()); 
 			Fvector vel; 
-			//vel.sub(Position(),ps_Element(0).vPosition); 
-			//vel.div((Level().timeServer()-ps_Element(0).dwTime)/1000.f);
 			vel.set(0,0,0);
 			pStaticPG->UpdateParent(pos, vel); 
 			pStaticPG->Play(false);
 
 			m_bStrike = false;
 		}
-	}else if(H_Parent()) XFORM().set(H_Parent()->XFORM());
+	}
+	else if(H_Parent())
+		XFORM().set(H_Parent()->XFORM());
 }
 
-//void CBlackGraviArtefact::Hit(float P, Fvector &dir,
-//						CObject* who, s16 element,
-//						Fvector position_in_object_space,
-//						float impulse,
-//						ALife::EHitType hit_type)
-void	CBlackGraviArtefact::Hit					(SHit* pHDS)
+
+void CBlackGraviArtefact::Hit(SHit* pHDS)
 {
 	SHit HDS = *pHDS;
 	if(HDS.impulse>m_fImpulseThreshold)
@@ -130,7 +109,6 @@ void	CBlackGraviArtefact::Hit					(SHit* pHDS)
 		HDS.impulse = 0;
 	}
 	
-//	inherited::Hit(P, dir, who, element, position_in_object_space, impulse, hit_type);
 	inherited::Hit(&HDS);
 }
 
@@ -150,11 +128,9 @@ void CBlackGraviArtefact::feel_touch_delete(CObject* O)
 	CGameObject* pGameObject = static_cast<CGameObject*>(O);
 	CArtefact* pArtefact = smart_cast<CArtefact*>(O);
 
-	if(pGameObject && !pArtefact)
+	if (pGameObject && !pArtefact)
 	{
-		m_GameObjectList.erase(std::find(m_GameObjectList.begin(), 
-										 m_GameObjectList.end(), 
-										 pGameObject));
+		m_GameObjectList.erase(std::find(m_GameObjectList.begin(), m_GameObjectList.end(), pGameObject));
 	}
 }
 
@@ -170,21 +146,19 @@ bool CBlackGraviArtefact::feel_touch_contact(CObject* O)
 
 void CBlackGraviArtefact::GraviStrike()
 {
-	xr_list<s16>		elements_list;
-	xr_list<Fvector>	bone_position_list;
+	xr_list<s16> elements_list;
+	xr_list<Fvector> bone_position_list;
 
-	Fvector object_pos					; 
-	Fvector strike_dir					;
+	Fvector object_pos; 
+	Fvector strike_dir;
 
-	rq_storage.r_clear	();
+	rq_storage.r_clear();
 
-	for(GAME_OBJECT_LIST_it it = m_GameObjectList.begin(); 
-						    m_GameObjectList.end() != it;
-							++it)
+	for (GAME_OBJECT_LIST_it it = m_GameObjectList.begin(); m_GameObjectList.end() != it; ++it)
 	{
 		CPhysicsShellHolder* pGameObject = *it;
 
-		if(pGameObject->Visual()) 
+		if (pGameObject->Visual()) 
 			pGameObject->Center(object_pos); 
 		else 
 			object_pos.set(pGameObject->Position());
@@ -192,30 +166,25 @@ void CBlackGraviArtefact::GraviStrike()
 		strike_dir.sub(object_pos, Position()); 
 		float distance = strike_dir.magnitude(); 
 
-		float impulse = 100.f*m_fStrikeImpulse * (1.f - (distance/m_fRadius)*
-										   (distance/m_fRadius));
-						
-		if(impulse > .001f) 
+		float impulse = 100.f * m_fStrikeImpulse * (1.f - (distance / m_fRadius) * (distance / m_fRadius));
+
+		if (impulse > .001f) 
 		{
-//?			BOOL		enabled = getEnabled();
-//?			setEnabled	(FALSE);
-			impulse		*= CExplosive::ExplosionEffect	(rq_storage,NULL,pGameObject, Position(),m_fRadius);
-//?			setEnabled	(enabled);
+			impulse *= CExplosive::ExplosionEffect(rq_storage, NULL, pGameObject, Position(), m_fRadius);
 		}
 
-		float hit_power		;
+		float hit_power;
 		CEntityAlive* pEntityAlive = smart_cast<CEntityAlive*>(pGameObject);
-		if(pGameObject->m_pPhysicsShell)	hit_power = 0;
-		else if(pEntityAlive && pEntityAlive->g_Alive() && 
-				pEntityAlive->character_physics_support()->movement()->CharacterExist())
+		if (pGameObject->m_pPhysicsShell)
+			hit_power = 0;
+		else if (pEntityAlive && pEntityAlive->g_Alive() && pEntityAlive->character_physics_support()->movement()->CharacterExist())
 			hit_power = 0;
 		else
 			hit_power = impulse;
 
-		
-		if(impulse > .001f) 
+		if (impulse > .001f) 
 		{
-			while(!elements_list.empty()) 
+			while (!elements_list.empty()) 
 			{
 				s16 element = elements_list.front();
 				Fvector bone_pos = bone_position_list.front();
