@@ -13,25 +13,31 @@ static void generate_orthonormal_basis(const Fvector& dir,Fmatrix &result)
 	result.k.normalize	(dir);
 	Fvector::generate_orthonormal_basis(result.k, result.j, result.i);
 }
+
 CParticlesPlayer::SParticlesInfo* CParticlesPlayer::SBoneInfo::FindParticles(const shared_str& ps_name)
 {
 	for (ParticlesInfoListIt it=particles.begin(); it!=particles.end(); ++it)
-		if (it->ps && it->ps->Name()==ps_name) return &(*it);
+		if (it->ps && it->ps->Name()==ps_name)
+			return &(*it);
 	return 0;
 }
+
 CParticlesPlayer::SParticlesInfo* CParticlesPlayer::SBoneInfo::AppendParticles(CObject* object, const shared_str& ps_name)
 {
 	SParticlesInfo* pi	= FindParticles(ps_name);
-	if (pi)				return pi;
+	if (pi)
+		return pi;
 	particles.push_back	(SParticlesInfo());
 	pi					= &particles.back();
 	pi->ps				= CParticlesObject::Create(*ps_name,FALSE);
 	return pi;
 }
+
 void CParticlesPlayer::SBoneInfo::StopParticles(const shared_str& ps_name, bool bDestroy)
 {
 	SParticlesInfo* pi	= FindParticles(ps_name);
-	if (pi){
+	if (pi)
+	{
 		if(!bDestroy)
 			pi->ps->Stop();
 		else
@@ -42,14 +48,14 @@ void CParticlesPlayer::SBoneInfo::StopParticles(const shared_str& ps_name, bool 
 void CParticlesPlayer::SBoneInfo::StopParticles(u16 sender_id, bool bDestroy)
 {
 	for (ParticlesInfoListIt it=particles.begin(); it!=particles.end(); it++)
-		if (it->sender_id==sender_id){
+		if (it->sender_id==sender_id)
+		{
 			if(!bDestroy)
 				it->ps->Stop();
 			else
 				CParticlesObject::Destroy(it->ps);
 		}
 }
-//-------------------------------------------------------------------------------------
 
 CParticlesPlayer::CParticlesPlayer ()
 {
@@ -70,18 +76,19 @@ CParticlesPlayer::~CParticlesPlayer ()
 
 void CParticlesPlayer::LoadParticles(IKinematics* K)
 {
-	VERIFY				(K);
+	VERIFY(K);
 
 	m_Bones.clear();
 	
-
 	//считать список косточек и соответствующих
 	//офсетов  куда можно вешать партиклы
-	CInifile* ini		= K->LL_UserData();
-	if(ini&&ini->section_exist("particle_bones")){
+	CInifile* ini = K->LL_UserData();
+	if (ini && ini->section_exist("particle_bones"))
+	{
 		bone_mask		= 0;
 		CInifile::Sect& data		= ini->r_section("particle_bones");
-		for (CInifile::SectCIt I=data.Data.begin(); I!=data.Data.end(); ++I){
+		for (CInifile::SectCIt I=data.Data.begin(); I!=data.Data.end(); ++I)
+		{
 			const CInifile::Item& item	= *I;
 			u16 index				= K->LL_BoneID(*item.first); 
 			R_ASSERT3(index != BI_NONE, "Particles bone not found", *item.first);
@@ -97,6 +104,7 @@ void CParticlesPlayer::LoadParticles(IKinematics* K)
 		m_Bones.push_back	(SBoneInfo(K->LL_GetBoneRoot(),Fvector().set(0,0,0)));
 	}
 }
+
 //уничтожение партиклов на net_Destroy
 void	CParticlesPlayer::net_DestroyParticles	()
 {
@@ -127,13 +135,13 @@ CParticlesPlayer::SBoneInfo* CParticlesPlayer::get_nearest_bone_info(IKinematics
 	return get_bone_info(play_bone);
 }
 
-
 void CParticlesPlayer::StartParticles(const shared_str& particles_name, u16 bone_num, const Fvector& dir, u16 sender_id, int life_time, bool auto_stop)
 {
 	Fmatrix xform;
 	generate_orthonormal_basis(dir,xform);
 	StartParticles(particles_name,bone_num,xform,sender_id,life_time,auto_stop);
 }
+
 void CParticlesPlayer::StartParticles(const shared_str& particles_name, u16 bone_num, const Fmatrix& xform, u16 sender_id, int life_time, bool auto_stop)
 {
 	VERIFY(fis_zero(xform.c.magnitude()));
@@ -143,7 +151,8 @@ void CParticlesPlayer::StartParticles(const shared_str& particles_name, u16 bone
 	VERIFY(object);
 
 	SBoneInfo* pBoneInfo			=  get_nearest_bone_info(smart_cast<IKinematics*>(object->Visual()),bone_num);
-	if(!pBoneInfo) return;
+	if(!pBoneInfo)
+		return;
 
 	SParticlesInfo &particles_info	=*pBoneInfo->AppendParticles(object,particles_name);
 	
@@ -152,7 +161,8 @@ void CParticlesPlayer::StartParticles(const shared_str& particles_name, u16 bone
 	particles_info.life_time=auto_stop ? life_time : u32(-1);
 	xform.getHPB(particles_info.angles);
 
-	Fmatrix m;m.setHPB(particles_info.angles.x,particles_info.angles.y,particles_info.angles.z);
+	Fmatrix m;
+	m.setHPB(particles_info.angles.x,particles_info.angles.y,particles_info.angles.z);
 	GetBonePos(object,pBoneInfo->index,pBoneInfo->offset,m.c);
 	particles_info.ps->UpdateParent(m,zero_vel);
 	if(!particles_info.ps->IsPlaying())
@@ -172,8 +182,8 @@ void CParticlesPlayer::StartParticles(const shared_str& ps_name, const Fmatrix& 
 
 		particles_info.life_time=auto_stop ? life_time : u32(-1);
 		xform.getHPB(particles_info.angles);
-		//начать играть партиклы
 
+		//начать играть партиклы
 		Fmatrix m;m.set(xform);
 		GetBonePos(object,it->index,it->offset,m.c);
 		particles_info.ps->UpdateParent(m,zero_vel);
@@ -190,7 +200,6 @@ void CParticlesPlayer::StartParticles(const shared_str& ps_name, const Fvector& 
 	generate_orthonormal_basis(dir,xform);
 	StartParticles(ps_name,xform,sender_id,life_time,auto_stop);
 }
-
 
 void CParticlesPlayer::StopParticles(u16 sender_id, u16 bone_id, bool bDestroy)
 {
@@ -234,18 +243,22 @@ void CParticlesPlayer::AutoStopParticles(const shared_str& ps_name, u16 bone_id,
 
 void CParticlesPlayer::UpdateParticles()
 {
-	if	(!m_bActiveBones)	return;
+	if (!m_bActiveBones)
+		return;
 	m_bActiveBones			= false;
 
     CObject* object			= m_self_object;
 	VERIFY	(object);
 
-	for(BoneInfoVecIt b_it=m_Bones.begin(); b_it!=m_Bones.end(); ++b_it){
+	for(BoneInfoVecIt b_it=m_Bones.begin(); b_it!=m_Bones.end(); ++b_it)
+	{
 		SBoneInfo& b_info	= *b_it;
 
-		for (ParticlesInfoListIt p_it=b_info.particles.begin(); p_it!=b_info.particles.end(); ++p_it){
+		for (ParticlesInfoListIt p_it=b_info.particles.begin(); p_it!=b_info.particles.end(); ++p_it)
+		{
 			SParticlesInfo& p_info	= *p_it;
-			if(!p_info.ps) continue;
+			if(!p_info.ps)
+				continue;
 			//обновить позицию партиклов
 			Fmatrix xform;
 			xform.setHPB(p_info.angles.x,p_info.angles.y,p_info.angles.z);
@@ -253,16 +266,18 @@ void CParticlesPlayer::UpdateParticles()
 			p_info.ps->UpdateParent(xform, parent_vel);
 
 			//обновить время существования
-			if(p_info.life_time!=u32(-1))
+			if (p_info.life_time!=u32(-1))
 			{
-				if(p_info.life_time>Device.dwTimeDelta)	p_info.life_time-=Device.dwTimeDelta;
+				if (p_info.life_time>Device.dwTimeDelta)
+					p_info.life_time-=Device.dwTimeDelta;
 				else 
 				{
 					p_info.ps->Stop();
 					p_info.life_time=u32(-1);
 				}
 			}
-			if(!p_info.ps->IsPlaying()){
+			if (!p_info.ps->IsPlaying())
+			{
 				CParticlesObject::Destroy(p_info.ps);
 			}
 			else
@@ -271,12 +286,11 @@ void CParticlesPlayer::UpdateParticles()
 
 		const auto RI = std::remove_if(b_info.particles.begin(), b_info.particles.end(), [](const SParticlesInfo& pi)
 		{
-				return pi.ps == nullptr;
+			return pi.ps == nullptr;
 		});
 		b_info.particles.erase(RI,b_info.particles.end());
 	}
 }
-
 
 void CParticlesPlayer::GetBonePos	(CObject* pObject, u16 bone_id, const Fvector& offset, Fvector& result)
 {
