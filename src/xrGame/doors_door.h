@@ -11,12 +11,14 @@
 
 class CPhysicObject;
 
-namespace doors {
+namespace doors 
+{
 
 class actor;
 enum door_state;
 
-class door : private boost::noncopyable {
+class door : private boost::noncopyable 
+{
 public:
 						door				( CPhysicObject* object );
 						~door				( );
@@ -28,21 +30,21 @@ public:
 	bool				check_initiator		( actor const* initiator ) const;
 #endif // #ifdef DEBUG
 
-	void				lock				( );
-	void				unlock				( );
+	void lock();
+	void unlock();
 
-	Fvector const&		position			( ) const;
-	Fmatrix const&		get_matrix			( ) const;
-	Fvector const&		get_vector			( door_state state ) const;
-	bool				is_locked			( door_state state ) const;
-	bool				is_blocked			( door_state state ) const;
-
-private:
-	void				change_state		( actor* initiator, door_state start_state, door_state stop_state );
-	void				change_state		( );
+	Fvector const& position() const;
+	Fmatrix const& get_matrix() const;
+	Fvector const& get_vector(door_state state) const;
+	bool is_locked(door_state state) const;
+	bool is_blocked(door_state state) const;
 
 private:
-	typedef xr_vector<actor*>				actors_type;
+	void change_state(actor* initiator, door_state start_state, door_state stop_state);
+	void change_state(actor* initiator);
+
+private:
+	typedef xr_vector<actor*> actors_type;
 
 private:
 	actors_type			m_initiators;
