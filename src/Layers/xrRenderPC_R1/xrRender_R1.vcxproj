@@ -437,6 +437,7 @@
     <ClCompile Include="..\xrRender\r__dsgraph_build.cpp" />
     <ClCompile Include="..\xrRender\r__dsgraph_render.cpp" />
     <ClCompile Include="..\xrRender\r__dsgraph_render_lods.cpp" />
+    <ClCompile Include="..\xrRender\r__R_calculate.cpp" />
     <ClCompile Include="..\xrRender\r__screenshot.cpp" />
     <ClCompile Include="..\xrRender\r__sector.cpp" />
     <ClCompile Include="..\xrRender\r__sector_traversal.cpp" />
