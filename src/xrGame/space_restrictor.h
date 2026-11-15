@@ -12,12 +12,14 @@
 #include "restriction_space.h"
 #include "script_export_space.h"
 
-class CSpaceRestrictor : public CGameObject {
+class CSpaceRestrictor : public CGameObject 
+{
 private:
 	typedef CGameObject			inherited;
 
 private:
-	enum {
+	enum 
+	{
 		PLANE_COUNT = 6,
 	};
 
@@ -25,7 +27,8 @@ private:
 	typedef Fplane				CPlanesArray[PLANE_COUNT];
 
 private:
-	struct CPlanes {
+	struct CPlanes 
+	{
 		CPlanesArray			m_planes;
 	};
 
@@ -62,6 +65,7 @@ public:
 
 	IC RestrictionSpace::ERestrictorTypes restrictor_type() const; 
 
+	IC void change_restrictor_type(RestrictionSpace::ERestrictorTypes);
 public:
 #ifdef DEBUG
 	virtual void				OnRender			();
