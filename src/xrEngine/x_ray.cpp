@@ -979,7 +979,6 @@ CApplication::~CApplication()
     Engine.Event.Handler_Detach(eStart, this);
     Engine.Event.Handler_Detach(eQuit, this);
     Engine.Event.Handler_Detach(eStartMPDemo, this);
-
 }
 
 extern CRenderDevice Device;
@@ -997,6 +996,7 @@ void CApplication::OnEvent(EVENT E, u64 P1, u64 P2)
             xr_free(Levels[i].folder);
             xr_free(Levels[i].name);
         }
+		Levels.clear();
     }
     else if (E == eStart)
     {
@@ -1101,7 +1101,6 @@ void CApplication::LoadBegin()
     ll_dwReference++;
     if (1 == ll_dwReference)
     {
-
         g_appLoaded = FALSE;
 
 #ifndef DEDICATED_SERVER
@@ -1135,7 +1134,8 @@ void CApplication::destroy_loading_shaders()
 
 PROTECT_API void CApplication::LoadDraw()
 {
-    if (g_appLoaded) return;
+    if (g_appLoaded)
+		return;
 
     Device.dwFrame += 1;
 
@@ -1159,7 +1159,6 @@ void CApplication::LoadTitleInt(LPCSTR str1, LPCSTR str2, LPCSTR str3)
     xr_strcpy(ls_header, str1);
     xr_strcpy(ls_tip_number, str2);
     xr_strcpy(ls_tip, str3);
-    // LoadDraw ();
 }
 void CApplication::LoadStage()
 {
@@ -1174,12 +1173,11 @@ void CApplication::LoadStage()
         max_load_stage = 17;
     else
         max_load_stage = 14;
+
     LoadDraw();
 }
 
-void CApplication::LoadSwitch()
-{
-}
+void CApplication::LoadSwitch() {}
 
 // Sequential
 void CApplication::OnFrame()
@@ -1198,12 +1196,7 @@ void CApplication::Level_Append(LPCSTR folder)
     strconcat(sizeof(N2), N2, folder, "level.ltx");
     strconcat(sizeof(N3), N3, folder, "level.geom");
     strconcat(sizeof(N4), N4, folder, "level.cform");
-    if (
-        FS.exist("$game_levels$", N1) &&
-        FS.exist("$game_levels$", N2) &&
-        FS.exist("$game_levels$", N3) &&
-        FS.exist("$game_levels$", N4)
-    )
+    if (FS.exist("$game_levels$", N1) && FS.exist("$game_levels$", N2) && FS.exist("$game_levels$", N3) && FS.exist("$game_levels$", N4))
     {
         sLevelInfo LI;
         LI.folder = xr_strdup(folder);
@@ -1221,9 +1214,7 @@ void CApplication::Level_Scan()
     }
     Levels.clear();
 
-
     xr_vector<char*>* folder = FS.file_list_open("$game_levels$", FS_ListFolders | FS_RootOnly);
-    //. R_ASSERT (folder&&folder->size());
 
     for (u32 i = 0; i < folder->size(); ++i)
         Level_Append((*folder)[i]);
@@ -1477,6 +1468,7 @@ void doBenchmark(LPCSTR name)
         Startup();
     }
 }
+
 #pragma optimize("g", off)
 void CApplication::load_draw_internal()
 {
