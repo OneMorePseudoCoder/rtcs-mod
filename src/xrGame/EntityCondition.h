@@ -8,7 +8,9 @@ class CLevel;
 #include "hit_immunity.h"
 #include "Hit.h"
 #include "Level.h"
-enum EBoostParams{
+
+enum EBoostParams
+{
 	eBoostHpRestore = 0,
 	eBoostPowerRestore,
 	eBoostRadiationRestore,
@@ -50,7 +52,8 @@ static const LPCSTR ef_boosters_section_names[] =
 	"boost_wound_immunity"
 };
 
-struct SBooster{
+struct SBooster
+{
 	float fBoostTime;
 	float fBoostValue;
 	EBoostParams m_type;
@@ -58,7 +61,8 @@ struct SBooster{
 	void Load(const shared_str& sect, EBoostParams type);
 };
 
-struct SMedicineInfluenceValues{
+struct SMedicineInfluenceValues
+{
 	float fHealth;
 	float fPower;
 	float fSatiety;
@@ -125,7 +129,12 @@ public:
 	virtual void 			ChangeAlcohol			(const float value){};
 
 	IC void					MaxPower				()					{m_fPower = m_fPowerMax;};
-	IC void					SetMaxPower				(const float val)	{m_fPowerMax = val; clamp(m_fPowerMax,0.1f,1.0f);};
+	IC void					SetMaxPower				(const float val)
+	{ 
+		m_fPowerMax = val;
+		clamp(m_fPowerMax, 0.1f, 1.0f);
+		clamp(m_fPower, 0.f, m_fPowerMax);
+	};
 	IC float				GetMaxPower				() const			{return m_fPowerMax;};
 
 	void 					ChangeBleeding			(const float percent);
@@ -272,5 +281,4 @@ public:
 	IC float&						hit_bone_scale		()			{return		(m_fHitBoneScale);		}
 	IC float&						wound_bone_scale	()			{return		(m_fWoundBoneScale);	}
 	IC SConditionChangeV&			change_v			()			{return		(m_change_v);			}
-
 };
