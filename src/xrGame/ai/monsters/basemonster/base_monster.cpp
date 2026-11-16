@@ -64,7 +64,6 @@ CBaseMonster::CBaseMonster() :	m_psy_aura(this, "psy"),
 	m_pPhysics_support				->in_Init();
 
 	// Components external init 
-	
 	m_control_manager				= xr_new<CControl_Manager>(this);
 
 	EnemyMemory.init_external		(this, 20000);
@@ -76,7 +75,6 @@ CBaseMonster::CBaseMonster() :	m_psy_aura(this, "psy"),
 	CorpseMan.init_external			(this);
 
 	// Инициализация параметров анимации	
-
 	StateMan						= 0;
 
 	MeleeChecker.init_external		(this);
@@ -389,11 +387,9 @@ void CBaseMonster::shedule_Update(u32 dt)
 #endif
 }
 
-
 //////////////////////////////////////////////////////////////////////
 // Other functions
 //////////////////////////////////////////////////////////////////////
-
 
 void CBaseMonster::Die(CObject* who)
 {
@@ -426,7 +422,6 @@ void CBaseMonster::Die(CObject* who)
 	
 	if (m_controlled)			m_controlled->on_die();
 }
-
 
 void CBaseMonster::Hit(SHit* pHDS)
 {
@@ -752,6 +747,7 @@ DLL_Pure *CBaseMonster::_construct	()
 	
 	inherited::_construct		();
 	CStepManager::_construct	();
+	CInventoryOwner::_construct	();
 	return						(this);
 }
 
@@ -879,10 +875,45 @@ bool CBaseMonster::check_start_conditions(ControlCom::EControlType type)
 void CBaseMonster::OnEvent(NET_Packet& P, u16 type)
 {
 	inherited::OnEvent			(P,type);
+	CInventoryOwner::OnEvent	(P, type);
 
 	u16			id;
 	switch (type)
 	{
+	case GE_TRADE_BUY:
+	case GE_OWNERSHIP_TAKE:
+		{
+			P.r_u16(id);
+			CObject* O = Level().Objects.net_Find(id);
+			VERIFY(O);
+
+			CGameObject* GO = smart_cast<CGameObject*>(O);
+			CInventoryItem* pIItem = smart_cast<CInventoryItem*>(GO);
+			VERIFY(inventory().CanTakeItem(pIItem));
+			pIItem->m_ItemCurrPlace.type = eItemPlaceRuck;
+
+			O->H_SetParent(this);
+			inventory().Take(GO, true, true);
+			break;
+		}
+	case GE_TRADE_SELL:
+	case GE_OWNERSHIP_REJECT:
+		{
+			P.r_u16(id);
+			CObject* O = Level().Objects.net_Find(id);
+			VERIFY(O);
+
+			const bool just_before_destroy = !P.r_eof() && P.r_u8();
+			const bool dont_create_shell = (type == GE_TRADE_SELL) || just_before_destroy;
+
+			O->SetTmpPreDestroy(just_before_destroy);
+			if (inventory().DropItem(smart_cast<CGameObject*>(O), just_before_destroy, dont_create_shell) &&
+				!O->getDestroy())
+			{
+				feel_touch_deny(O, 2000);
+			}
+			break;
+		}
 	case GE_KILL_SOMEONE:
 		P.r_u16		(id);
 		CObject* O	= Level().Objects.net_Find	(id);

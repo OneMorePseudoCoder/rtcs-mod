@@ -356,19 +356,19 @@ void CUIActorMenu::UpdatePartnerBag()
 {
 	string64 buf;
 
-	CBaseMonster* monster = smart_cast<CBaseMonster*>( m_pPartnerInvOwner );
-	if ( monster || m_pPartnerInvOwner->use_simplified_visual() ) 
+	CBaseMonster* monster = smart_cast<CBaseMonster*>(m_pPartnerInvOwner);
+	if (monster || m_pPartnerInvOwner->use_simplified_visual()) 
 	{
-		m_PartnerWeight->SetText( "" );
+		m_PartnerMoney->SetText("");
 	}
-	else if ( m_pPartnerInvOwner->InfinitiveMoney() ) 
+	else if (m_pPartnerInvOwner->InfinitiveMoney()) 
 	{
-		m_PartnerMoney->SetText( "--- RU" );
+		m_PartnerMoney->SetText("--- RU");
 	}
 	else
 	{
-		xr_sprintf( buf, "%d RU", m_pPartnerInvOwner->get_money() );
-		m_PartnerMoney->SetText( buf );
+		xr_sprintf(buf, "%d RU", m_pPartnerInvOwner->get_money());
+		m_PartnerMoney->SetText(buf);
 	}	
 
 	LPCSTR kg_str = CStringTable().translate( "st_kg" ).c_str();
