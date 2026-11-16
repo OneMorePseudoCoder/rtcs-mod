@@ -35,31 +35,50 @@ IC static void generate_orthonormal_basis1(const Fvector& dir,Fvector& updir, Fv
 
 void CActor::g_cl_ValidateMState(float dt, u32 mstate_wf)
 {
-	// Lookout
-	if (mstate_wf&mcLookout)
-		mstate_real		|= mstate_wf&mcLookout;
+	if ((mstate_wf & mcLLookout) && (mstate_wf & mcRLookout))
+	{
+		// It's impossible to perform right and left lookouts in the same time
+		mstate_real &= ~mcLookout;
+	}
+	else if (mstate_wf & mcLookout)
+	{		
+		// Activate one of lookouts
+		mstate_real |= mstate_wf & mcLookout;
+	}
 	else
-		mstate_real		&= ~mcLookout;
+	{
+		// No lookouts needed
+		mstate_real &= ~mcLookout;
+	}
 	
 	if (mstate_real&(mcJump|mcFall|mcLanding|mcLanding2))
 		mstate_real		&= ~mcLookout;
 
 	// закончить приземление
-	if (mstate_real&(mcLanding|mcLanding2)){
+	if (mstate_real&(mcLanding|mcLanding2))
+	{
 		m_fLandingTime		-= dt;
-		if (m_fLandingTime<=0.f){
+		if (m_fLandingTime<=0.f)
+		{
 			mstate_real		&=~	(mcLanding|mcLanding2);
 			mstate_real		&=~	(mcFall|mcJump);
 		}
 	}
+
 	// закончить падение
-	if (character_physics_support()->movement()->gcontact_Was){
-		if (mstate_real&mcFall){
-			if (character_physics_support()->movement()->GetContactSpeed()>4.f){
-				if (fis_zero(character_physics_support()->movement()->gcontact_HealthLost)){	
+	if (character_physics_support()->movement()->gcontact_Was)
+	{
+		if (mstate_real&mcFall)
+		{
+			if (character_physics_support()->movement()->GetContactSpeed()>4.f)
+			{
+				if (fis_zero(character_physics_support()->movement()->gcontact_HealthLost))
+				{	
 					m_fLandingTime	= s_fLandingTime1;
 					mstate_real		|= mcLanding;
-				}else{
+				}
+				else
+				{
 					m_fLandingTime	= s_fLandingTime2;
 					mstate_real		|= mcLanding2;
 				}
@@ -69,6 +88,7 @@ void CActor::g_cl_ValidateMState(float dt, u32 mstate_wf)
 		m_fJumpTime			=	s_fJumpTime;
 		mstate_real			&=~	(mcFall|mcJump);
 	}
+
 	if ((mstate_wf&mcJump)==0)	
 		m_bJumpKeyPressed	=	FALSE;
 
@@ -77,6 +97,7 @@ void CActor::g_cl_ValidateMState(float dt, u32 mstate_wf)
 	{
 		mstate_real				&=~ mcAnyMove;
 	}
+
 	if (character_physics_support()->movement()->Environment()==CPHMovementControl::peOnGround || character_physics_support()->movement()->Environment()==CPHMovementControl::peAtWall)
 	{
 		// если на земле гарантированно снимать флажок Jump
@@ -86,6 +107,7 @@ void CActor::g_cl_ValidateMState(float dt, u32 mstate_wf)
 			m_fJumpTime			= s_fJumpTime;
 		}
 	}
+
 	if(character_physics_support()->movement()->Environment()==CPHMovementControl::peAtWall)
 	{
 		if(!(mstate_real & mcClimb))
@@ -104,9 +126,12 @@ void CActor::g_cl_ValidateMState(float dt, u32 mstate_wf)
 		mstate_real				&=~mcClimb;		
 	};
 
-	if (mstate_wf != mstate_real){
-		if ((mstate_real&mcCrouch)&&((0==(mstate_wf&mcCrouch)) || mstate_real&mcClimb)){
-			if (character_physics_support()->movement()->ActivateBoxDynamic(0)){
+	if (mstate_wf != mstate_real)
+	{
+		if ((mstate_real&mcCrouch)&&((0==(mstate_wf&mcCrouch)) || mstate_real&mcClimb))
+		{
+			if (character_physics_support()->movement()->ActivateBoxDynamic(0))
+			{
 				mstate_real &= ~mcCrouch;
 			}
 		}
