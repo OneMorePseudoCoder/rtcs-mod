@@ -103,12 +103,7 @@ public:
     IC const shared_str& name() { return m_load_section; }
     IC const shared_str& get_ambients_config_filename() { return m_ambients_config_filename; }
 
-    INGAME_EDITOR_VIRTUAL void load(
-        CInifile& ambients_config,
-        CInifile& sound_channels_config,
-        CInifile& effects_config,
-        const shared_str& section
-        );
+    INGAME_EDITOR_VIRTUAL void load(CInifile& ambients_config, CInifile& sound_channels_config, CInifile& effects_config, const shared_str& section);
     IC SEffect* get_rnd_effect() { return effects().empty() ? 0 : effects()[Random.randI(effects().size())]; }
     IC u32 get_rnd_effect_time() { return Random.randI(m_effect_period.x, m_effect_period.y); }
 
@@ -132,12 +127,7 @@ public:
 
     BENCH_SEC_SCRAMBLEMEMBER1
 
-        /*
-        ref_texture sky_texture ;
-        ref_texture sky_texture_env ;
-        ref_texture clouds_texture ;
-        */
-        FactoryPtr<IEnvDescriptorRender> m_pDescriptor;
+    FactoryPtr<IEnvDescriptorRender> m_pDescriptor;
 
     Fvector4 clouds_color;
     Fvector3 sky_color;
@@ -164,15 +154,12 @@ public:
     Fvector3 sun_dir;
     float m_fSunShaftsIntensity;
     float m_fWaterIntensity;
+    float m_fTreeAmplitudeIntensity;
 
-
-    // int lens_flare_id;
-    // int tb_id;
     shared_str lens_flare_id;
     shared_str tb_id;
 
     CEnvAmbient* env_ambient;
-
 
     CEnvDescriptor(shared_str const& identifier);
 
@@ -195,11 +182,6 @@ public:
 class ENGINE_API CEnvDescriptorMixer : public CEnvDescriptor
 {
 public:
-    /*
-    STextureList sky_r_textures;
-    STextureList sky_r_textures_env;
-    STextureList clouds_r_textures;
-    */
     FactoryPtr<IEnvDescriptorMixerRender> m_pDescriptorMixer;
     float weight;
 
@@ -222,6 +204,7 @@ class ENGINE_API CEnvironment
             return xr_strcmp(x, y) < 0;
         }
     };
+
 public:
     using EnvAmbVec = xr_vector<CEnvAmbient*>;
     using EnvAmbVecIt = EnvAmbVec::iterator;
@@ -236,6 +219,7 @@ private:
     // clouds
     FvectorVec CloudsVerts;
     U16Vec CloudsIndices;
+
 private:
     float NormalizeTime(float tm);
     float TimeDiff(float prev, float cur);
@@ -244,6 +228,7 @@ private:
     void SelectEnv(EnvVec* envs, CEnvDescriptor*& e, float tm);
 
     void calculate_dynamic_sun_dir();
+
 public:
     static bool sort_env_pred(const CEnvDescriptor* x, const CEnvDescriptor* y)
     {
@@ -253,10 +238,11 @@ public:
     {
         return x->exec_time_loaded < y->exec_time_loaded;
     }
+
 protected:
     CPerlinNoise1D* PerlinNoise1D;
-
     float fGameTime;
+
 public:
     FactoryPtr<IEnvironmentRender> m_pRender;
     BOOL bNeed_re_create_env;
@@ -272,9 +258,10 @@ public:
     float wind_blast_strength_start_value;
     float wind_blast_strength_stop_value;
     Fquaternion wind_blast_current;
+
     // Environments
     BENCH_SEC_SCRAMBLEMEMBER2
-        CEnvDescriptorMixer* CurrentEnv;
+    CEnvDescriptorMixer* CurrentEnv;
     CEnvDescriptor* Current[2];
 
     bool bWFX;
