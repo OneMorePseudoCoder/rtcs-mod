@@ -230,7 +230,8 @@ void CCameraManager::RemoveCamEffector(ECamEffectorType type)
 CEffectorPP* CCameraManager::GetPPEffector(EEffectorPPType type)
 {
     for (EffectorPPIt it = m_EffectorsPP.begin(); it != m_EffectorsPP.end(); it++)
-        if ((*it)->Type() == type) return *it;
+        if ((*it)->Type() == type)
+			return *it;
     return 0;
 }
 
@@ -271,7 +272,6 @@ void CCameraManager::RemovePPEffector(EEffectorPPType type)
             if ((*it)->FreeOnRemove())
             {
                 OnEffectorReleased(*it);
-                // xr_delete (*it);
             }
             m_EffectorsPP.erase(it);
             return;
@@ -371,28 +371,35 @@ bool CCameraManager::ProcessCameraEffector(CEffectorCam* eff)
     {
         res = true;
     }
-    else
+    else if (eff->AllowProcessingIfInvalid())
     {
-        if (eff->AllowProcessingIfInvalid())
-        {
-            eff->ProcessIfInvalid(m_cam_info);
-            res = true;
-        }
-
-        EffectorCamVec::iterator it = std::find(m_EffectorsCam.begin(), m_EffectorsCam.end(), eff);
-
-        m_EffectorsCam.erase(it);
-        OnEffectorReleased(eff);
+        eff->ProcessIfInvalid(m_cam_info);
     }
     return res;
 }
 
 void CCameraManager::UpdateCamEffectors()
 {
-    if (m_EffectorsCam.empty()) return;
-    EffectorCamVec::reverse_iterator rit = m_EffectorsCam.rbegin();
-    for (; rit != m_EffectorsCam.rend(); ++rit)
-        ProcessCameraEffector(*rit);
+    if (m_EffectorsCam.empty())
+		return;
+
+    auto r_it = m_EffectorsCam.rbegin();    
+    while (r_it != m_EffectorsCam.rend())
+    {
+        if (ProcessCameraEffector(*r_it))
+        {
+            ++r_it;
+        }
+        else
+        {
+            // Dereferencing reverse iterator returns previous element of the list, r_it.base() returns current element
+            // So, we should use base()-1 iterator to delete just processed element. 'Previous' element would be 
+            // automatically changed after deletion, so r_it would dereferencing to another value, no need to change it
+            OnEffectorReleased(*r_it);
+            auto r_to_del = r_it.base();
+            m_EffectorsCam.erase(--r_to_del);
+        }
+    }
 
     m_cam_info.d.normalize();
     m_cam_info.n.normalize();
@@ -462,10 +469,9 @@ extern ENGINE_API BOOL psSVP1FrustumOptimize;
 void CCameraManager::ApplyDeviceInternal(float _viewport_near)
 {
     // Device params
-
 	if (Device.m_bMakeLevelMap)
 	{
-				// build camera matrix
+		// build camera matrix
 		Fbox bb = Device.curr_lm_fbox;
 		bb.getcenter(Device.vCameraPosition);
 
