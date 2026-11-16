@@ -1,11 +1,8 @@
 #include "stdafx.h"
 #include "igame_level.h"
-
-//#include "xr_effgamma.h"
 #include "x_ray.h"
 #include "xr_ioconsole.h"
 #include "xr_ioc_cmd.h"
-//#include "fbasicvisual.h"
 #include "cameramanager.h"
 #include "environment.h"
 #include "xr_input.h"
@@ -14,6 +11,9 @@
 #include "../Include/xrRender/RenderDeviceRender.h"
 
 #include "xr_object.h"
+
+#include <regex>
+#include <string>
 
 xr_token* vid_quality_token = NULL;
 
@@ -61,7 +61,6 @@ public:
     CCC_Quit(LPCSTR N) : IConsole_Command(N) { bEmptyArgsHandled = TRUE; };
     virtual void Execute(LPCSTR args)
     {
-        // TerminateProcess(GetCurrentProcess(),0);
         Console->Hide();
         Engine.Event.Defer("KERNEL:disconnect");
         Engine.Event.Defer("KERNEL:quit");
@@ -76,11 +75,11 @@ public:
     virtual void Execute(LPCSTR args)
     {
         string_path fn;
-        if (args&&args[0]) xr_sprintf(fn, sizeof(fn), "%s.dump", args);
-        else strcpy_s_s(fn, sizeof(fn), "x:\\$memory$.dump");
+        if (args&&args[0])
+			xr_sprintf(fn, sizeof(fn), "%s.dump", args);
+        else
+			strcpy_s_s(fn, sizeof(fn), "x:\\$memory$.dump");
         Memory.mem_statistic(fn);
-        // g_pStringContainer->dump ();
-        // g_pSharedMemoryContainer->dump ();
     }
 };
 #endif // DEBUG_MEMORY_MANAGER
@@ -115,8 +114,6 @@ public:
     CCC_MotionsStat(LPCSTR N) : IConsole_Command(N) { bEmptyArgsHandled = TRUE; };
     virtual void Execute(LPCSTR args)
     {
-        //g_pMotionsContainer->dump();
-        // TODO: move this console commant into renderer
         VERIFY(0);
     }
 };
@@ -127,9 +124,6 @@ public:
     virtual void Execute(LPCSTR args)
     {
         Device.DumpResourcesMemoryUsage();
-        //Device.Resources->_DumpMemoryUsage();
-        // TODO: move this console commant into renderer
-        //VERIFY(0);
     }
 };
 //-----------------------------------------------------------------------
@@ -177,7 +171,8 @@ public:
 
         bool exist = Render->texture_is_exist(args);
 
-        if (!exist) { 
+        if (!exist) 
+		{ 
             Msg("Warning: wrong path or texture is not exist!"); 
             override_material = false; 
             d_texture_name = NULL; 
@@ -323,11 +318,11 @@ void CCC_LoadCFG::Execute(LPCSTR args)
     }
 }
 
-CCC_LoadCFG_custom::CCC_LoadCFG_custom(LPCSTR cmd)
-    :CCC_LoadCFG(cmd)
+CCC_LoadCFG_custom::CCC_LoadCFG_custom(LPCSTR cmd) : CCC_LoadCFG(cmd)
 {
     xr_strcpy(m_cmd, cmd);
 };
+
 bool CCC_LoadCFG_custom::allow(LPCSTR cmd)
 {
     return (cmd == strstr(cmd, m_cmd));
@@ -339,8 +334,14 @@ class CCC_Start : public IConsole_Command
     void parse(LPSTR dest, LPCSTR args, LPCSTR name)
     {
         dest[0] = 0;
-        if (strstr(args, name))
-            sscanf(strstr(args, name) + xr_strlen(name), "(%[^)])", dest);
+		if (strstr(args, name)) 
+		{
+			std::string str = strstr(args, name) + xr_strlen(name);
+			std::regex Reg("\\(([^)]+)\\)");
+			std::smatch results;
+			if (std::regex_search(str, results, Reg))
+				strcpy(dest, results[1].str().c_str());
+		}
     }
 
     void protect_Name_strlwr(LPSTR str)
@@ -376,11 +377,6 @@ public:
     CCC_Start(LPCSTR N) : IConsole_Command(N) { bLowerCaseArgs = false; };
     virtual void Execute(LPCSTR args)
     {
-        /* if (g_pGameLevel) {
-         Log ("! Please disconnect/unload first");
-         return;
-         }
-         */
         string4096 op_server, op_client, op_demo;
         op_server[0] = 0;
         op_client[0] = 0;
@@ -517,13 +513,9 @@ public:
     virtual void Execute(LPCSTR args)
     {
         CCC_Float::Execute(args);
-        //Device.Gamma.Gamma (ps_gamma);
         Device.m_pRender->setGamma(ps_gamma);
-        //Device.Gamma.Brightness (ps_brightness);
         Device.m_pRender->setBrightness(ps_brightness);
-        //Device.Gamma.Contrast (ps_contrast);
         Device.m_pRender->setContrast(ps_contrast);
-        //Device.Gamma.Update ();
         Device.m_pRender->updateGamma();
     }
 };
@@ -532,8 +524,6 @@ ENGINE_API BOOL r2_sun_static = TRUE;
 ENGINE_API BOOL r2_advanced_pp = FALSE; // advanced post process and effects
 
 u32 renderer_value = 3;
-//void fill_render_mode_list();
-//void free_render_mode_list();
 
 class CCC_r2 : public CCC_Token
 {
@@ -541,19 +531,14 @@ class CCC_r2 : public CCC_Token
 public:
     CCC_r2(LPCSTR N) :inherited(N, &renderer_value, NULL) { renderer_value = 3; };
     virtual ~CCC_r2()
-    {
-        //free_render_mode_list();
-    }
+    {}
     virtual void Execute(LPCSTR args)
     {
-        //fill_render_mode_list ();
         // vid_quality_token must be already created!
         tokens = vid_quality_token;
 
         inherited::Execute(args);
-        // 0 - r1
-        // 1..3 - r2
-        // 4 - r3
+
         psDeviceFlags.set(rsR2, ((renderer_value > 0) && renderer_value < 4));
         psDeviceFlags.set(rsR3, (renderer_value == 4));
         psDeviceFlags.set(rsR4, (renderer_value >= 5));
@@ -565,13 +550,13 @@ public:
 
     virtual void Save(IWriter* F)
     {
-        //fill_render_mode_list ();
         tokens = vid_quality_token;
         if (!strstr(Core.Params, "-r2"))
         {
             inherited::Save(F);
         }
     }
+
     virtual xr_token* GetToken()
     {
         tokens = vid_quality_token;
@@ -675,12 +660,9 @@ public:
     }
 };
 
-
 ENGINE_API float psHUD_FOV_def = 0.5f; //--#SM+#--	Дефолтный HUD FOV (В % от Camera FOV) [default hud_fov (perc. of g_fov)]
 ENGINE_API float psHUD_FOV = psHUD_FOV_def; //--#SM+#-- Текущий HUD FOV (В % от Camera FOV) [current hud_fov (perc. of g_fov)]
 ENGINE_API float VIEWPORT_NEAR = 0.2f; //--#SM+#-- (Old: 0.2f)
-
-
 
 ENGINE_API float hud_adj_delta_pos = 0.0005f;
 ENGINE_API float hud_adj_delta_rot = 0.05f;
@@ -703,7 +685,6 @@ ENGINE_API bool override_material = false;
 
 ENGINE_API float fps_limit = 60.0f;
 
-//extern int psSkeletonUpdate;
 extern int rsDVB_Size;
 extern int rsDIB_Size;
 extern int psNET_ServerUpdate;
@@ -784,7 +765,6 @@ void CCC_Register()
 #ifdef DEBUG
     CMD3(CCC_Mask, "rs_occ_draw", &psDeviceFlags, rsOcclusionDraw);
     CMD3(CCC_Mask, "rs_occ_stats", &psDeviceFlags, rsOcclusionStats);
-    //CMD4(CCC_Integer, "rs_skeleton_update", &psSkeletonUpdate, 2, 128 );
 #endif // DEBUG
 
     CMD2(CCC_Gamma, "rs_c_gamma", &ps_gamma);
@@ -840,7 +820,7 @@ void CCC_Register()
 #ifndef DEDICATED_SERVER
     CMD1(CCC_soundDevice, "snd_device");
 #endif
-    //psSoundRolloff = pSettings->r_float ("sound","rolloff"); clamp(psSoundRolloff, EPS_S, 2.f);
+
     psSoundOcclusionScale = pSettings->r_float("sound", "occlusion_scale");
     clamp(psSoundOcclusionScale, 0.1f, .5f);
 
