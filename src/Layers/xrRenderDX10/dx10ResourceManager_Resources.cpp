@@ -11,7 +11,7 @@
 
 #include <D3DX10Core.h>
 
-#include "../xrRender/ResourceManager.h"
+#include <Layers/xrRender/ResourceManager.h>
 #include "../xrRender/tss.h"
 #include "../xrRender/blenders/blender.h"
 #include "../xrRender/blenders/blender_recorder.h"
@@ -275,8 +275,6 @@ SPS*	CResourceManager::_CreatePS			(LPCSTR _name)
 		if (!file)
 		{
 			string1024			tmp;
-			//	TODO: HACK: Test failure
-			//Memory.mem_compact();
 			xr_sprintf				(tmp, "DX10: %s is missing. Replace with stub_default.ps", cname);
 			Msg					(tmp);
 			strconcat					(sizeof(cname), cname,::Render->getShaderPath(),"stub_default",".ps");
@@ -292,24 +290,75 @@ SPS*	CResourceManager::_CreatePS			(LPCSTR _name)
 		FS.r_close				( file );
 
 		// Select target
-		LPCSTR						c_target	= "ps_2_0";
-		LPCSTR						c_entry		= "main";
-		if (strstr(data,"main_ps_1_1"))			{ c_target = "ps_1_1"; c_entry = "main_ps_1_1";	}
-		if (strstr(data,"main_ps_1_2"))			{ c_target = "ps_1_2"; c_entry = "main_ps_1_2";	}
-		if (strstr(data,"main_ps_1_3"))			{ c_target = "ps_1_3"; c_entry = "main_ps_1_3";	}
-		if (strstr(data,"main_ps_1_4"))			{ c_target = "ps_1_4"; c_entry = "main_ps_1_4";	}
-		if (strstr(data,"main_ps_2_0"))			{ c_target = "ps_2_0"; c_entry = "main_ps_2_0";	}
+#ifdef USE_DX11
+		LPCSTR c_target	= "ps_5_0";
+#else
+		LPCSTR c_target = "ps_4_0";
+#endif
+		LPCSTR c_entry = "main";
+		if (strstr(data,"main_ps_1_1"))
+		{ 
+			c_target = "ps_1_1";
+			c_entry = "main_ps_1_1";	
+		}
 
-		HRESULT	const _hr		= ::Render->shader_compile(name,(DWORD const*)data,size, c_entry, c_target, D3D10_SHADER_PACK_MATRIX_ROW_MAJOR, (void*&)_ps );
+		if (strstr(data,"main_ps_1_2"))
+		{ 
+			c_target = "ps_1_2";
+			c_entry = "main_ps_1_2";	
+		}
+
+		if (strstr(data,"main_ps_1_3"))
+		{ 
+			c_target = "ps_1_3";
+			c_entry = "main_ps_1_3";	
+		}
+
+		if (strstr(data,"main_ps_1_4"))
+		{ 
+			c_target = "ps_1_4";
+			c_entry = "main_ps_1_4";	
+		}
+
+		if (strstr(data,"main_ps_2_0")) 
+		{ 
+			c_target = "ps_2_0";
+			c_entry = "main_ps_2_0";	
+		}
+
+		if (strstr(data,"main_ps_2_1"))
+		{ 
+			c_target = "ps_2_1";
+			c_entry = "main_ps_2_1"; 
+		}
+
+		if (strstr(data,"main_ps_3_0"))
+		{ 
+			c_target = "ps_3_0";
+			c_entry = "main_ps_3_0"; 
+		}
+	
+		if (strstr(data,"main_ps_4_0"))
+		{ 
+			c_target = "ps_4_0";
+			c_entry = "main_ps_4_0"; 
+		}
+
+#ifdef USE_DX11
+		if (strstr(data, "main_ps_5_0"))
+		{ 
+			c_target = "ps_5_0";
+			c_entry = "main_ps_5_0"; 
+		}
+#endif
+
+		HRESULT	const _hr = ::Render->shader_compile(name, reinterpret_cast<DWORD const*>(data), size, c_entry, c_target, D3D10_SHADER_PACK_MATRIX_ROW_MAJOR, (void*&)_ps);
 		
 		VERIFY(SUCCEEDED(_hr));
 
-		CHECK_OR_EXIT		(
-			!FAILED(_hr),
-			make_string("Your video card doesn't meet game requirements.\n\nTry to lower game settings.")
-			);
+		CHECK_OR_EXIT(!FAILED(_hr), make_string("Your video card doesn't meet game requirements.\n\nTry to lower game settings."));
 
-		return			_ps;
+		return _ps;
 	}
 }
 
