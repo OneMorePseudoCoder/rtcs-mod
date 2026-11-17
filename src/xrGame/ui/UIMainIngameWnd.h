@@ -25,7 +25,6 @@ public:
 	virtual void Draw();
 	virtual void Update();
 
-
 protected:
 	
 	CUIStatic*			UIStaticDiskIO;

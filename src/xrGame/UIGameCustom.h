@@ -6,6 +6,7 @@
 #include "gametype_chooser.h"
 #include "UIDialogHolder.h"
 #include "xrEngine/CustomHUD.h"
+
 // refs
 class CUI;
 class CTeamBaseZone;
@@ -17,7 +18,6 @@ class CUIWindow;
 class CUIXml;
 class CUIActorMenu;
 class CUIPdaWnd;			
-struct KillMessageStruct;
 class CUIMainIngameWnd;
 class CUIMessagesWindow;
 
@@ -118,7 +118,6 @@ public:
     void CommonMessageOut(const char* text);
     virtual void ChangeTotalMoneyIndicator(const char* newMoneyString) {}
     virtual void DisplayMoneyChange(const char* deltaMoney) {}
-    virtual void DisplayMoneyBonus(KillMessageStruct* bonus) {}
     virtual void UnLoad();
     void Load();
     void OnConnected();
