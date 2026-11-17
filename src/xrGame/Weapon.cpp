@@ -26,12 +26,12 @@
 #include "ui/UIXmlInit.h"
 #include "Torch.h"
 
-#define WEAPON_REMOVE_TIME		60000
-#define ROTATION_TIME			0.25f
+#define WEAPON_REMOVE_TIME 60000
+#define ROTATION_TIME 0.25f
 
 ENGINE_API extern float psHUD_FOV_def;
 
-BOOL	b_toggle_weapon_aim = FALSE;
+BOOL b_toggle_weapon_aim = FALSE;
 extern CUIXml* pWpnScopeXml = NULL;
 
 CWeapon::CWeapon()
@@ -99,7 +99,7 @@ CWeapon::CWeapon()
 
 	m_fSecondRTZoomFactor = -1.0f;
 
-	bHasBulletsToHide   = false;
+	bHasBulletsToHide = false;
 	bullet_cnt = 0;
 
 	NeedUpdateHudParams = false;
@@ -152,10 +152,11 @@ bool CWeapon::bChangeNVSecondVPStatus()
 
 	return true;
 }
+
 shared_str CWeapon::GetNameWithAttachmentSilencer()
 {
-
 }
+
 shared_str CWeapon::GetNameWithAttachmentScope()
 {
 	string64 str;
@@ -194,9 +195,6 @@ void CWeapon::Hit(SHit* pHDS)
 
 void CWeapon::UpdateXForm()
 {
-	//if (Device.dwFrame == dwXF_Frame)
-		//return;
-
 	dwXF_Frame = Device.dwFrame;
 
 	if (!H_Parent())
@@ -205,7 +203,8 @@ void CWeapon::UpdateXForm()
 	// Get access to entity and its visual
 	CEntityAlive* E = smart_cast<CEntityAlive*>(H_Parent());
 
-	if (!E) {
+	if (!E)
+	{
 		if (!IsGameTypeSingle())
 			UpdatePosition(H_Parent()->XFORM());
 
@@ -219,34 +218,38 @@ void CWeapon::UpdateXForm()
 	if (parent->attached(this))
 		return;
 
-	IKinematics* V = smart_cast<IKinematics*>	(E->Visual());
+	IKinematics* V = smart_cast<IKinematics*>(E->Visual());
 	VERIFY(V);
 
 	// Get matrices
-	int						boneL = -1, boneR = -1, boneR2 = -1;
+	int boneL = -1, boneR = -1, boneR2 = -1;
 
 	// this ugly case is possible in case of a CustomMonster, not a Stalker, nor an Actor
 	E->g_WeaponBones(boneL, boneR, boneR2);
 
-	if (boneR == -1)		return;
+	if (boneR == -1)
+		return;
 
 	if ((HandDependence() == hd1Hand) || (GetState() == eReload) || (!E->g_Alive()))
 		boneL = boneR2;
 
 	V->CalculateBones();
-	
+
 	Fmatrix& mL = V->LL_GetTransform(u16(boneL));
 	Fmatrix& mR = V->LL_GetTransform(u16(boneR));
+
 	// Calculate
-	Fmatrix					mRes;
-	Fvector					R, D, N;
+	Fmatrix mRes;
+	Fvector R, D, N;
 	D.sub(mL.c, mR.c);
 
-	if (fis_zero(D.magnitude())) {
+	if (fis_zero(D.magnitude()))
+	{
 		mRes.set(E->XFORM());
 		mRes.c.set(mR.c);
 	}
-	else {
+	else
+	{
 		D.normalize();
 		R.crossproduct(mR.j, D);
 
@@ -298,7 +301,6 @@ void CWeapon::ForceUpdateFireParticles()
 {
 	if (!GetHUDmode())
 	{//update particlesXFORM real bullet direction
-
 		if (!H_Parent())		return;
 
 		Fvector					p, d;
@@ -319,17 +321,16 @@ void CWeapon::Load(LPCSTR section)
 	inherited::Load(section);
 	CShootingObject::Load(section);
 
-
 	if (pSettings->line_exist(section, "flame_particles_2"))
 		m_sFlameParticles2 = pSettings->r_string(section, "flame_particles_2");
 
 	// load ammo classes
 	m_ammoTypes.clear();
-	LPCSTR				S = pSettings->r_string(section, "ammo_class");
+	LPCSTR S = pSettings->r_string(section, "ammo_class");
 	if (S && S[0])
 	{
-		string128		_ammoItem;
-		int				count = _GetItemCount(S);
+		string128 _ammoItem;
+		int count = _GetItemCount(S);
 		for (int it = 0; it < count; ++it)
 		{
 			_GetItem(S, it, _ammoItem);
@@ -370,6 +371,7 @@ void CWeapon::Load(LPCSTR section)
 			cam_recoil.RelaxSpeed_AI = EPS_L;
 		}
 	}
+
 	temp_f = pSettings->r_float(section, "cam_max_angle");
 	cam_recoil.MaxAngleVert = _abs(deg2rad(temp_f));
 	VERIFY(!fis_zero(cam_recoil.MaxAngleVert));
@@ -403,7 +405,6 @@ void CWeapon::Load(LPCSTR section)
 	zoom_cam_recoil.ReturnMode = cam_recoil.ReturnMode;
 	zoom_cam_recoil.StopReturn = cam_recoil.StopReturn;
 
-
 	if (pSettings->line_exist(section, "zoom_cam_relax_speed"))
 	{
 		zoom_cam_recoil.RelaxSpeed = _abs(deg2rad(pSettings->r_float(section, "zoom_cam_relax_speed")));
@@ -413,6 +414,7 @@ void CWeapon::Load(LPCSTR section)
 			zoom_cam_recoil.RelaxSpeed = EPS_L;
 		}
 	}
+
 	if (pSettings->line_exist(section, "zoom_cam_relax_speed_ai"))
 	{
 		zoom_cam_recoil.RelaxSpeed_AI = _abs(deg2rad(pSettings->r_float(section, "zoom_cam_relax_speed_ai")));
@@ -422,6 +424,7 @@ void CWeapon::Load(LPCSTR section)
 			zoom_cam_recoil.RelaxSpeed_AI = EPS_L;
 		}
 	}
+
 	if (pSettings->line_exist(section, "zoom_cam_max_angle"))
 	{
 		zoom_cam_recoil.MaxAngleVert = _abs(deg2rad(pSettings->r_float(section, "zoom_cam_max_angle")));
@@ -431,6 +434,7 @@ void CWeapon::Load(LPCSTR section)
 			zoom_cam_recoil.MaxAngleVert = EPS;
 		}
 	}
+
 	if (pSettings->line_exist(section, "zoom_cam_max_angle_horz"))
 	{
 		zoom_cam_recoil.MaxAngleHorz = _abs(deg2rad(pSettings->r_float(section, "zoom_cam_max_angle_horz")));
@@ -440,10 +444,14 @@ void CWeapon::Load(LPCSTR section)
 			zoom_cam_recoil.MaxAngleHorz = EPS;
 		}
 	}
-	if (pSettings->line_exist(section, "zoom_cam_step_angle_horz")) {
+
+	if (pSettings->line_exist(section, "zoom_cam_step_angle_horz"))
+	{
 		zoom_cam_recoil.StepAngleHorz = deg2rad(pSettings->r_float(section, "zoom_cam_step_angle_horz"));
 	}
-	if (pSettings->line_exist(section, "zoom_cam_dispersion_frac")) {
+
+	if (pSettings->line_exist(section, "zoom_cam_dispersion_frac"))
+	{
 		zoom_cam_recoil.DispersionFrac = _abs(pSettings->r_float(section, "zoom_cam_dispersion_frac"));
 	}
 
@@ -456,18 +464,12 @@ void CWeapon::Load(LPCSTR section)
 	m_first_bullet_controller.load(section);
 	fireDispersionConditionFactor = pSettings->r_float(section, "fire_dispersion_condition_factor");
 
-	// modified by Peacemaker [17.10.08]
-	//	misfireProbability			  = pSettings->r_float(section,"misfire_probability"); 
-	//	misfireConditionK			  = READ_IF_EXISTS(pSettings, r_float, section, "misfire_condition_k",	1.0f);
 	misfireStartCondition = pSettings->r_float(section, "misfire_start_condition");
 	misfireEndCondition = READ_IF_EXISTS(pSettings, r_float, section, "misfire_end_condition", 0.f);
 	misfireStartProbability = READ_IF_EXISTS(pSettings, r_float, section, "misfire_start_prob", 0.f);
 	misfireEndProbability = pSettings->r_float(section, "misfire_end_prob");
 	conditionDecreasePerShot = pSettings->r_float(section, "condition_shot_dec");
 	conditionDecreasePerQueueShot = READ_IF_EXISTS(pSettings, r_float, section, "condition_queue_shot_dec", conditionDecreasePerShot);
-
-
-
 
 	vLoadedFirePoint = pSettings->r_fvector3(section, "fire_point");
 
@@ -481,10 +483,9 @@ void CWeapon::Load(LPCSTR section)
 	m_bIsSingleHanded = true;
 	if (pSettings->line_exist(section, "single_handed"))
 		m_bIsSingleHanded = !!pSettings->r_bool(section, "single_handed");
-	// 
+
 	m_fMinRadius = pSettings->r_float(section, "min_radius");
 	m_fMaxRadius = pSettings->r_float(section, "max_radius");
-
 
 	// информация о возможных апгрейдах и их визуализации в инвентаре
 	m_eScopeStatus = (ALife::EWeaponAddonStatus)pSettings->r_s32(section, "scope_status");
@@ -518,8 +519,10 @@ void CWeapon::Load(LPCSTR section)
 		m_iGrenadeLauncherX = pSettings->r_s32(section, "grenade_launcher_x");
 		m_iGrenadeLauncherY = pSettings->r_s32(section, "grenade_launcher_y");
 	}
+
 	UpdateAltScope();
 	InitAddons();
+
 	if (pSettings->line_exist(section, "weapon_remove_time"))
 		m_dwWeaponRemoveTime = pSettings->r_u32(section, "weapon_remove_time");
 	else
@@ -535,24 +538,22 @@ void CWeapon::Load(LPCSTR section)
 	if (pSettings->line_exist(hud_sect, "zoom_hide_crosshair"))
 		m_zoom_params.m_bHideCrosshairInZoom = !!pSettings->r_bool(hud_sect, "zoom_hide_crosshair");
 
-	Fvector			def_dof;
+	Fvector def_dof;
 	def_dof.set(-1, -1, -1);
 	//	m_zoom_params.m_ZoomDof		= READ_IF_EXISTS(pSettings, r_fvector3, section, "zoom_dof", Fvector().set(-1,-1,-1));
 	//	m_zoom_params.m_bZoomDofEnabled	= !def_dof.similar(m_zoom_params.m_ZoomDof);
 
 	//	m_zoom_params.m_ReloadDof	= READ_IF_EXISTS(pSettings, r_fvector4, section, "reload_dof", Fvector4().set(-1,-1,-1,-1));
 
-
 	m_bHasTracers = !!READ_IF_EXISTS(pSettings, r_bool, section, "tracers", true);
 	m_u8TracerColorID = READ_IF_EXISTS(pSettings, r_u8, section, "tracers_color_ID", u8(-1));
 
-	string256						temp;
+	string256 temp;
 	for (int i = egdNovice; i < egdCount; ++i)
 	{
 		strconcat(sizeof(temp), temp, "hit_probability_", get_token_name(difficulty_type_token, i));
 		m_hit_probability[i] = READ_IF_EXISTS(pSettings, r_float, section, temp, 1.f);
 	}
-
 }
 
 void CWeapon::LoadFireParams(LPCSTR section)
@@ -560,17 +561,21 @@ void CWeapon::LoadFireParams(LPCSTR section)
 	cam_recoil.Dispersion = deg2rad(pSettings->r_float(section, "cam_dispersion"));
 	cam_recoil.DispersionInc = 0.0f;
 
-	if (pSettings->line_exist(section, "cam_dispersion_inc")) {
+	if (pSettings->line_exist(section, "cam_dispersion_inc"))
+	{
 		cam_recoil.DispersionInc = deg2rad(pSettings->r_float(section, "cam_dispersion_inc"));
 	}
 
 	zoom_cam_recoil.Dispersion = cam_recoil.Dispersion;
 	zoom_cam_recoil.DispersionInc = cam_recoil.DispersionInc;
 
-	if (pSettings->line_exist(section, "zoom_cam_dispersion")) {
+	if (pSettings->line_exist(section, "zoom_cam_dispersion"))
+	{
 		zoom_cam_recoil.Dispersion = deg2rad(pSettings->r_float(section, "zoom_cam_dispersion"));
 	}
-	if (pSettings->line_exist(section, "zoom_cam_dispersion_inc")) {
+
+	if (pSettings->line_exist(section, "zoom_cam_dispersion_inc"))
+	{
 		zoom_cam_recoil.DispersionInc = deg2rad(pSettings->r_float(section, "zoom_cam_dispersion_inc"));
 	}
 
@@ -587,7 +592,6 @@ void CWeapon::LoadModParams(LPCSTR section)
 	m_nearwall_dist_max = READ_IF_EXISTS(pSettings, r_float, section, "nearwall_dist_max", 1.f);
 	m_nearwall_target_hud_fov = READ_IF_EXISTS(pSettings, r_float, section, "nearwall_target_hud_fov", 0.27f);
 	m_nearwall_speed_mod = READ_IF_EXISTS(pSettings, r_float, section, "nearwall_speed_mod", 10.f);
-
 
 	// Настройки стрейфа (боковая ходьба)
 	const Fvector vZero = { 0.f, 0.f, 0.f };
@@ -693,7 +697,7 @@ void CWeapon::LoadOriginalScopesParams(LPCSTR section)
 			LPCSTR str = pSettings->r_string(section, "scopes_sect");
 			for (int i = 0, count = _GetItemCount(str); i < count; ++i)
 			{
-				string128						scope_section;
+				string128 scope_section;
 				_GetItem(str, i, scope_section);
 				m_scopes.push_back(scope_section);
 			}
@@ -785,7 +789,6 @@ BOOL CWeapon::net_Spawn(CSE_Abstract* DC)
 	CSE_Abstract* e = (CSE_Abstract*)(DC);
 	CSE_ALifeItemWeapon* E = smart_cast<CSE_ALifeItemWeapon*>(e);
 
-	//iAmmoCurrent					= E->a_current;
 	iAmmoElapsed = E->a_elapsed;
 	m_flagsAddOnState = E->m_addon_flags.get();
 	m_ammoType = E->ammo_type;
@@ -811,7 +814,6 @@ BOOL CWeapon::net_Spawn(CSE_Abstract* DC)
 	VERIFY((u32)iAmmoElapsed == m_magazine.size());
 	m_bAmmoWasSpawned = false;
 
-
 	return bResult;
 }
 
@@ -825,13 +827,14 @@ void CWeapon::net_Destroy()
 	StopLight();
 	Light_Destroy();
 
-	while (m_magazine.size()) m_magazine.pop_back();
+	m_magazine.clear();
+	m_magazine.shrink_to_fit();
 }
 
 BOOL CWeapon::IsUpdating()
 {
 	bool bIsActiveItem = m_pInventory && m_pInventory->ActiveItem() == this;
-	return bIsActiveItem || bWorking;// || IsPending() || getVisible();
+	return bIsActiveItem || bWorking;
 }
 
 void CWeapon::net_Export(NET_Packet& P)
@@ -839,7 +842,6 @@ void CWeapon::net_Export(NET_Packet& P)
 	inherited::net_Export(P);
 
 	P.w_float_q8(GetCondition(), 0.0f, 1.0f);
-
 
 	u8 need_upd = IsUpdating() ? 1 : 0;
 	P.w_u8(need_upd);
@@ -865,7 +867,7 @@ void CWeapon::net_Import(NET_Packet& P)
 	u16 ammo_elapsed = 0;
 	P.r_u16(ammo_elapsed);
 
-	u8						NewAddonState;
+	u8 NewAddonState;
 	P.r_u8(NewAddonState);
 
 	m_flagsAddOnState = NewAddonState;
@@ -885,8 +887,10 @@ void CWeapon::net_Import(NET_Packet& P)
 
 	if (H_Parent() && H_Parent()->Remote())
 	{
-		if (Zoom) OnZoomIn();
-		else OnZoomOut();
+		if (Zoom)
+			OnZoomIn();
+		else
+			OnZoomOut();
 	};
 	switch (wstate)
 	{
@@ -895,7 +899,8 @@ void CWeapon::net_Import(NET_Packet& P)
 	case eSwitch:
 	case eReload:
 	{
-	}break;
+	}
+	break;
 	default:
 	{
 		if (ammoType >= m_ammoTypes.size())
@@ -905,7 +910,8 @@ void CWeapon::net_Import(NET_Packet& P)
 			m_ammoType = ammoType;
 			SetAmmoElapsed((ammo_elapsed));
 		}
-	}break;
+	}
+	break;
 	}
 
 	VERIFY((u32)iAmmoElapsed == m_magazine.size());
@@ -944,7 +950,6 @@ void CWeapon::load(IReader& input_packet)
 	load_data(m_fSecondRTZoomFactor, input_packet);
 }
 
-
 void CWeapon::OnEvent(NET_Packet& P, u16 type)
 {
 	switch (type)
@@ -954,14 +959,13 @@ void CWeapon::OnEvent(NET_Packet& P, u16 type)
 		P.r_u8(m_flagsAddOnState);
 		InitAddons();
 		UpdateAddonsVisibility();
-	}break;
-
+	}
+	break;
 	case GE_WPN_STATE_CHANGE:
 	{
-		u8				state;
+		u8 state;
 		P.r_u8(state);
 		P.r_u8(m_sub_state);
-		//			u8 NewAmmoType = 
 		P.r_u8();
 		u8 AmmoElapsed = P.r_u8();
 		u8 NextAmmo = P.r_u8();
@@ -970,23 +974,21 @@ void CWeapon::OnEvent(NET_Packet& P, u16 type)
 		else
 			m_set_next_ammoType_on_reload = NextAmmo;
 
-		if (OnClient()) SetAmmoElapsed(int(AmmoElapsed));
+		if (OnClient())
+			SetAmmoElapsed(int(AmmoElapsed));
 		OnStateSwitch(u32(state));
 	}
 	break;
 	default:
 	{
 		inherited::OnEvent(P, type);
-	}break;
+	}
+	break;
 	}
 };
 
 void CWeapon::shedule_Update(u32 dT)
 {
-	// Queue shrink
-//	u32	dwTimeCL		= Level().timeServer()-NET_Latency;
-//	while ((NET.size()>2) && (NET[1].dwTimeStamp<dwTimeCL)) NET.pop_front();	
-
 	// Inherited
 	inherited::shedule_Update(dT);
 }
@@ -1032,14 +1034,9 @@ void CWeapon::OnActiveItem()
 	UpdateAddonsVisibility();
 	m_BriefInfo_CalcFrame = 0;
 
-	//. Show
 	SwitchState(eShowing);
-	//-
 
 	inherited::OnActiveItem();
-	//если мы занружаемся и оружие было в руках
-//.	SetState					(eIdle);
-//.	SetNextState				(eIdle);
 }
 
 void CWeapon::OnHiddenItem()
@@ -1062,7 +1059,7 @@ void CWeapon::SendHiddenItem()
 	if (!CHudItem::object().getDestroy() && m_pInventory)
 	{
 		// !!! Just single entry for given state !!!
-		NET_Packet		P;
+		NET_Packet P;
 		CHudItem::object().u_EventGen(P, GE_WPN_STATE_CHANGE, CHudItem::object().ID());
 		P.w_u8(u8(eHiding));
 		P.w_u8(u8(m_sub_state));
@@ -1073,7 +1070,6 @@ void CWeapon::SendHiddenItem()
 		SetPending(TRUE);
 	}
 }
-
 
 void CWeapon::OnH_B_Chield()
 {
@@ -1110,11 +1106,7 @@ void CWeapon::UpdateCL()
 		CActor* pActor = smart_cast<CActor*>(H_Parent());
 		if (pActor && !pActor->AnyMove() && this == pActor->inventory().ActiveItem())
 		{
-			if (hud_adj_mode == 0 &&
-				GetState() == eIdle &&
-				(Device.dwTimeGlobal - m_dw_curr_substate_time > 20000) &&
-				!IsZoomed() &&
-				g_player_hud->attached_item(1) == NULL)
+			if (hud_adj_mode == 0 && GetState() == eIdle && (Device.dwTimeGlobal - m_dw_curr_substate_time > 20000) && !IsZoomed() && g_player_hud->attached_item(1) == NULL)
 			{
 				if (AllowBore())
 					SwitchState(eBore);
@@ -1138,7 +1130,6 @@ void CWeapon::UpdateCL()
 			}
 			m_zoom_params.m_pNight_vision->Start(m_zoom_params.m_sUseZoomPostprocess, pA, false);
 		}
-
 	}
 	else if (m_bRememberActorNVisnStatus)
 	{
@@ -1149,6 +1140,7 @@ void CWeapon::UpdateCL()
 	if (m_zoom_params.m_pVision)
 		m_zoom_params.m_pVision->Update();
 }
+
 void CWeapon::EnableActorNVisnAfterZoom()
 {
 	CActor* pA = smart_cast<CActor*>(H_Parent());
@@ -1179,7 +1171,8 @@ void CWeapon::renderable_Render()
 	{
 		//mesh->UpdateRenderPos(Visual(), false, XFORM());
 		//mesh->Render(false);
-		if (!mesh->m_UseWorldModel) mesh->Update_And_Render_World(Visual(), XFORM());
+		if (!mesh->m_UseWorldModel)
+			mesh->Update_And_Render_World(Visual(), XFORM());
 	}
 
 	//нарисовать подсветку
@@ -1199,6 +1192,7 @@ void CWeapon::signal_HideComplete()
 {
 	if (H_Parent())
 		setVisible(FALSE);
+
 	SetPending(FALSE);
 
 	m_fLR_MovingFactor = 0.f;
@@ -1224,11 +1218,10 @@ void CWeapon::UpdatePosition(const Fmatrix& trans)
 	VERIFY(!fis_zero(DET(renderable.xform)));
 }
 
-
 bool CWeapon::Action(u16 cmd, u32 flags)
 {
-	if (inherited::Action(cmd, flags)) return true;
-
+	if (inherited::Action(cmd, flags))
+		return true;
 
 	switch (cmd)
 	{
@@ -1241,7 +1234,7 @@ bool CWeapon::Action(u16 cmd, u32 flags)
 		//если оружие чем-то занято, то ничего не делать
 		{
 			if (IsPending())
-				return				false;
+				return false;
 
 			if (flags & CMD_START)
 				FireStart();
@@ -1299,8 +1292,10 @@ bool CWeapon::Action(u16 cmd, u32 flags)
 	case kWPN_ZOOM_DEC:
 		if (IsZoomEnabled() && IsZoomed())
 		{
-			if (cmd == kWPN_ZOOM_INC)  ZoomInc();
-			else					ZoomDec();
+			if (cmd == kWPN_ZOOM_INC)
+				ZoomInc();
+			else
+				ZoomDec();
 			return true;
 		}
 		else
@@ -1339,14 +1334,19 @@ bool CWeapon::SwitchAmmoType(u32 flags)
 
 void CWeapon::SpawnAmmo(u32 boxCurr, LPCSTR ammoSect, u32 ParentID)
 {
-	if (!m_ammoTypes.size())			return;
-	if (OnClient())					return;
+	if (!m_ammoTypes.size())
+		return;
+
+	if (OnClient())
+		return;
+
 	m_bAmmoWasSpawned = true;
 
 	int l_type = 0;
 	l_type %= m_ammoTypes.size();
 
-	if (!ammoSect) ammoSect = m_ammoTypes[l_type].c_str();
+	if (!ammoSect)
+		ammoSect = m_ammoTypes[l_type].c_str();
 
 	++l_type;
 	l_type %= m_ammoTypes.size();
@@ -1359,7 +1359,6 @@ void CWeapon::SpawnAmmo(u32 boxCurr, LPCSTR ammoSect, u32 ParentID)
 		l_pA->m_boxSize = (u16)pSettings->r_s32(ammoSect, "box_size");
 		D->s_name = ammoSect;
 		D->set_name_replace("");
-		//.		D->s_gameid					= u8(GameID());
 		D->s_RP = 0xff;
 		D->ID = 0xffff;
 		if (ParentID == 0xffffffff)
@@ -1378,7 +1377,7 @@ void CWeapon::SpawnAmmo(u32 boxCurr, LPCSTR ammoSect, u32 ParentID)
 		while (boxCurr)
 		{
 			l_pA->a_elapsed = (u16)(boxCurr > l_pA->m_boxSize ? l_pA->m_boxSize : boxCurr);
-			NET_Packet				P;
+			NET_Packet P;
 			D->Spawn_Write(P, TRUE);
 			Level().Send(P, net_flags(TRUE));
 
@@ -1462,21 +1461,11 @@ int CWeapon::GetAmmoCount_forType(shared_str const& ammo_type) const
 
 float CWeapon::GetConditionMisfireProbability() const
 {
-	// modified by Peacemaker [17.10.08]
-	//	if(GetCondition() > 0.95f) 
-	//		return 0.0f;
 	if (GetCondition() > misfireStartCondition)
 		return 0.0f;
 	if (GetCondition() < misfireEndCondition)
 		return misfireEndProbability;
-	//	float mis = misfireProbability+powf(1.f-GetCondition(), 3.f)*misfireConditionK;
-	float mis = misfireStartProbability + (
-		(misfireStartCondition - GetCondition()) *				// condition goes from 1.f to 0.f
-		(misfireEndProbability - misfireStartProbability) /		// probability goes from 0.f to 1.f
-		((misfireStartCondition == misfireEndCondition) ?		// !!!say "No" to devision by zero
-			misfireStartCondition :
-			(misfireStartCondition - misfireEndCondition))
-		);
+	float mis = misfireStartProbability + ((misfireStartCondition - GetCondition()) * (misfireEndProbability - misfireStartProbability) / ((misfireStartCondition == misfireEndCondition) ? misfireStartCondition : (misfireStartCondition - misfireEndCondition)));
 	clamp(mis, 0.0f, 0.99f);
 	return mis;
 }
@@ -1504,32 +1493,25 @@ BOOL CWeapon::IsMisfire() const
 {
 	return bMisfire;
 }
+
 void CWeapon::Reload()
 {
 	OnZoomOut();
 }
 
-
 bool CWeapon::IsGrenadeLauncherAttached() const
 {
-	return (ALife::eAddonAttachable == m_eGrenadeLauncherStatus &&
-		0 != (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonGrenadeLauncher)) ||
-		ALife::eAddonPermanent == m_eGrenadeLauncherStatus;
+	return (ALife::eAddonAttachable == m_eGrenadeLauncherStatus && 0 != (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonGrenadeLauncher)) || ALife::eAddonPermanent == m_eGrenadeLauncherStatus;
 }
 
 bool CWeapon::IsScopeAttached() const
 {
-	return (ALife::eAddonAttachable == m_eScopeStatus &&
-		0 != (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonScope)) ||
-		ALife::eAddonPermanent == m_eScopeStatus;
-
+	return (ALife::eAddonAttachable == m_eScopeStatus && 0 != (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonScope)) || ALife::eAddonPermanent == m_eScopeStatus;
 }
 
 bool CWeapon::IsSilencerAttached() const
 {
-	return (ALife::eAddonAttachable == m_eSilencerStatus &&
-		0 != (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonSilencer)) ||
-		ALife::eAddonPermanent == m_eSilencerStatus;
+	return (ALife::eAddonAttachable == m_eSilencerStatus && 0 != (m_flagsAddOnState & CSE_ALifeItemWeapon::eWeaponAddonSilencer)) || ALife::eAddonPermanent == m_eSilencerStatus;
 }
 
 bool CWeapon::GrenadeLauncherAttachable()
@@ -1573,10 +1555,12 @@ void CWeapon::UpdateHUDAddonsVisibility()
 			if (m_eScopeStatus == ALife::eAddonPermanent)
 				HudItemData()->set_bone_visible(wpn_scope, TRUE, TRUE);
 	}
+
 	if (SilencerAttachable())
 	{
 		HudItemData()->set_bone_visible(wpn_silencer, IsSilencerAttached());
 	}
+
 	if (m_eSilencerStatus == ALife::eAddonDisabled)
 	{
 		HudItemData()->set_bone_visible(wpn_silencer, FALSE, TRUE);
@@ -1589,6 +1573,7 @@ void CWeapon::UpdateHUDAddonsVisibility()
 	{
 		HudItemData()->set_bone_visible(wpn_grenade_launcher, IsGrenadeLauncherAttached());
 	}
+
 	if (m_eGrenadeLauncherStatus == ALife::eAddonDisabled)
 	{
 		HudItemData()->set_bone_visible(wpn_grenade_launcher, FALSE, TRUE);
@@ -1602,14 +1587,16 @@ void CWeapon::UpdateHUDAddonsVisibility()
 
 void CWeapon::HUD_VisualBulletUpdate(bool force, int force_idx)
 {
-	if (!bHasBulletsToHide) 
+	if (!bHasBulletsToHide)
 		return;
 
-	if (!GetHUDmode())	return;
+	if (!GetHUDmode())
+		return;
 
 	bool hide = true;
 
-	if (last_hide_bullet == bullet_cnt || force) hide = false;
+	if (last_hide_bullet == bullet_cnt || force)
+		hide = false;
 
 	for (u8 b = 0; b < bullet_cnt; b++)
 	{
@@ -1618,7 +1605,8 @@ void CWeapon::HUD_VisualBulletUpdate(bool force, int force_idx)
 		if (bone_id != BI_NONE)
 			HudItemData()->set_bone_visible(bullets_bones[b], !hide);
 
-		if (b == last_hide_bullet) hide = false;
+		if (b == last_hide_bullet)
+			hide = false;
 	}
 }
 
@@ -1640,7 +1628,7 @@ void CWeapon::UpdateAddonsVisibility()
 			if (bone_id != BI_NONE && !pWeaponVisual->LL_GetBoneVisible(bone_id))
 				pWeaponVisual->LL_SetBoneVisible(bone_id, TRUE, TRUE);
 		}
-		else 
+		else
 		{
 			if (bone_id != BI_NONE && pWeaponVisual->LL_GetBoneVisible(bone_id))
 				pWeaponVisual->LL_SetBoneVisible(bone_id, FALSE, TRUE);
@@ -1655,12 +1643,12 @@ void CWeapon::UpdateAddonsVisibility()
 	bone_id = pWeaponVisual->LL_BoneID(wpn_silencer);
 	if (SilencerAttachable())
 	{
-		if (IsSilencerAttached()) 
+		if (IsSilencerAttached())
 		{
 			if (!pWeaponVisual->LL_GetBoneVisible(bone_id))
 				pWeaponVisual->LL_SetBoneVisible(bone_id, TRUE, TRUE);
 		}
-		else 
+		else
 		{
 			if (pWeaponVisual->LL_GetBoneVisible(bone_id))
 				pWeaponVisual->LL_SetBoneVisible(bone_id, FALSE, TRUE);
@@ -1680,7 +1668,7 @@ void CWeapon::UpdateAddonsVisibility()
 			if (!pWeaponVisual->LL_GetBoneVisible(bone_id))
 				pWeaponVisual->LL_SetBoneVisible(bone_id, TRUE, TRUE);
 		}
-		else 
+		else
 		{
 			if (pWeaponVisual->LL_GetBoneVisible(bone_id))
 				pWeaponVisual->LL_SetBoneVisible(bone_id, FALSE, TRUE);
@@ -1698,7 +1686,6 @@ void CWeapon::UpdateAddonsVisibility()
 
 void CWeapon::InitAddons()
 {
-	
 }
 
 float CWeapon::CurrentZoomFactor()
@@ -1744,17 +1731,16 @@ float CWeapon::GetControlInertionFactor() const
 		}
 		else
 		{
-			return m_fScopeInertionFactor;//m_fScopeInertionFactor;
+			return m_fScopeInertionFactor;
 		}
 	}
-
 
 	return fInertionFactor;
 }
 
 void CWeapon::GetZoomData(const float scope_factor, float& delta, float& min_zoom_factor)
 {
-	float def_fov = bIsSecondVPZoomPresent() ? 75.0f : g_fov;//float(g_fov);
+	float def_fov = bIsSecondVPZoomPresent() ? 75.0f : g_fov;
 	float delta_factor_total = def_fov - scope_factor;
 	VERIFY(delta_factor_total > 0);
 	min_zoom_factor = def_fov - delta_factor_total * m_fZoomMinKoeff;
@@ -1771,7 +1757,7 @@ void CWeapon::OnZoomIn()
 
 	if (!m_zoom_params.m_bUseDynamicZoom)
 		SetZoomFactor(CurrentZoomFactor());
-	else 
+	else
 		SetZoomFactor(psActorFlags.test(AF_3DSCOPE_ENABLE) && bIsSecondVPZoomPresent() ? m_zoom_params.m_f3dZoomFactor : m_fRTZoomFactor);
 
 	// Отключаем инерцию (Заменено GetInertionFactor())
@@ -1818,7 +1804,6 @@ void CWeapon::OnZoomOut()
 	// Включаем инерцию (также заменено  GetInertionFactor())
 	// EnableHudInertion	(TRUE);
 
-
 // 	GamePersistent().RestoreEffectorDOF	();
 
 	if (GetHUDmode())
@@ -1849,8 +1834,7 @@ void CWeapon::SwitchState(u32 S)
 #ifndef MASTER_GOLD
 	if (bDebug)
 	{
-		Msg("---Server is going to send GE_WPN_STATE_CHANGE to [%d], weapon_section[%s], parent[%s]",
-			S, cNameSect().c_str(), H_Parent() ? H_Parent()->cName().c_str() : "NULL Parent");
+		Msg("---Server is going to send GE_WPN_STATE_CHANGE to [%d], weapon_section[%s], parent[%s]", S, cNameSect().c_str(), H_Parent() ? H_Parent()->cName().c_str() : "NULL Parent");
 	}
 #endif // #ifndef MASTER_GOLD
 
@@ -1900,18 +1884,19 @@ void CWeapon::reload(LPCSTR section)
 
 	bUseAltScope = !!bReloadSectionScope(section);
 
-	if (m_eScopeStatus == ALife::eAddonAttachable) {
+	if (m_eScopeStatus == ALife::eAddonAttachable)
+	{
 		m_addon_holder_range_modifier = READ_IF_EXISTS(pSettings, r_float, GetScopeName(), "holder_range_modifier", m_holder_range_modifier);
 		m_addon_holder_fov_modifier = READ_IF_EXISTS(pSettings, r_float, GetScopeName(), "holder_fov_modifier", m_holder_fov_modifier);
 	}
-	else {
+	else
+	{
 		m_addon_holder_range_modifier = m_holder_range_modifier;
 		m_addon_holder_fov_modifier = m_holder_fov_modifier;
 	}
 
-
 	{
-		Fvector				pos, ypr;
+		Fvector pos, ypr;
 		pos = pSettings->r_fvector3(section, "position");
 		ypr = pSettings->r_fvector3(section, "orientation");
 		ypr.mul(PI / 180.f);
@@ -1921,8 +1906,10 @@ void CWeapon::reload(LPCSTR section)
 	}
 
 	m_StrapOffset = m_Offset;
-	if (pSettings->line_exist(section, "strap_position") && pSettings->line_exist(section, "strap_orientation")) {
-		Fvector				pos, ypr;
+
+	if (pSettings->line_exist(section, "strap_position") && pSettings->line_exist(section, "strap_orientation"))
+	{
+		Fvector pos, ypr;
 		pos = pSettings->r_fvector3(section, "strap_position");
 		ypr = pSettings->r_fvector3(section, "strap_orientation");
 		ypr.mul(PI / 180.f);
@@ -1952,10 +1939,10 @@ bool CWeapon::ActivationSpeedOverriden(Fvector& dest, bool clear_override)
 		}
 
 		dest = m_overriden_activation_speed;
-		return							true;
+		return true;
 	}
 
-	return								false;
+	return false;
 }
 
 void CWeapon::SetActivationSpeedOverride(Fvector const& speed)
@@ -1977,16 +1964,22 @@ void CWeapon::setup_physic_shell()
 
 bool CWeapon::NeedToDestroyObject()	const
 {
-	if (GameID() == eGameIDSingle) return false;
-	if (Remote()) return false;
-	if (H_Parent()) return false;
+	if (GameID() == eGameIDSingle) 
+		return false;
+
+	if (Remote())
+		return false;
+
+	if (H_Parent())
+		return false;
+
 	if (TimePassedAfterIndependant() > m_dwWeaponRemoveTime)
 		return true;
 
 	return false;
 }
 
-ALife::_TIME_ID	 CWeapon::TimePassedAfterIndependant()	const
+ALife::_TIME_ID	 CWeapon::TimePassedAfterIndependant() const
 {
 	if (!H_Parent() && m_dwWeaponIndependencyTime != 0)
 		return Level().timeServer() - m_dwWeaponIndependencyTime;
@@ -1997,58 +1990,56 @@ ALife::_TIME_ID	 CWeapon::TimePassedAfterIndependant()	const
 bool CWeapon::can_kill() const
 {
 	if (GetSuitableAmmoTotal(true) || m_ammoTypes.empty())
-		return				(true);
+		return true;
 
-	return					(false);
+	return false;
 }
 
 CInventoryItem* CWeapon::can_kill(CInventory* inventory) const
 {
 	if (GetAmmoElapsed() || m_ammoTypes.empty())
-		return				(const_cast<CWeapon*>(this));
+		return const_cast<CWeapon*>(this);
 
 	TIItemContainer::iterator I = inventory->m_all.begin();
 	TIItemContainer::iterator E = inventory->m_all.end();
-	for (; I != E; ++I) {
+	for (; I != E; ++I)
+	{
 		CInventoryItem* inventory_item = smart_cast<CInventoryItem*>(*I);
 		if (!inventory_item)
 			continue;
 
-		xr_vector<shared_str>::const_iterator	i = std::find(m_ammoTypes.begin(), m_ammoTypes.end(), inventory_item->object().cNameSect());
+		xr_vector<shared_str>::const_iterator i = std::find(m_ammoTypes.begin(), m_ammoTypes.end(), inventory_item->object().cNameSect());
 		if (i != m_ammoTypes.end())
-			return			(inventory_item);
+			return inventory_item;
 	}
 
-	return					(0);
+	return 0;
 }
 
 const CInventoryItem* CWeapon::can_kill(const xr_vector<const CGameObject*>& items) const
 {
 	if (m_ammoTypes.empty())
-		return				(this);
+		return this;
 
 	xr_vector<const CGameObject*>::const_iterator I = items.begin();
 	xr_vector<const CGameObject*>::const_iterator E = items.end();
-	for (; I != E; ++I) {
+	for (; I != E; ++I)
+	{
 		const CInventoryItem* inventory_item = smart_cast<const CInventoryItem*>(*I);
 		if (!inventory_item)
 			continue;
 
-		xr_vector<shared_str>::const_iterator	i = std::find(m_ammoTypes.begin(), m_ammoTypes.end(), inventory_item->object().cNameSect());
+		xr_vector<shared_str>::const_iterator i = std::find(m_ammoTypes.begin(), m_ammoTypes.end(), inventory_item->object().cNameSect());
 		if (i != m_ammoTypes.end())
-			return			(inventory_item);
+			return inventory_item;
 	}
 
-	return					(0);
+	return 0;
 }
 
 bool CWeapon::ready_to_kill() const
 {
-	return					(
-		!IsMisfire() &&
-		((GetState() == eIdle) || (GetState() == eFire) || (GetState() == eFire2)) &&
-		GetAmmoElapsed()
-		);
+	return (!IsMisfire() && ((GetState() == eIdle) || (GetState() == eFire) || (GetState() == eFire2)) && GetAmmoElapsed());
 }
 
 void _inertion(float& _val_cur, const float& _val_trgt, const float& _friction)
@@ -2105,7 +2096,7 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
 		m_zoom_params.m_fZoomRotationFactor = _lerp(m_zoom_params.m_fZoomRotationFactor, target, src);
 		clamp(m_zoom_params.m_fZoomRotationFactor, 0.f, 1.0f);
 	}
-	
+
 	//============= Подготавливаем общие переменные =============//
 
 	clamp(idx, u8(0), u8(1));
@@ -2132,17 +2123,12 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
 
 	// Добавляем боковой наклон от движения камеры
 	float fCamReturnSpeedMod = 1.5f; // Восколько ускоряем нормализацию наклона, полученного от движения камеры (только от бедра)
+
 	// Высчитываем минимальную скорость поворота камеры для начала инерции
-	float fStrafeMinAngle = _lerp(
-		m_strafe_offset[3][0].y,
-		m_strafe_offset[3][1].y,
-		m_zoom_params.m_fZoomRotationFactor);
+	float fStrafeMinAngle = _lerp(m_strafe_offset[3][0].y, m_strafe_offset[3][1].y, m_zoom_params.m_fZoomRotationFactor);
 
 	// Высчитываем мксимальный наклон от поворота камеры
-	float fCamLimitBlend = _lerp(
-		m_strafe_offset[3][0].x,
-		m_strafe_offset[3][1].x,
-		m_zoom_params.m_fZoomRotationFactor);
+	float fCamLimitBlend = _lerp(m_strafe_offset[3][0].x, m_strafe_offset[3][1].x, m_zoom_params.m_fZoomRotationFactor);
 
 	// Считаем стрейф от поворота камеры
 	if (abs(fYMag) > (m_fLR_CameraFactor == 0.0f ? fStrafeMinAngle : 0.0f))
@@ -2247,47 +2233,23 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
 	}
 
 	//============= Инерция оружия =============//
-   // Параметры инерции
-	float fInertiaSpeedMod = _lerp(
-		hi->m_measures.m_inertion_params.m_tendto_speed,
-		hi->m_measures.m_inertion_params.m_tendto_speed_aim,
-		m_zoom_params.m_fZoomRotationFactor);
-
-	float fInertiaReturnSpeedMod = _lerp(
-		hi->m_measures.m_inertion_params.m_tendto_ret_speed,
-		hi->m_measures.m_inertion_params.m_tendto_ret_speed_aim,
-		m_zoom_params.m_fZoomRotationFactor);
-
-	float fInertiaMinAngle = _lerp(
-		hi->m_measures.m_inertion_params.m_min_angle,
-		hi->m_measures.m_inertion_params.m_min_angle_aim,
-		m_zoom_params.m_fZoomRotationFactor);
+	// Параметры инерции
+	float fInertiaSpeedMod = _lerp(hi->m_measures.m_inertion_params.m_tendto_speed, hi->m_measures.m_inertion_params.m_tendto_speed_aim, m_zoom_params.m_fZoomRotationFactor);
+	float fInertiaReturnSpeedMod = _lerp(hi->m_measures.m_inertion_params.m_tendto_ret_speed, hi->m_measures.m_inertion_params.m_tendto_ret_speed_aim, m_zoom_params.m_fZoomRotationFactor);
+	float fInertiaMinAngle = _lerp(hi->m_measures.m_inertion_params.m_min_angle, hi->m_measures.m_inertion_params.m_min_angle_aim, m_zoom_params.m_fZoomRotationFactor);
 
 	Fvector4 vIOffsets; // x = L, y = R, z = U, w = D
-	vIOffsets.x = _lerp(
-		hi->m_measures.m_inertion_params.m_offset_LRUD.x,
-		hi->m_measures.m_inertion_params.m_offset_LRUD_aim.x,
-		m_zoom_params.m_fZoomRotationFactor) * fInertiaPower;
-	vIOffsets.y = _lerp(
-		hi->m_measures.m_inertion_params.m_offset_LRUD.y,
-		hi->m_measures.m_inertion_params.m_offset_LRUD_aim.y,
-		m_zoom_params.m_fZoomRotationFactor) * fInertiaPower;
-	vIOffsets.z = _lerp(
-		hi->m_measures.m_inertion_params.m_offset_LRUD.z,
-		hi->m_measures.m_inertion_params.m_offset_LRUD_aim.z,
-		m_zoom_params.m_fZoomRotationFactor) * fInertiaPower;
-	vIOffsets.w = _lerp(
-		hi->m_measures.m_inertion_params.m_offset_LRUD.w,
-		hi->m_measures.m_inertion_params.m_offset_LRUD_aim.w,
-		m_zoom_params.m_fZoomRotationFactor) * fInertiaPower;
+	vIOffsets.x = _lerp(hi->m_measures.m_inertion_params.m_offset_LRUD.x, hi->m_measures.m_inertion_params.m_offset_LRUD_aim.x, m_zoom_params.m_fZoomRotationFactor) * fInertiaPower;
+	vIOffsets.y = _lerp(hi->m_measures.m_inertion_params.m_offset_LRUD.y, hi->m_measures.m_inertion_params.m_offset_LRUD_aim.y, m_zoom_params.m_fZoomRotationFactor) * fInertiaPower;
+	vIOffsets.z = _lerp(hi->m_measures.m_inertion_params.m_offset_LRUD.z, hi->m_measures.m_inertion_params.m_offset_LRUD_aim.z, m_zoom_params.m_fZoomRotationFactor) * fInertiaPower;
+	vIOffsets.w = _lerp(hi->m_measures.m_inertion_params.m_offset_LRUD.w, hi->m_measures.m_inertion_params.m_offset_LRUD_aim.w, m_zoom_params.m_fZoomRotationFactor) * fInertiaPower;
 
 	// Высчитываем инерцию из поворотов камеры
 	bool bIsInertionPresent = m_fLR_InertiaFactor != 0.0f || m_fUD_InertiaFactor != 0.0f;
 	if (abs(fYMag) > fInertiaMinAngle || bIsInertionPresent)
 	{
 		float fSpeed = fInertiaSpeedMod;
-		if (fYMag > 0.0f && m_fLR_InertiaFactor > 0.0f ||
-			fYMag < 0.0f && m_fLR_InertiaFactor < 0.0f)
+		if (fYMag > 0.0f && m_fLR_InertiaFactor > 0.0f || fYMag < 0.0f && m_fLR_InertiaFactor < 0.0f)
 		{
 			fSpeed *= 2.f; //--> Ускоряем инерцию при движении в противоположную сторону
 		}
@@ -2298,8 +2260,7 @@ void CWeapon::UpdateHudAdditonal(Fmatrix& trans)
 	if (abs(fPMag) > fInertiaMinAngle || bIsInertionPresent)
 	{
 		float fSpeed = fInertiaSpeedMod;
-		if (fPMag > 0.0f && m_fUD_InertiaFactor > 0.0f ||
-			fPMag < 0.0f && m_fUD_InertiaFactor < 0.0f)
+		if (fPMag > 0.0f && m_fUD_InertiaFactor > 0.0f || fPMag < 0.0f && m_fUD_InertiaFactor < 0.0f)
 		{
 			fSpeed *= 2.f; //--> Ускоряем инерцию при движении в противоположную сторону
 		}
@@ -2369,7 +2330,7 @@ void CWeapon::SetAmmoElapsed(int ammo_count)
 	{
 		if (uAmmo > m_magazine.size())
 		{
-			CCartridge			l_cartridge;
+			CCartridge l_cartridge;
 			l_cartridge.Load(m_ammoTypes[m_ammoType].c_str(), m_ammoType);
 			while (uAmmo > m_magazine.size())
 				m_magazine.push_back(l_cartridge);
@@ -2401,7 +2362,8 @@ bool CWeapon::IsNecessaryItem(const shared_str& item_sect)
 
 void CWeapon::modify_holder_params(float& range, float& fov) const
 {
-	if (!IsScopeAttached()) {
+	if (!IsScopeAttached())
+	{
 		inherited::modify_holder_params(range, fov);
 		return;
 	}
@@ -2437,21 +2399,22 @@ bool CWeapon::unlimited_ammo()
 			return false;
 	}
 
-	return ((GameID() == eGameIDDeathmatch) &&
-		m_DefaultCartridge.m_flags.test(CCartridge::cfCanBeUnlimited));
-
+	return ((GameID() == eGameIDDeathmatch) && m_DefaultCartridge.m_flags.test(CCartridge::cfCanBeUnlimited));
 };
 
 float CWeapon::Weight() const
 {
 	float res = CInventoryItemObject::Weight();
-	if (IsGrenadeLauncherAttached() && GetGrenadeLauncherName().size()) {
+	if (IsGrenadeLauncherAttached() && GetGrenadeLauncherName().size())
+	{
 		res += pSettings->r_float(GetGrenadeLauncherName(), "inv_weight");
 	}
-	if (IsScopeAttached() && m_scopes.size()) {
+	if (IsScopeAttached() && m_scopes.size())
+	{
 		res += pSettings->r_float(GetScopeName(), "inv_weight");
 	}
-	if (IsSilencerAttached() && GetSilencerName().size()) {
+	if (IsSilencerAttached() && GetSilencerName().size())
+	{
 		res += pSettings->r_float(GetSilencerName(), "inv_weight");
 	}
 
@@ -2519,7 +2482,7 @@ void CWeapon::debug_draw_firedeps()
 
 		if (hud_adj_mode == 5)
 			render.draw_aabb(get_LastFP(), 0.005f, 0.005f, 0.005f, D3DCOLOR_XRGB(255, 0, 0));
-			
+
 		if (hud_adj_mode == 6)
 			render.draw_aabb(get_LastFP2(), 0.005f, 0.005f, 0.005f, D3DCOLOR_XRGB(0, 0, 255));
 
@@ -2548,10 +2511,10 @@ void CWeapon::OnAnimationEnd(u32 state)
 u8 CWeapon::GetCurrentHudOffsetIdx()
 {
 	CActor* pActor = smart_cast<CActor*>(H_Parent());
-	if (!pActor)		return 0;
+	if (!pActor)
+		return 0;
 
-	bool b_aiming = ((IsZoomed() && m_zoom_params.m_fZoomRotationFactor <= 1.f) ||
-		(!IsZoomed() && m_zoom_params.m_fZoomRotationFactor > 0.f));
+	bool b_aiming = ((IsZoomed() && m_zoom_params.m_fZoomRotationFactor <= 1.f) || (!IsZoomed() && m_zoom_params.m_fZoomRotationFactor > 0.f));
 
 	if (!b_aiming)
 		return	0;
@@ -2630,13 +2593,16 @@ void CWeapon::ZoomDec()
 u32 CWeapon::Cost() const
 {
 	u32 res = CInventoryItem::Cost();
-	if (IsGrenadeLauncherAttached() && GetGrenadeLauncherName().size()) {
+	if (IsGrenadeLauncherAttached() && GetGrenadeLauncherName().size())
+	{
 		res += pSettings->r_u32(GetGrenadeLauncherName(), "cost");
 	}
-	if (IsScopeAttached() && m_scopes.size()) {
+	if (IsScopeAttached() && m_scopes.size())
+	{
 		res += pSettings->r_u32(GetScopeName(), "cost");
 	}
-	if (IsSilencerAttached() && GetSilencerName().size()) {
+	if (IsSilencerAttached() && GetSilencerName().size())
+	{
 		res += pSettings->r_u32(GetSilencerName(), "cost");
 	}
 
@@ -2648,7 +2614,6 @@ u32 CWeapon::Cost() const
 		res += iFloor(w * (iAmmoElapsed / bs));
 	}
 	return res;
-
 }
 
 // Получить HUD FOV текущего оружия
@@ -2713,15 +2678,14 @@ void CWeapon::UpdateSecondVP(bool bInGrenade)
 	bool bCond_1 = bInZoomRightNow();													// Мы должны целиться
 
 	bool bCond_2 = bIsSecondVPZoomPresent() && psActorFlags.test(AF_3DSCOPE_ENABLE);	// В конфиге должен быть прописан фактор зума для линзы (scope_lense_factor
-																						// больше чем 0)
-	bool bCond_3 = pActor->cam_Active() == pActor->cam_FirstEye();						// Мы должны быть от 1-го лица	
+	// больше чем 0)
+	bool bCond_3 = pActor->cam_Active() == pActor->cam_FirstEye();						// Мы должны быть от 1-го лица
 
 	Device.m_SecondViewport.SetSVPActive(bCond_1 && bCond_2 && bCond_3 && !bInGrenade);
 }
 
 void CWeapon::UpdateAddonsHudParams()
 {
-
 }
 
 void CWeapon::UpdateAddonsSlotTransform()
@@ -2737,7 +2701,6 @@ void CWeapon::UpdateAddonsSlotTransform()
 
 void CWeapon::UpdateAddonsVisual()
 {
-	
 }
 
 void CWeapon::UpdateAddonsTransform()
@@ -2778,8 +2741,8 @@ void CWeapon::SaveAttachableParams()
 	xr_delete(pHudCfg);
 	Msg("data saved to %s", fname);
 	Sleep(250);
-
 }
+
 void CWeapon::ParseCurrentItem(CGameFont* F)
 {
 	F->OutNext("WEAPON IN STRAPPED MOD [%d]", m_strapped_mode);

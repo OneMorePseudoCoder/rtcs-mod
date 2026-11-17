@@ -13,10 +13,11 @@
 
 #define BULLET_MANAGER_SECTION "bullet_manager"
 
-CCartridge::CCartridge() 
+CCartridge::CCartridge()
 {
-	m_flags.assign			(cfTracer | cfRicochet);
+	m_flags.assign(cfTracer | cfRicochet);
 	m_ammoSect = NULL;
+	m_LocalAmmoType = NULL;
 	param_s.Init();
 	bullet_material_idx = u16(-1);
 }
