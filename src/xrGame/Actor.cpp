@@ -1316,9 +1316,9 @@ void CActor::shedule_Update	(u32 DT)
 				m_BloodSnd.stop();
 		}
 
-		if(!g_Alive()&&m_BloodSnd._feedback())
-				m_BloodSnd.stop();
-		// -------------------------------
+		if (!g_Alive()&&m_BloodSnd._feedback())
+			m_BloodSnd.stop();
+
 		bs = conditions().GetZoneDanger();
 		if ( bs > 0.1f )
 		{
@@ -1330,9 +1330,7 @@ void CActor::shedule_Update	(u32 DT)
 				m_DangerSnd.set_position(snd_pos);
 
 			float v = bs+0.25f;
-//			Msg( "bs            = %.2f", bs );
-
-			m_DangerSnd.set_volume	(v);
+			m_DangerSnd.set_volume(v);
 		}
 		else
 		{
@@ -1355,7 +1353,7 @@ void CActor::shedule_Update	(u32 DT)
 	{
 		m_pObjectWeLookingAt			= smart_cast<CGameObject*>(RQ.O);
 		
-		CGameObject						*game_object = smart_cast<CGameObject*>(RQ.O);
+		CGameObject* game_object = smart_cast<CGameObject*>(RQ.O);
 		m_pUsableObject					= smart_cast<CUsableScriptObject*>(game_object);
 		m_pInvBoxWeLookingAt			= smart_cast<CInventoryBox*>(game_object);
 		m_pPersonWeLookingAt			= game_object->cast_inventory_owner();

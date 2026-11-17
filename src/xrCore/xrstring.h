@@ -59,17 +59,37 @@ class shared_str
 {
 private:
     str_value* p_;
+
 protected:
     // ref-counting
-    void _dec() { if (0 == p_) return; p_->dwReference--; if (0 == p_->dwReference) p_ = 0; }
+    void _dec()
+    { 
+        if (0 == p_)
+            return;
+        p_->dwReference--;
+        if (0 == p_->dwReference)
+            p_ = 0; 
+    }
+
 public:
-    void _set(str_c rhs) { str_value* v = g_pStringContainer->dock(rhs); if (0 != v) v->dwReference++; _dec(); p_ = v; }
-    void _set(shared_str const& rhs) { str_value* v = rhs.p_; if (0 != v) v->dwReference++; _dec(); p_ = v; }
-    // void _set (shared_str const &rhs) { str_value* v = g_pStringContainer->dock(rhs.c_str()); if (0!=v) v->dwReference++; _dec(); p_ = v; }
-
-
-
+    void _set(str_c rhs)
+    { 
+        str_value* v = g_pStringContainer->dock(rhs);
+        if (0 != v)
+            v->dwReference++;
+        _dec();
+        p_ = v; 
+    }
+    void _set(shared_str const& rhs)
+    { 
+        str_value* v = rhs.p_;
+        if (0 != v)
+            v->dwReference++;
+        _dec();
+        p_ = v; 
+    }
     const str_value* _get() const { return p_; }
+
 public:
     // construction
     shared_str() { p_ = 0; }
@@ -97,19 +117,12 @@ public:
         int vs_sz = _vsnprintf(buf, sizeof(buf) - 1, format, p);
         buf[sizeof(buf) - 1] = 0;
         va_end(p);
-        if (vs_sz) _set(buf);
+        if (vs_sz)
+            _set(buf);
         return (shared_str&)*this;
     }
 };
 
-// res_ptr == res_ptr
-// res_ptr != res_ptr
-// const res_ptr == ptr
-// const res_ptr != ptr
-// ptr == const res_ptr
-// ptr != const res_ptr
-// res_ptr < res_ptr
-// res_ptr > res_ptr
 IC bool operator == (shared_str const& a, shared_str const& b) { return a._get() == b._get(); }
 IC bool operator != (shared_str const& a, shared_str const& b) { return a._get() != b._get(); }
 IC bool operator < (shared_str const& a, shared_str const& b) { return a._get() < b._get(); }
@@ -122,8 +135,10 @@ IC int xr_strcmp(const shared_str& a, const char* b) { return xr_strcmp(*a, b); 
 IC int xr_strcmp(const char* a, const shared_str& b) { return xr_strcmp(a, *b); }
 IC int xr_strcmp(const shared_str& a, const shared_str& b)
 {
-    if (a.equal(b)) return 0;
-    else return xr_strcmp(*a, *b);
+    if (a.equal(b))
+        return 0;
+    else
+        return xr_strcmp(*a, *b);
 }
 IC void xr_strlwr(xr_string& src) { for (xr_string::iterator it = src.begin(); it != src.end(); ++it) *it = xr_string::value_type(tolower(*it)); }
 IC void xr_strlwr(shared_str& src) { if (*src) { LPSTR lp = xr_strdup(*src); xr_strlwr(lp); src = lp; xr_free(lp); } }

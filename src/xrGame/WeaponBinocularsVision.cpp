@@ -24,7 +24,7 @@ extern u32 C_ON_FRIEND;
 struct FindVisObjByObject
 {
 	const CObject* O;
-	FindVisObjByObject(const CObject* o) : O(o){}
+	FindVisObjByObject(const CObject* o) : O(o) {}
 	bool operator()(const SBinocVisibleObj* vis)
 	{
 		return (O == vis->m_object);
@@ -33,7 +33,7 @@ struct FindVisObjByObject
 
 void SBinocVisibleObj::create_default(u32 color)
 {
-	Frect r = {0, 0, RECT_SIZE,RECT_SIZE};
+	Frect r = { 0, 0, RECT_SIZE, RECT_SIZE };
 	m_lt.InitTexture("ui\\ui_enemy_frame");
 	m_lt.SetWndRect(r);
 	m_lt.SetAlignment(waCenter);
@@ -48,11 +48,11 @@ void SBinocVisibleObj::create_default(u32 color)
 	m_rb.SetAlignment(waCenter);
 
 	m_lt.SetTextureRect(Frect().set(0, 0, RECT_SIZE, RECT_SIZE));
-	m_lb.SetTextureRect(Frect().set(0, 32 - RECT_SIZE,	RECT_SIZE, 32));
-	m_rt.SetTextureRect(Frect().set(32-RECT_SIZE, 0, 32, RECT_SIZE));
-	m_rb.SetTextureRect(Frect().set(32-RECT_SIZE, 32 - RECT_SIZE,	32, 32));
+	m_lb.SetTextureRect(Frect().set(0, 32 - RECT_SIZE, RECT_SIZE, 32));
+	m_rt.SetTextureRect(Frect().set(32 - RECT_SIZE, 0, 32, RECT_SIZE));
+	m_rb.SetTextureRect(Frect().set(32 - RECT_SIZE, 32 - RECT_SIZE, 32, 32));
 
-	u32 clr = subst_alpha(color,128);
+	u32 clr = subst_alpha(color, 128);
 	m_lt.SetTextureColor(clr);
 	m_lb.SetTextureColor(clr);
 	m_rt.SetTextureColor(clr);
@@ -76,7 +76,7 @@ void SBinocVisibleObj::Draw()
 
 struct check_pred
 {
-	check_pred(){ apos = Actor()->Position(); };
+	check_pred() { apos = Actor()->Position(); };
 	Fvector apos;
 	IC void operator()(SBinocVisibleObj* _it)
 	{
@@ -92,14 +92,14 @@ void SBinocVisibleObj::Update()
 {
 	m_flags.set(flVisObjNotValid, TRUE);
 
-	if (!m_object->Visual())	
+	if (!m_object->Visual())
 		return;
 
 	Fbox b = m_object->Visual()->getVisData().box;
 
 	Fmatrix xform;
-	xform.mul(Device.mFullTransform,m_object->XFORM());
-	Fvector2 mn = {flt_max, flt_max}, mx = {flt_min, flt_min};
+	xform.mul(Device.mFullTransform, m_object->XFORM());
+	Fvector2 mn = { flt_max, flt_max }, mx = { flt_min, flt_min };
 
 	for (u32 k = 0; k < 8; ++k)
 	{
@@ -111,7 +111,7 @@ void SBinocVisibleObj::Update()
 		mx.x = _max(mx.x, p.x);
 		mx.y = _max(mx.y, p.y);
 	}
-	static Frect screen_rect = {-1.0f, -1.0f, 1.0f, 1.0f};
+	static Frect screen_rect = { -1.0f, -1.0f, 1.0f, 1.0f };
 
 	Frect new_rect;
 	new_rect.lt = mn;
@@ -122,7 +122,7 @@ void SBinocVisibleObj::Update()
 
 	if (new_rect.in(screen_rect.lt) && new_rect.in(screen_rect.rb))
 		return;
-	
+
 	std::swap(mn.y, mx.y);
 	mn.x = (1.f + mn.x) / 2.f * UI_BASE_WIDTH;
 	mx.x = (1.f + mx.x) / 2.f * UI_BASE_WIDTH;
@@ -137,8 +137,8 @@ void SBinocVisibleObj::Update()
 
 	if (m_flags.is(flTargetLocked))
 	{
-		cur_rect.lt.set	(mn);
-		cur_rect.rb.set	(mx);
+		cur_rect.lt.set(mn);
+		cur_rect.rb.set(mx);
 	}
 	else
 	{
@@ -147,10 +147,10 @@ void SBinocVisibleObj::Update()
 		cur_rect.rb.x += (mx.x - cur_rect.rb.x) * m_upd_speed * Device.fTimeDelta;
 		cur_rect.rb.y += (mx.y - cur_rect.rb.y) * m_upd_speed * Device.fTimeDelta;
 		if (mn.similar(cur_rect.lt, 2.f) && mx.similar(cur_rect.rb, 2.f))
-		{ 
+		{
 			// target locked
-			m_flags.set(flTargetLocked,TRUE);
-			u32 clr	= subst_alpha(m_lt.GetTextureColor(), 255);
+			m_flags.set(flTargetLocked, TRUE);
+			u32 clr = subst_alpha(m_lt.GetTextureColor(), 255);
 
 			CActor* pActor = NULL;
 			if (IsGameTypeSingle())
@@ -163,7 +163,7 @@ void SBinocVisibleObj::Update()
 				}
 			}
 
-			if (pActor) 
+			if (pActor)
 			{
 				CInventoryOwner* our_inv_owner = smart_cast<CInventoryOwner*>(pActor);
 				CInventoryOwner* others_inv_owner = smart_cast<CInventoryOwner*>(m_object);
@@ -182,7 +182,7 @@ void SBinocVisibleObj::Update()
 							clr = C_ON_NEUTRAL;
 							break;
 						case ALife::eRelationTypeFriend:
-							clr = C_ON_FRIEND; 
+							clr = C_ON_FRIEND;
 							break;
 						}
 					}
@@ -259,15 +259,15 @@ void CBinocularsVision::Update()
 			continue;
 
 		CObject* object_ = const_cast<CObject*>(_object_);
-		
-		CEntityAlive*	EA = smart_cast<CEntityAlive*>(object_);
+
+		CEntityAlive* EA = smart_cast<CEntityAlive*>(object_);
 		if (!EA || !EA->g_Alive())
 			continue;
-		
+
 		Fvector opos = Fvector(object_->Position());
 		if (0 > opos.sub(Actor()->Position()).dotproduct(Device.vCameraDirection))
 			continue;
-	
+
 		FindVisObjByObject f(object_);
 		VIS_OBJECTS_IT found;
 		found = std::find_if(m_active_objects.begin(), m_active_objects.end(), f);
@@ -284,7 +284,7 @@ void CBinocularsVision::Update()
 			new_vis_obj->m_object = object_;
 			new_vis_obj->create_default(m_frame_color.get());
 			new_vis_obj->m_upd_speed = m_rotating_speed;
-			
+
 			m_sounds.PlaySound("found_snd", Fvector().set(0, 0, 0), NULL, true);
 		}
 	}
@@ -299,13 +299,13 @@ void CBinocularsVision::Update()
 	for (; it != m_active_objects.end(); ++it)
 	{
 		SBinocVisibleObj* visObj = (*it);
-		
+
 		BOOL bLocked = visObj->m_flags.test(flTargetLocked);
-		
+
 		(*it)->Update();
-		
+
 		if (bLocked != visObj->m_flags.test(flTargetLocked))
-			m_sounds.PlaySound("catch_snd", Fvector().set(0,0,0), NULL, true);
+			m_sounds.PlaySound("catch_snd", Fvector().set(0, 0, 0), NULL, true);
 	}
 }
 
@@ -324,7 +324,7 @@ void CBinocularsVision::Load(const shared_str& section)
 	m_sounds.LoadSound(section.c_str(), "catch_snd", "catch_snd", false, SOUND_TYPE_NO_SOUND);
 }
 
-void CBinocularsVision::remove_links(CObject *object)
+void CBinocularsVision::remove_links(CObject* object)
 {
 	VIS_OBJECTS::iterator I = std::find_if(m_active_objects.begin(), m_active_objects.end(), FindVisObjByObject(object));
 	if (I == m_active_objects.end())
