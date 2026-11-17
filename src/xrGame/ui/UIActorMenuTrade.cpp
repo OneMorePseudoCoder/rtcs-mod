@@ -1,4 +1,3 @@
-//#include "stdafx.h"
 #include "pch_script.h"
 #include "UIActorMenu.h"
 #include "UI3tButton.h"
@@ -291,16 +290,13 @@ u32 CUIActorMenu::CalcItemsPrice(CUIDragDropListEx* pList, CTrade* pTrade, bool 
 
 bool CUIActorMenu::CanMoveToPartner(PIItem pItem)
 {
-	if(!pItem->CanTrade())
+	if (!pItem->CanTrade())
 		return false;
 
-	if ( !m_pPartnerInvOwner->trade_parameters().enabled(
-		CTradeParameters::action_buy(0), pItem->object().cNameSect() ) )
-	{
+	if (!m_pPartnerInvOwner->trade_parameters().enabled(CTradeParameters::action_buy(0), pItem->object().cNameSect()))
 		return false;
-	}
 
-	if(pItem->GetCondition()<m_pPartnerInvOwner->trade_parameters().buy_item_condition_factor)
+	if (pItem->GetCondition() < m_pPartnerInvOwner->trade_parameters().buy_item_condition_factor)
 		return false;
 
 	float r1				= CalcItemsWeight( m_pTradeActorList );		// actor
@@ -318,17 +314,10 @@ bool CUIActorMenu::CanMoveToPartner(PIItem pItem)
 
 void CUIActorMenu::UpdateActor()
 {
-	if ( IsGameTypeSingle() )
-	{
-		string64 buf;
-		xr_sprintf( buf, "%d RU", m_pActorInvOwner->get_money() );
-		m_ActorMoney->SetText( buf );
-	}
-	else
-	{
-		UpdateActorMP();
-	}
-	
+	string64 buf;
+	xr_sprintf( buf, "%d RU", m_pActorInvOwner->get_money() );
+	m_ActorMoney->SetText( buf );
+
 	CActor* actor = smart_cast<CActor*>( m_pActorInvOwner );
 	if ( actor )
 	{

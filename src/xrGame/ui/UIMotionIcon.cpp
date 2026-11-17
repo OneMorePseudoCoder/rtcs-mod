@@ -45,9 +45,6 @@ void CUIMotionIcon::Init(Frect const& zonemap_rect)
 	float k = UI().get_current_kx();
 	sz.mul						(rel_sz*k);
 
-
-	//float h = Device.dwHeight;
-	//float w = Device.dwWidth;
 	AttachChild					(&m_luminosity_progress);
 	xml_init.InitProgressShape	(uiXml, "luminosity_progress", 0, &m_luminosity_progress);	
 	m_luminosity_progress.SetWndSize(sz);
@@ -57,23 +54,16 @@ void CUIMotionIcon::Init(Frect const& zonemap_rect)
 	xml_init.InitProgressShape	(uiXml, "noise_progress", 0, &m_noise_progress);
 	m_noise_progress.SetWndSize	(sz);
 	m_noise_progress.SetWndPos	(pos);
-
 }
 
 void CUIMotionIcon::SetNoise(float Pos)
 {
-	if(!IsGameTypeSingle())
-		return;
-
 	Pos	= clampr(Pos, 0.f, 100.f);
 	m_noise_progress.SetPos(Pos/100.f);
 }
 
 void CUIMotionIcon::SetLuminosity(float Pos)
 {
-	if(!IsGameTypeSingle())
-		return;
-
 	m_luminosity	= Pos;
 }
 
@@ -84,11 +74,6 @@ void CUIMotionIcon::Draw()
 
 void CUIMotionIcon::Update()
 {
-	if(!IsGameTypeSingle())
-	{
-		inherited::Update();
-		return;
-	}
 	if(m_bchanged){
 		m_bchanged = false;
 		if( m_npc_visibility.size() )
@@ -116,9 +101,6 @@ void CUIMotionIcon::Update()
 
 void SetActorVisibility		(u16 who_id, float value)
 {
-	if(!IsGameTypeSingle())
-		return;
-
 	if(g_pMotionIcon)
 		g_pMotionIcon->SetActorVisibility(who_id, value);
 }

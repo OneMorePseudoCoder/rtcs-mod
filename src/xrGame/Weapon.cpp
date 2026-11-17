@@ -205,9 +205,6 @@ void CWeapon::UpdateXForm()
 
 	if (!E)
 	{
-		if (!IsGameTypeSingle())
-			UpdatePosition(H_Parent()->XFORM());
-
 		return;
 	}
 
@@ -461,7 +458,6 @@ void CWeapon::Load(LPCSTR section)
 	m_pdm.m_fPDM_disp_crouch = pSettings->r_float(section, "PDM_disp_crouch");
 	m_pdm.m_fPDM_disp_crouch_no_acc = pSettings->r_float(section, "PDM_disp_crouch_no_acc");
 	m_crosshair_inertion = READ_IF_EXISTS(pSettings, r_float, section, "crosshair_inertion", 5.91f);
-	m_first_bullet_controller.load(section);
 	fireDispersionConditionFactor = pSettings->r_float(section, "fire_dispersion_condition_factor");
 
 	misfireStartCondition = pSettings->r_float(section, "misfire_start_condition");
@@ -1030,7 +1026,6 @@ void CWeapon::OnH_A_Chield()
 
 void CWeapon::OnActiveItem()
 {
-	//. from Activate
 	UpdateAddonsVisibility();
 	m_BriefInfo_CalcFrame = 0;
 
@@ -1043,10 +1038,7 @@ void CWeapon::OnHiddenItem()
 {
 	m_BriefInfo_CalcFrame = 0;
 
-	if (IsGameTypeSingle())
-		SwitchState(eHiding);
-	else
-		SwitchState(eHidden);
+	SwitchState(eHiding);
 
 	OnZoomOut();
 	inherited::OnHiddenItem();
@@ -1091,6 +1083,7 @@ void CWeapon::UpdateCL()
 {
 	inherited::UpdateCL();
 	UpdateHUDAddonsVisibility();
+
 	//подсветка от выстрела
 	UpdateLight();
 
@@ -1098,10 +1091,7 @@ void CWeapon::UpdateCL()
 	UpdateFlameParticles();
 	UpdateFlameParticles2();
 
-	if (!IsGameTypeSingle())
-		make_Interpolation();
-
-	if ((GetNextState() == GetState()) && IsGameTypeSingle() && H_Parent() == Level().CurrentEntity())
+	if ((GetNextState() == GetState()) && H_Parent() == Level().CurrentEntity())
 	{
 		CActor* pActor = smart_cast<CActor*>(H_Parent());
 		if (pActor && !pActor->AnyMove() && this == pActor->inventory().ActiveItem())
@@ -1144,7 +1134,7 @@ void CWeapon::UpdateCL()
 void CWeapon::EnableActorNVisnAfterZoom()
 {
 	CActor* pA = smart_cast<CActor*>(H_Parent());
-	if (IsGameTypeSingle() && !pA)
+	if (!pA)
 		pA = g_actor;
 
 	if (pA)
@@ -2389,17 +2379,7 @@ void CWeapon::render_item_ui()
 
 bool CWeapon::unlimited_ammo()
 {
-	if (IsGameTypeSingle())
-	{
-		if (m_pInventory)
-		{
-			return inventory_owner().unlimited_ammo() && m_DefaultCartridge.m_flags.test(CCartridge::cfCanBeUnlimited);
-		}
-		else
-			return false;
-	}
-
-	return ((GameID() == eGameIDDeathmatch) && m_DefaultCartridge.m_flags.test(CCartridge::cfCanBeUnlimited));
+	return m_pInventory ? inventory_owner().unlimited_ammo() && m_DefaultCartridge.m_flags.test(CCartridge::cfCanBeUnlimited) : false;
 };
 
 float CWeapon::Weight() const

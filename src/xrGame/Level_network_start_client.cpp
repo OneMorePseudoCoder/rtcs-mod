@@ -1,6 +1,4 @@
 #include "stdafx.h"
-//#include "PHdynamicdata.h"
-//#include "Physics.h"
 #include "level.h"
 #include "../xrEngine/x_ray.h"
 #include "../xrEngine/igame_persistent.h"
@@ -13,15 +11,16 @@
 
 #include "../xrphysics/iphworld.h"
 
-
 #include "phcommander.h"
 #include "physics_game.h"
+
 extern	pureFrame*				g_pNetProcessor;
 
 bool CLevel::net_Start_client	( const char* options )
 {
 	return false;
 }
+
 #include "string_table.h"
 bool	CLevel::net_start_client1				()
 {
@@ -121,8 +120,6 @@ bool	CLevel::net_start_client3				()
 		// Load level
 		R_ASSERT2				(Load(level_id),"Loading failed.");
 		map_data.m_level_geom_crc32 = 0;
-		if (!IsGameTypeSingle())
-			CalculateLevelCrc32		();
 	}
 	return true;
 }

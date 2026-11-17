@@ -1067,7 +1067,6 @@
     <ClInclude Include="filetransfer_node.h" />
     <ClInclude Include="file_transfer.h" />
     <ClInclude Include="fire_disp_controller.h" />
-    <ClInclude Include="first_bullet_controller.h" />
     <ClInclude Include="flare.h" />
     <ClInclude Include="FoodItem.h" />
     <ClInclude Include="FryupZone.h" />
@@ -2561,7 +2560,6 @@
     <ClCompile Include="filetransfer_node.cpp" />
     <ClCompile Include="file_transfer.cpp" />
     <ClCompile Include="fire_disp_controller.cpp" />
-    <ClCompile Include="first_bullet_controller.cpp" />
     <ClCompile Include="flare.cpp" />
     <ClCompile Include="FoodItem.cpp" />
     <ClCompile Include="FryupZone.cpp" />

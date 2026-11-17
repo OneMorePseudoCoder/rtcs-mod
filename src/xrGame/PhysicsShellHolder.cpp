@@ -10,11 +10,8 @@
 #include "PHScriptCall.h"
 #include "CustomRocket.h"
 #include "Grenade.h"
-
-//#include "phactivationshape.h"
 #include "../xrphysics/iphworld.h"
 #include "../xrphysics/iActivationShape.h"
-//#include "../xrphysics/phvalide.h"
 #include "characterphysicssupport.h"
 #include "phmovementcontrol.h"
 #include "physics_shell_animated.h"
@@ -23,18 +20,18 @@
 #ifdef	DEBUG
 #include "../xrengine/objectdump.h"
 #endif
+
 CPhysicsShellHolder::CPhysicsShellHolder()
 {
 	init();
 }
-CPhysicsShellHolder::	~CPhysicsShellHolder						()
+
+CPhysicsShellHolder::~CPhysicsShellHolder						()
 {
-	VERIFY ( !m_pPhysicsShell );
-//#ifndef MASTER_GOLD
-	//R_ASSERT( !m_pPhysicsShell );
-//#endif
+	VERIFY(!m_pPhysicsShell);
 	destroy_physics_shell( m_pPhysicsShell );
 }
+
 const IObjectPhysicsCollision*CPhysicsShellHolder::physics_collision	()
 {
 	CCharacterPhysicsSupport	*char_support = character_physics_support();
@@ -42,6 +39,7 @@ const IObjectPhysicsCollision*CPhysicsShellHolder::physics_collision	()
 		char_support->create_animation_collision();
 	return this;
 }
+
 const IPhysicsShell	*CPhysicsShellHolder::physics_shell() const	
 {
 	if( m_pPhysicsShell )
@@ -120,8 +118,6 @@ void	CPhysicsShellHolder::PHHit( SHit &H )
 		if(m_pPhysicsShell) m_pPhysicsShell->applyHit(H.bone_space_position(),H.direction(),H.phys_impulse(),H.bone(),H.type());
 }
 
-//void	CPhysicsShellHolder::Hit(float P, Fvector &dir, CObject* who, s16 element,
-//						 Fvector p_in_object_space, float impulse, ALife::EHitType hit_type)
 void	CPhysicsShellHolder::Hit					(SHit* pHDS)
 {
 	bool const is_special_burn_hit_2_self	=	(pHDS->who == this) && (pHDS->boneID == BI_NONE) && 
@@ -228,13 +224,10 @@ void CPhysicsShellHolder::activate_physic_shell()
 		smart_cast<IKinematics*>(H_Parent()->Visual())->CalculateBones_Invalidate	();
 		smart_cast<IKinematics*>(H_Parent()->Visual())->CalculateBones	(TRUE);
 	}
+
 	smart_cast<IKinematics*>(Visual())->CalculateBones_Invalidate	();
 	smart_cast<IKinematics*>(Visual())->CalculateBones(TRUE);
-	if(!IsGameTypeSingle())
-	{
-		if(!smart_cast<CCustomRocket*>(this)&&!smart_cast<CGrenade*>(this)) PPhysicsShell()->SetIgnoreDynamic();
-	}
-//	XFORM().set					(l_p1);
+
 	correct_spawn_pos();
 
 	Fvector overriden_vel;
@@ -473,14 +466,8 @@ bool CPhysicsShellHolder::register_schedule	() const
 
 void CPhysicsShellHolder::on_physics_disable()
 {
-	if (IsGameTypeSingle())
-		return;
-
-	/*NET_Packet			net_packet;
-	u_EventGen			(net_packet,GE_FREEZE_OBJECT,ID());
-	Level().Send		(net_packet,net_flags(TRUE,TRUE));*/
+	return;
 }
-
 
 Fmatrix& CPhysicsShellHolder::ObjectXFORM()
 {

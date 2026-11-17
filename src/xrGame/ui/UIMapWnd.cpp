@@ -37,11 +37,6 @@ CUIMapWnd::CUIMapWnd()
 	m_currentZoom			= 1.0f;
 	m_map_location_hint		= NULL;
 	m_map_move_step			= 10.0f;
-/*
-#ifdef DEBUG
-//	m_dbg_text_hint			= NULL;
-//	m_dbg_info				= NULL;
-#endif // DEBUG /**/
 
 //	UIMainMapHeader			= NULL;
 	m_scroll_mode			= false;
@@ -55,14 +50,9 @@ CUIMapWnd::~CUIMapWnd()
 	delete_data( m_ActionPlanner );
 	delete_data( m_GameMaps );
 	delete_data( m_map_location_hint );
-/*
-#ifdef DEBUG
-	delete_data( m_dbg_text_hint );
-	delete_data( m_dbg_info );
-#endif // DEBUG/**/
+
 	g_map_wnd				= NULL;
 }
-
 
 void CUIMapWnd::Init(LPCSTR xml_name, LPCSTR start_from)
 {
@@ -136,11 +126,7 @@ void CUIMapWnd::Init(LPCSTR xml_name, LPCSTR start_from)
 	init_xml_nav( uiXml );
 
 	// initialize local maps
-	xr_string sect_name;
-	if( IsGameTypeSingle() )
-		sect_name = "level_maps_single";
-	else
-		sect_name = "level_maps_mp";
+	xr_string sect_name = "level_maps_single";
 
 	if (pGameIni->section_exist(sect_name.c_str()))
 	{
@@ -296,7 +282,7 @@ void CUIMapWnd::SetTargetMap			(CUICustomMap* m, const Fvector2& pos, bool bZoom
 	else
 	{
 
-		if(bZoomIn/* && fsimilar(GlobalMap()->GetCurrentZoom(), GlobalMap()->GetMinZoom(),EPS_L )*/)
+		if (bZoomIn)
 			SetZoom(GlobalMap()->GetMaxZoom());
 
 //		m_tgtCenter						= m->ConvertRealToLocalNoTransform(pos, m->BoundRect());
@@ -316,11 +302,6 @@ void CUIMapWnd::MoveMap( Fvector2 const& pos_delta )
 void CUIMapWnd::Draw()
 {
 	inherited::Draw();
-/*
-#ifdef DEBUG
-	m_dbg_text_hint->Draw	();
-	m_dbg_info->Draw		();
-#endif // DEBUG/**/
 
 	m_btn_nav_parent->Draw();
 }

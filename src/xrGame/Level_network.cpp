@@ -30,11 +30,7 @@ extern bool	g_b_ClearGameCaptions;
 
 void CLevel::remove_objects	()
 {
-	if (!IsGameTypeSingle()) Msg("CLevel::remove_objects - Start");
 	BOOL						b_stored = psDeviceFlags.test(rsDisableObjectsAsCrows);
-	
-	
-	//Lights.ldbTargetViewPortBuffer->rawPackage_.clear();
 
 	int loop = 5;
 	while(loop)
@@ -107,10 +103,6 @@ void CLevel::remove_objects	()
 	}
 
 	g_pGamePersistent->destroy_particles		(false);
-
-//.	xr_delete									(m_seniority_hierarchy_holder);
-//.	m_seniority_hierarchy_holder				= xr_new<CSeniorityHierarchyHolder>();
-	if (!IsGameTypeSingle()) Msg("CLevel::remove_objects - End");
 }
 
 #ifdef DEBUG
@@ -479,13 +471,7 @@ void			CLevel::ClearAllObjects				()
 		CObject* pObj = Level().Objects.o_get_by_iterator(i);
 		if (pObj->H_Parent() != NULL)
 		{
-			if (IsGameTypeSingle())
-			{
-				FATAL("pObj->H_Parent()==NULL");
-			} else
-			{
-				Msg("! ERROR: object's parent is not NULL");
-			}
+			FATAL("pObj->H_Parent()==NULL");
 		}
 		
 		//-----------------------------------------------------------

@@ -8,14 +8,13 @@
 #include "xrmessages.h"
 #include "../Include/xrRender/Kinematics.h"
 #include "../Include/xrRender/KinematicsAnimated.h"
-//#include "PHWorld.h"
+
 CTeleWhirlwind ::CTeleWhirlwind () 
 {
 	m_owner_object=NULL;
 	m_center.set(0.f,0.f,0.f);
 	m_keep_radius=1.f;
 	m_throw_power=100.f;
-
 }
 
 CTelekineticObject* CTeleWhirlwind::activate(CPhysicsShellHolder *obj, float strength, float height, u32 max_time_keep, bool rot)
@@ -30,14 +29,15 @@ CTelekineticObject* CTeleWhirlwind::activate(CPhysicsShellHolder *obj, float str
 	else
 		return 0;
 }
+
 void CTeleWhirlwind::clear_impacts()
 {
 	m_saved_impacts.clear();
 }
+
 void CTeleWhirlwind::clear()
 {
 	inherited::clear();
-	
 }
 
 void CTeleWhirlwind::add_impact(const Fvector& dir,float val)
@@ -48,6 +48,7 @@ void CTeleWhirlwind::add_impact(const Fvector& dir,float val)
 	point.set(0.f,0.f,0.f);
 	m_saved_impacts.push_back(SPHImpact(force,point,0));
 }
+
 void CTeleWhirlwind::set_throw_power(float throw_pow)
 {
 	m_throw_power=throw_pow;
@@ -159,8 +160,6 @@ void		CTeleWhirlwindObject::		release					()
 		b_destroyed=destroy_object(dir_inv,throw_power*100.f);
 	}
 
-
-
 	if(!b_destroyed)object->m_pPhysicsShell->applyImpulse(dir_inv,impulse);
 	switch_state(TS_None);
 }
@@ -173,16 +172,11 @@ bool	CTeleWhirlwindObject::destroy_object		(const Fvector dir,float val)
 		D->PhysicallyRemoveSelf();
 		D->Destroy(m_telekinesis->OwnerObject()->ID());
 		
-//.		m_telekinesis->add_impact(dir,val*10.f);
-
 		xr_vector<shared_str>::iterator i = D->m_destroyed_obj_visual_names.begin();
 		xr_vector<shared_str>::iterator e = D->m_destroyed_obj_visual_names.end();
-		if (IsGameTypeSingle())
-		{
-			for(;e!=i;i++)
-				m_telekinesis->add_impact(dir,val*10.f);
-		};	
 
+		for (; e != i; i++)
+			m_telekinesis->add_impact(dir,val*10.f);
 
 		CParticlesPlayer* PP = smart_cast<CParticlesPlayer*>(object);
 		if(PP)

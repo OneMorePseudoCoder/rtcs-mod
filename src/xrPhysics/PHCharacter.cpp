@@ -230,14 +230,13 @@ void	CPHCharacter::	fix_body_rotation					()
 		}
 }
 
-
-
-CPHCharacter	*create_ai_character()
+CPHCharacter* create_ai_character()
 {
-	return xr_new<CPHAICharacter>	();
+	return xr_new<CPHAICharacter>();
 }
-CPHCharacter	*create_actor_character( bool single_game )
+
+CPHCharacter* create_actor_character()
 {
-	return xr_new<CPHActorCharacter>	( single_game );
+	return xr_new<CPHActorCharacter>();
 }
 

@@ -548,7 +548,7 @@ BOOL CActor::net_Spawn		(CSE_Abstract* DC)
 	r_model_yaw				= E->o_torso.yaw;
 	r_torso.yaw				= E->o_torso.yaw;
 	r_torso.pitch			= E->o_torso.pitch;
-	r_torso.roll			= 0.0f;//E->o_Angle.z;
+	r_torso.roll			= 0.0f;
 
 	unaffected_r_torso.yaw	= r_torso.yaw;
 	unaffected_r_torso.pitch= r_torso.pitch;
@@ -559,27 +559,16 @@ BOOL CActor::net_Spawn		(CSE_Abstract* DC)
 	else
 		cam_Set					(eacFirstEye);
 
-	cam_Active()->Set		(-E->o_torso.yaw,E->o_torso.pitch,0);//E->o_Angle.z);
+	cam_Active()->Set		(-E->o_torso.yaw,E->o_torso.pitch,0);
 
-	// *** movement state - respawn
-	//mstate_wishful			= 0;
-	//mstate_real				= 0;
-	//mstate_old				= 0;
 	m_bJumpKeyPressed		= FALSE;
-//
-//	m_bJumpKeyPressed = ((mstate_wishful&mcJump)!=0);
-//		
+	
 	NET_SavedAccel.set		(0,0,0);
 	NET_WasInterpolating	= TRUE;
 
 	setEnabled				(E->s_flags.is(M_SPAWN_OBJECT_LOCAL));
 
 	Engine.Sheduler.Register	(this,TRUE);
-
-	if (!IsGameTypeSingle())
-	{
-		setEnabled(TRUE);
-	}
 
 	m_hit_slowmo				= 0.f;
 
@@ -639,9 +628,6 @@ BOOL CActor::net_Spawn		(CSE_Abstract* DC)
 		mstate_real		&=		~mcAnyMove;
 		IKinematicsAnimated* K= smart_cast<IKinematicsAnimated*>(Visual());
 		K->PlayCycle("death_init");
-
-		
-		//   
 		m_HeavyBreathSnd.stop();
 	}
 	
@@ -652,23 +638,17 @@ BOOL CActor::net_Spawn		(CSE_Abstract* DC)
 	if (E->m_holderID != ALife::_OBJECT_ID(-1))
 		if(!g_dedicated_server)
 			Level().client_spawn_manager().add(E->m_holderID,ID(),callback);
-	//F
-	//-------------------------------------------------------------
+
 	m_iLastHitterID = u16(-1);
 	m_iLastHittingWeaponID = u16(-1);
 	m_s16LastHittedElement = -1;
 	m_bWasHitted = false;
 	m_dwILastUpdateTime		= 0;
 
-	if (IsGameTypeSingle())
-	{
+	Level().MapManager().AddMapLocation("actor_location",ID());
+	Level().MapManager().AddMapLocation("actor_location_p",ID());
 
-		Level().MapManager().AddMapLocation("actor_location",ID());
-		Level().MapManager().AddMapLocation("actor_location_p",ID());
-
-		m_statistic_manager = xr_new<CActorStatisticMgr>();
-	}
-
+	m_statistic_manager = xr_new<CActorStatisticMgr>();
 
 	spatial.type |=STYPE_REACTTOSOUND;
 	psHUD_Flags.set(HUD_WEAPON_RT,TRUE);

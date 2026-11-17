@@ -1,7 +1,6 @@
 #include "pch_script.h"
 #include "physicobject.h"
 #include "../xrphysics/PhysicsShell.h"
-//#include "Physics.h"
 #include "xrserver_objects_alife.h"
 #include "Level.h"
 #include "../Include/xrRender/Kinematics.h"
@@ -10,13 +9,13 @@
 #include "../xrEngine/cf_dynamic_mesh.h"
 #include "PHSynchronize.h"
 #include "game_object_space.h"
-//#include "../xrphysics/PhysicsShellAnimator.h"
 #include "moving_bones_snd_player.h"
 #include "../xrphysics/extendedgeom.h"
 #ifdef	DEBUG
 #include "phdebug.h"
 #include "../xrengine/objectdump.h"
 #endif
+
 BOOL dbg_draw_doors = false;
 CPhysicObject::CPhysicObject(void): 
 m_anim_blend( 0 ),
@@ -350,20 +349,15 @@ void CPhysicObject::UpdateCL()
 		m_pPhysicsShell->AnimatorOnFrame();
 	}
 	
-	if (!IsGameTypeSingle())
-	{
-		Interpolate();
-	}
-
 	m_anim_script_callback.update( *this );
 	PHObjectPositionUpdate();
 
 #ifdef	DEBUG
-if(dbg_draw_doors)
-{
-	Fvector c,o;
-	get_door_vectors( c, o );
-}
+	if(dbg_draw_doors)
+	{
+		Fvector c,o;
+		get_door_vectors( c, o );
+	}
 #endif
 
 	if( !is_active( bones_snd_player ) )
@@ -513,35 +507,10 @@ void	CPhysicObject::	set_collision_hit_callback	(ICollisionHitCallback *cc)
 	m_collision_hit_callback = cc;
 }
 
-//////////////////////////////////////////////////////////////////////////
-/*
-DEFINE_MAP_PRED	(LPCSTR,	CPhysicsJoint*,	JOINT_P_MAP,	JOINT_P_PAIR_IT,	pred_str);
-
-JOINT_P_MAP			*l_tpJointMap = xr_new<JOINT_P_MAP>();
-
-l_tpJointMap->insert(std::make_pair(bone_name,joint*));
-JOINT_P_PAIR_IT		I = l_tpJointMap->find(bone_name);
-if (l_tpJointMap->end()!=I){
-//bone_name is found and is an pair_iterator
-(*I).second
-}
-
-JOINT_P_PAIR_IT		I = l_tpJointMap->begin();
-JOINT_P_PAIR_IT		E = l_tpJointMap->end();
-for ( ; I != E; ++I) {
-(*I).second->joint_method();
-Msg("%s",(*I).first);
-}
-
-*/
-
-//////////////////////////////////////////////////////////////////////////
 bool CPhysicObject::is_ai_obstacle		() const
 {
 	return							!!( READ_IF_EXISTS(pSettings, r_bool, cNameSect(), "is_ai_obstacle", true ) );
 }
-
-// network synchronization ----------------------------
 
 net_updatePhData* CPhysicObject::NetSync()			
 {
@@ -552,81 +521,24 @@ net_updatePhData* CPhysicObject::NetSync()
 
 void CPhysicObject::net_Export			(NET_Packet& P) 
 {	
-	if (this->H_Parent() || IsGameTypeSingle()) 
-	{
-		P.w_u8				(0);
-		return;
-	}
-
-	CPHSynchronize* pSyncObj				= NULL;
-	SPHNetState								State;
-	pSyncObj = this->PHGetSyncItem		(0);
-
-	if (pSyncObj && !this->H_Parent()) 
-		pSyncObj->get_State					(State);
-	else 	
-		State.position.set					(this->Position());
-
-
-	mask_num_items			num_items;
-	num_items.mask			= 0;
-	u16						temp = this->PHGetSyncItemsNumber();
-	R_ASSERT				(temp < (u16(1) << 5));
-	num_items.num_items		= u8(temp);
-
-	if (State.enabled)									num_items.mask |= CSE_ALifeObjectPhysic::inventory_item_state_enabled;
-	if (fis_zero(State.angular_vel.square_magnitude()))	num_items.mask |= CSE_ALifeObjectPhysic::inventory_item_angular_null;
-	if (fis_zero(State.linear_vel.square_magnitude()))	num_items.mask |= CSE_ALifeObjectPhysic::inventory_item_linear_null;
-	//if (m_pPhysicsShell->PPhysicsShellAnimator())		{num_items.mask |= CSE_ALifeObjectPhysic::animated;}
-
-	P.w_u8					(num_items.common);
-
-	/*if (num_items.mask&CSE_ALifeObjectPhysic::animated)
-	{
-		net_Export_Anim_Params(P);
-	}*/
-	net_Export_PH_Params(P,State,num_items);
-	
-	if (PPhysicsShell()->isEnabled())
-	{
-		P.w_u8(1);	//not freezed
-	} else
-	{
-		P.w_u8(0);  //freezed
-	}
+	P.w_u8(0);
+	return;
 };
 
 void CPhysicObject::net_Export_PH_Params(NET_Packet& P, SPHNetState& State, mask_num_items&	num_items)
 {
-	//UI().Font().pFontStat->OutSet(100.0f,100.0f);
 	P.w_vec3				(State.force);
-	//Msg("Export State.force.y:%4.6f",State.force.y);
 	P.w_vec3				(State.torque);
-	//UI().Font().pFontStat->OutNext("Export State.torque:%4.6f",State.torque.magnitude());
 	P.w_vec3				(State.position);
-	//Msg("Export State.position.y:%4.6f",State.position.y);
-	//Msg("Export State.enabled:%i",int(State.enabled));
 
 	float					magnitude = _sqrt(State.quaternion.magnitude());
-	if (fis_zero(magnitude)) {
+	if (fis_zero(magnitude)) 
+	{
 		magnitude			= 1;
 		State.quaternion.x	= 0.f;
 		State.quaternion.y	= 0.f;
 		State.quaternion.z	= 1.f;
 		State.quaternion.w	= 0.f;
-	}
-	else {
-		/*		float				invert_magnitude = 1.f/magnitude;
-
-		State.quaternion.x	*= invert_magnitude;
-		State.quaternion.y	*= invert_magnitude;
-		State.quaternion.z	*= invert_magnitude;
-		State.quaternion.w	*= invert_magnitude;
-
-		clamp				(State.quaternion.x,-1.f,1.f);
-		clamp				(State.quaternion.y,-1.f,1.f);
-		clamp				(State.quaternion.z,-1.f,1.f);
-		clamp				(State.quaternion.w,-1.f,1.f);*/
 	}
 
 	P.w_float			(State.quaternion.x);
@@ -634,32 +546,20 @@ void CPhysicObject::net_Export_PH_Params(NET_Packet& P, SPHNetState& State, mask
 	P.w_float			(State.quaternion.z);
 	P.w_float			(State.quaternion.w);
 
-	if (!(num_items.mask & CSE_ALifeObjectPhysic::inventory_item_angular_null)) {
-		/*	clamp				(State.angular_vel.x,-10.f*PI_MUL_2,10.f*PI_MUL_2);
-		clamp				(State.angular_vel.y,-10.f*PI_MUL_2,10.f*PI_MUL_2);
-		clamp				(State.angular_vel.z,-10.f*PI_MUL_2,10.f*PI_MUL_2);*/
-
+	if (!(num_items.mask & CSE_ALifeObjectPhysic::inventory_item_angular_null)) 
+	{
 		P.w_float		(State.angular_vel.x);
 		P.w_float		(State.angular_vel.y);
 		P.w_float		(State.angular_vel.z);
 	}
 
-	if (!(num_items.mask & CSE_ALifeObjectPhysic::inventory_item_linear_null)) {
-		/*clamp				(State.linear_vel.x,-32.f,32.f);
-		clamp				(State.linear_vel.y,-32.f,32.f);
-		clamp				(State.linear_vel.z,-32.f,32.f);*/
-
+	if (!(num_items.mask & CSE_ALifeObjectPhysic::inventory_item_linear_null)) 
+	{
 		P.w_float		(State.linear_vel.x);
 		P.w_float		(State.linear_vel.y);
 		P.w_float		(State.linear_vel.z);
-		//Msg("Export State.linear_vel.y:%4.6f",State.linear_vel.y);
-	}
-	else
-	{
-		//Msg("Export State.linear_vel.y:%4.6f",0.0f);
 	}
 }
-
 
 void CPhysicObject::net_Import			(NET_Packet& P) 
 {	
@@ -790,20 +690,7 @@ void CPhysicObject::PH_A_CrPr		()
 		PPhysicsShell()->GetGlobalTransformDynamic(&XFORM());
 		K->CalculateBones_Invalidate();
 		K->CalculateBones(TRUE);
-#if	0
-		Fbox bb= BoundingBox	();
-		DBG_OpenCashedDraw		();
-		Fvector c,r,p;
-		bb.get_CD(c,r );
-		XFORM().transform_tiny(p,c);
-		DBG_DrawAABB( p, r,D3DCOLOR_XRGB(255, 0, 0));
-		//PPhysicsShell()->XFORM().transform_tiny(c);
-		Fmatrix mm;
-		PPhysicsShell()->GetGlobalTransformDynamic(&mm);
-		mm.transform_tiny(p,c);
-		DBG_DrawAABB( p, r,D3DCOLOR_XRGB(0, 255, 0));
-		DBG_ClosedCashedDraw	(50000);
-#endif
+
 		spatial_move();
 		m_just_after_spawn = false;
 		

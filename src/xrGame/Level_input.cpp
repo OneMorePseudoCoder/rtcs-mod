@@ -115,7 +115,7 @@ void CLevel::IR_OnKeyboardPress	(int key)
 			if (Device.editor())	return;
 		#endif // INGAME_EDITOR
 
-		if (!g_block_pause && IsGameTypeSingle())
+		if (!g_block_pause)
 		{
 #ifdef DEBUG
 			if(psActorFlags.test(AF_NO_CLIP))
@@ -133,12 +133,10 @@ void CLevel::IR_OnKeyboardPress	(int key)
 	{
 	case kSCREENSHOT:
 		Render->Screenshot();
-		return;
 		break;
 
 	case kCONSOLE:
-		Console->Show				();
-		return;
+		Console->Show();
 		break;
 
 	case kQUIT: 
@@ -166,12 +164,13 @@ void CLevel::IR_OnKeyboardPress	(int key)
 
 	if ( game && game->OnKeyboardPress(get_binded_action(key)) )	return;
 
-	if(_curr == kQUICK_SAVE && IsGameTypeSingle())
+	if(_curr == kQUICK_SAVE)
 	{
-		Console->Execute			("save");
+		Console->Execute("save");
 		return;
 	}
-	if(_curr == kQUICK_LOAD && IsGameTypeSingle())
+
+	if(_curr == kQUICK_LOAD)
 	{
 #ifdef DEBUG
 		FS.get_path					("$game_config$")->m_Flags.set(FS_Path::flNeedRescan, TRUE);
@@ -189,8 +188,10 @@ void CLevel::IR_OnKeyboardPress	(int key)
 	}
 
 #ifndef MASTER_GOLD
-	switch (key) {
-	case DIK_F7: {
+	switch (key) 
+	{
+	case DIK_F7: 
+	{
 		if (GameID() != eGameIDSingle) return;
 		FS.get_path					("$game_config$")->m_Flags.set(FS_Path::flNeedRescan, TRUE);
 		FS.get_path					("$game_scripts$")->m_Flags.set(FS_Path::flNeedRescan, TRUE);
@@ -244,11 +245,6 @@ void CLevel::IR_OnKeyboardPress	(int key)
 #endif //DEBUG
 	case DIK_NUMPAD5: 
 		{
-			if (GameID()!=eGameIDSingle) 
-			{
-				Msg("For this game type Demo Record is disabled.");
-///				return;
-			};
 			if(!pInput->iGetAsyncKeyState(DIK_LSHIFT))
 			{
 				Console->Hide	();

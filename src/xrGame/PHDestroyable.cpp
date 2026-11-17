@@ -13,33 +13,13 @@
 #include "ai_object_location.h"
 #include "ai_space.h"
 #include "game_graph.h"
-//#include "PHCollideValidator.h"
-//#include "PHShell.h"
 #include "../xrphysics/MathUtils.h"
 #ifdef DEBUG
 #include "../xrphysics/IPHWorld.h"
 #endif
 
 #include "../Include/xrRender/Kinematics.h"
-/*
-[impulse_transition_to_parts]
-random_min              =1       ; х массу объекта = величина случайно направленного импульса 
-; с случайн				о выбранной точкой приложения в пределах нового обекта
-random_hit_imp         =0.1     ; х величена хит - импульса =............
 
-;ref_bone                       ; кость из по которой определяется скорость для частей у который связь не задана по умолчанию рут
-imp_transition_factor  =0.1     ; фактор с которым прикладывается хит по исходному объекту ко всем частям 
-lv_transition_factor   =1       ; коэффициент передачи линейной скорости
-av_transition_factor   =1       ; коэффициент передачи угловой скорости
-
-
-[impulse_transition_from_source_bone]
-source_bone            =0       ; ref_bone
-imp_transition_factor  =1       ; коэффициент передачи импульса     
-lv_transition_factor   =1       ; коэффициент передачи линейной скорости 
-av_transition_factor   =1       ; коэффициент передачи угловой скорости
-
-*/
 CPHDestroyable::CPHDestroyable()
 {
 	m_flags.flags=0;
@@ -50,17 +30,16 @@ CPHDestroyable::CPHDestroyable()
 void CPHDestroyable::GenSpawnReplace(u16 ref_id,LPCSTR section,shared_str visual_name)
 {
 
-	CSE_Abstract				*D	= F_entity_Create(section);//*cNameSect()
+	CSE_Abstract				*D	= F_entity_Create(section);
 	VERIFY						(D);
 	CSE_Visual					*V  =smart_cast<CSE_Visual*>(D);
 	V->set_visual				(*visual_name);
 	CSE_PHSkeleton				*l_tpPHSkeleton = smart_cast<CSE_PHSkeleton*>(D);
 	VERIFY						(l_tpPHSkeleton);
 	l_tpPHSkeleton->source_id	= ref_id;
-	//init
 
 	// Send
-	D->s_name			= section;//*cNameSect()
+	D->s_name			= section;
 	D->ID_Parent		= u16(-1);
 	InitServerObject	(D);
 	if (OnServer())
@@ -151,12 +130,9 @@ void CPHDestroyable::Destroy(u16 source_id/*=u16(-1)*/,LPCSTR section/*="ph_skel
 	}
 	xr_vector<shared_str>::iterator i=m_destroyed_obj_visual_names.begin(),e=m_destroyed_obj_visual_names.end();
 
-	if (IsGameTypeSingle())
-	{
-		for(;e!=i;i++)
-			GenSpawnReplace(source_id,section,*i);
-	};	
-///////////////////////////////////////////////////////////////////////////
+	for(;e!=i;i++)
+		GenSpawnReplace(source_id,section,*i);
+
 	m_flags.set(fl_destroyed,TRUE);
 	return;
 }

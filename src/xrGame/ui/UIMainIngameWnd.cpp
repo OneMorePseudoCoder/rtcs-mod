@@ -53,11 +53,7 @@
 #include "UIHudStatesWnd.h"
 #include "UIActorMenu.h"
 
-void test_draw	();
-void test_key	(int dik);
-
 #include "../Include/xrRender/Kinematics.h"
-
 
 using namespace InventoryUtilities;
 //BOOL		g_old_style_ui_hud			= FALSE;
@@ -75,8 +71,7 @@ const u32	g_clWhite					= 0xffffffff;
 
 #define				MAININGAME_XML				"maingame.xml"
 
-CUIMainIngameWnd::CUIMainIngameWnd()
-:/*m_pGrenade(NULL),m_pItem(NULL),*/m_pPickUpItem(NULL),m_pMPChatWnd(NULL),UIArtefactIcon(NULL),m_pMPLogWnd(NULL)
+CUIMainIngameWnd::CUIMainIngameWnd() : m_pPickUpItem(NULL)
 {
 	UIZoneMap					= xr_new<CUIZoneMap>();
 }
@@ -92,7 +87,6 @@ CUIMainIngameWnd::~CUIMainIngameWnd()
 	xr_delete					(g_MissileForceShape);
 	xr_delete					(UIWeaponJammedIcon);
 	xr_delete					(UIInvincibleIcon);
-	xr_delete					(UIArtefactIcon);
 }
 
 void CUIMainIngameWnd::Init()
@@ -166,14 +160,12 @@ void CUIMainIngameWnd::Init()
 	m_ind_boost_rad			->Show(false);
 	
 	// Загружаем иконки 
-/*	if ( IsGameTypeSingle() )
-	{
-		xml_init.InitStatic		(uiXml, "starvation_static", 0, &UIStarvationIcon);
-		UIStarvationIcon.Show	(false);
+/*	
+	xml_init.InitStatic		(uiXml, "starvation_static", 0, &UIStarvationIcon);
+	UIStarvationIcon.Show	(false);
 
-//		xml_init.InitStatic		(uiXml, "psy_health_static", 0, &UIPsyHealthIcon);
-//		UIPsyHealthIcon.Show	(false);
-	}
+	xml_init.InitStatic		(uiXml, "psy_health_static", 0, &UIPsyHealthIcon);
+	UIPsyHealthIcon.Show	(false);
 */
 	UIWeaponJammedIcon			= UIHelper::CreateStatic(uiXml, "weapon_jammed_static", NULL);
 	UIWeaponJammedIcon->Show	(false);
@@ -186,15 +178,8 @@ void CUIMainIngameWnd::Init()
 
 	UIInvincibleIcon			= UIHelper::CreateStatic(uiXml, "invincible_static", NULL);
 	UIInvincibleIcon->Show		(false);
-
-
-	if ( (GameID() == eGameIDArtefactHunt) || (GameID() == eGameIDCaptureTheArtefact) )
-	{
-		UIArtefactIcon			= UIHelper::CreateStatic(uiXml, "artefact_static", NULL);
-		UIArtefactIcon->Show		(false);
-	}
 	
-	shared_str warningStrings[7] = 
+	shared_str warningStrings[6] = 
 	{	
 		"jammed",
 		"radiation",
@@ -202,7 +187,6 @@ void CUIMainIngameWnd::Init()
 		"starvation",
 		"fatigue",
 		"invincible"
-		"artefact"
 	};
 
 	// Загружаем пороговые значения для индикаторов
@@ -272,30 +256,21 @@ void CUIMainIngameWnd::Draw()
 	bool IOActive	= (FS.dwOpenCounter>0);
 	if	(IOActive)	UIStaticDiskIO_start_time = Device.fTimeGlobal;
 
-	if ((UIStaticDiskIO_start_time+1.0f) < Device.fTimeGlobal)	UIStaticDiskIO->Show(false); 
-	else {
+	if ((UIStaticDiskIO_start_time+1.0f) < Device.fTimeGlobal)
+		UIStaticDiskIO->Show(false); 
+	else 
+	{
 		u32		alpha			= clampr(iFloor(255.f*(1.f-(Device.fTimeGlobal-UIStaticDiskIO_start_time)/1.f)),0,255);
 		UIStaticDiskIO->Show		( true  ); 
 		UIStaticDiskIO->SetTextureColor(color_rgba(255,255,255,alpha));
 	}
 	FS.dwOpenCounter = 0;
 
-	if(!IsGameTypeSingle())
-	{
-		float		luminocity = smart_cast<CGameObject*>(Level().CurrentEntity())->ROS()->get_luminocity();
-		float		power = log(luminocity > .001f ? luminocity : .001f)*(1.f/*luminocity_factor*/);
-		luminocity	= exp(power);
-
-		static float cur_lum = luminocity;
-		cur_lum = luminocity*0.01f + cur_lum*0.99f;
-		UIMotionIcon->SetLuminosity((s16)iFloor(cur_lum*100.0f));
-	}
 	if ( !pActor || !pActor->g_Alive() ) return;
 
 	UIMotionIcon->SetNoise((s16)(0xffff&iFloor(pActor->m_snd_noise*100)));
 
 	UIMotionIcon->Draw();
-
 
 	UIZoneMap->visible = true;
 	UIZoneMap->Render();
@@ -308,22 +283,10 @@ void CUIMainIngameWnd::Draw()
 	RenderQuickInfos();		
 }
 
-
-void CUIMainIngameWnd::SetMPChatLog(CUIWindow* pChat, CUIWindow* pLog){
-	m_pMPChatWnd = pChat;
-	m_pMPLogWnd  = pLog;
-}
-
 void CUIMainIngameWnd::Update()
 {
 	CUIWindow::Update();
 	CActor* pActor = smart_cast<CActor*>(Level().CurrentViewEntity());
-
-	if ( m_pMPChatWnd )
-		m_pMPChatWnd->Update();
-
-	if ( m_pMPLogWnd )
-		m_pMPLogWnd->Update();
 
 	if ( !pActor )
 		return;
@@ -351,22 +314,6 @@ void CUIMainIngameWnd::Update()
 	}
 	
 	UpdateMainIndicators();
-	if (IsGameTypeSingle())
-		return;
-
-	// ewiArtefact
-	if ( GameID() == eGameIDArtefactHunt )
-	{
-		bool b_Artefact = !!( pActor->inventory().ItemFromSlot(ARTEFACT_SLOT) );
-		if ( b_Artefact )
-		{
-			SetWarningIconColor( ewiArtefact, 0xffffff00 );
-		}
-		else
-		{
-			SetWarningIconColor( ewiArtefact, 0x00ffffff );
-		}
-	}
 }//update
 
 
@@ -454,12 +401,9 @@ void CUIMainIngameWnd::SetWarningIconColor(EWarningIcons icon, const u32 cl)
 */
 	case ewiInvincible:
 		SetWarningIconColorUI	(UIInvincibleIcon, cl);
-		if (bMagicFlag) break;
+		if (bMagicFlag)
+			break;
 		break;
-	case ewiArtefact:
-		SetWarningIconColorUI	(UIArtefactIcon, cl);
-		break;
-
 	default:
 		R_ASSERT(!"Unknown warning icon type");
 	}
@@ -636,14 +580,13 @@ void CUIMainIngameWnd::UpdateMainIndicators()
 		return;
 
 	UpdateQuickSlots();
-	if (IsGameTypeSingle())
-		CurrentGameUI()->GetPdaMenu().UpdateRankingWnd();
+	CurrentGameUI()->GetPdaMenu().UpdateRankingWnd();
 
 	u8 flags = 0;
 	flags |= LA_CYCLIC;
 	flags |= LA_ONLYALPHA;
 	flags |= LA_TEXTURECOLOR;
-// Bleeding icon
+	// Bleeding icon
 	float bleeding = pActor->conditions().BleedingSpeed();
 	if(fis_zero(bleeding, EPS))
 	{
@@ -773,7 +716,7 @@ void CUIMainIngameWnd::UpdateMainIndicators()
 	float cur_weight = pActor->inventory().TotalWeight();
 	float max_weight = pActor->MaxWalkWeight();
 	m_ind_overweight->Show(false);
-	if(cur_weight>=max_weight-10.0f && IsGameTypeSingle())
+	if(cur_weight>=max_weight-10.0f)
 	{
 		m_ind_overweight->Show(true);
 		if(cur_weight>max_weight)

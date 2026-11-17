@@ -19,7 +19,6 @@
 #	include "phdebug.h"
 #endif
 
-
 #define PLAYING_ANIM_TIME 10000
 
 #include "ui/UIProgressShape.h"
@@ -133,13 +132,7 @@ void CMissile::OnActiveItem		()
 
 void CMissile::OnHiddenItem()
 {
-
-//. -Hide
-	if(IsGameTypeSingle())
-		SwitchState			(eHiding);
-	else
-		SwitchState			(eHidden);
-//-
+	SwitchState			(eHiding);
 
 	inherited::OnHiddenItem	();
 	SetState				(eHidden);
@@ -616,13 +609,9 @@ void  CMissile::UpdateFireDependencies_internal	()
 
 void CMissile::activate_physic_shell()
 {
-	if (!smart_cast<CMissile*>(H_Parent())) {
+	if (!smart_cast<CMissile*>(H_Parent())) 
+	{
 		inherited::activate_physic_shell();
-		if(m_pPhysicsShell&&m_pPhysicsShell->isActive()&&!IsGameTypeSingle())
-		{
-				m_pPhysicsShell->add_ObjectContactCallback		(ExitContactCallback);
-				m_pPhysicsShell->set_CallbackData	(smart_cast<CPhysicsShellHolder*>(H_Root()));
-		}
 		return;
 	}
 

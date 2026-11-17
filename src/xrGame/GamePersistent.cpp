@@ -38,16 +38,6 @@
 #	include "ai_debug.h"
 #endif // _EDITOR
 
-//#ifdef DEBUG_MEMORY_MANAGER
-//	static	void *	ode_alloc	(size_t size)								{ return Memory.mem_alloc(size,"ODE");			}
-//	static	void *	ode_realloc	(void *ptr, size_t oldsize, size_t newsize)	{ return Memory.mem_realloc(ptr,newsize,"ODE");	}
-//	static	void	ode_free	(void *ptr, size_t size)					{ return xr_free(ptr);							}
-//#else // DEBUG_MEMORY_MANAGER
-//	static	void *	ode_alloc	(size_t size)								{ return xr_malloc(size);			}
-//	static	void *	ode_realloc	(void *ptr, size_t oldsize, size_t newsize)	{ return xr_realloc(ptr,newsize);	}
-//	static	void	ode_free	(void *ptr, size_t size)					{ return xr_free(ptr);				}
-//#endif // DEBUG_MEMORY_MANAGER
-
 CGamePersistent::CGamePersistent(void)
 {
 	m_bPickableDOF				= false;
@@ -64,7 +54,6 @@ CGamePersistent::CGamePersistent(void)
 
 	ZeroMemory					(ambient_sound_next_time, sizeof(ambient_sound_next_time));
 	
-
 	m_pUI_core					= NULL;
 	m_pMainMenu					= NULL;
 	m_intro						= NULL;
@@ -193,26 +182,8 @@ LPCSTR GameTypeToString(EGameIDs gt, bool bShort)
 	case eGameIDSingle:
 		return "single";
 		break;
-	case eGameIDDeathmatch:
-		return (bShort)?"dm":"deathmatch";
-		break;
-	case eGameIDTeamDeathmatch:
-		return (bShort)?"tdm":"teamdeathmatch";
-		break;
-	case eGameIDArtefactHunt:
-		return (bShort)?"ah":"artefacthunt";
-		break;
-	case eGameIDCaptureTheArtefact:
-		return (bShort)?"cta":"capturetheartefact";
-		break;
-	case eGameIDDominationZone:
-		return (bShort)?"dz":"dominationzone";
-		break;
-	case eGameIDTeamDominationZone:
-		return (bShort)?"tdz":"teamdominationzone";
-		break;
-	default :
-		return		"---";
+	default:
+		return "---";
 	}
 }
 
@@ -221,25 +192,7 @@ EGameIDs ParseStringToGameType(LPCSTR str)
 	if (!xr_strcmp(str, "single")) 
 		return eGameIDSingle;
 	else
-		if (!xr_strcmp(str, "deathmatch") || !xr_strcmp(str, "dm")) 
-			return eGameIDDeathmatch;
-		else
-			if (!xr_strcmp(str, "teamdeathmatch") || !xr_strcmp(str, "tdm")) 
-				return eGameIDTeamDeathmatch;
-			else
-				if (!xr_strcmp(str, "artefacthunt") || !xr_strcmp(str, "ah")) 
-					return eGameIDArtefactHunt;
-				else
-					if (!xr_strcmp(str, "capturetheartefact") || !xr_strcmp(str, "cta")) 
-						return eGameIDCaptureTheArtefact;
-					else
-						if (!xr_strcmp(str, "dominationzone")) 
-							return eGameIDDominationZone;
-						else
-							if (!xr_strcmp(str, "teamdominationzone")) 
-								return eGameIDTeamDominationZone;
-							else 
-								return eGameIDNoGame; //EGameIDs
+		return eGameIDNoGame;
 }
 
 void CGamePersistent::UpdateGameType			()
@@ -577,8 +530,10 @@ void CGamePersistent::OnFrame	()
 	if(Device.Paused())
 	{
 #ifndef MASTER_GOLD
-		if (Level().CurrentViewEntity() && IsGameTypeSingle()) {
-			if (!g_actor || (g_actor->ID() != Level().CurrentViewEntity()->ID())) {
+		if (Level().CurrentViewEntity()) 
+		{
+			if (!g_actor || (g_actor->ID() != Level().CurrentViewEntity()->ID())) 
+			{
 				CCustomMonster	*custom_monster = smart_cast<CCustomMonster*>(Level().CurrentViewEntity());
 				if (custom_monster) // can be spectator in multiplayer
 					custom_monster->UpdateCamera();
@@ -631,7 +586,7 @@ void CGamePersistent::OnFrame	()
 			}
 		}
 #else // MASTER_GOLD
-		if (g_actor && IsGameTypeSingle())
+		if (g_actor)
 		{
 			CCameraBase* C = NULL;
 			if(!Actor()->Holder())
@@ -834,8 +789,9 @@ void CGamePersistent::LoadTitle(bool change_tip, shared_str map_name)
 
 bool CGamePersistent::CanBePaused()
 {
-	return IsGameTypeSingle();
+	return true;
 }
+
 void CGamePersistent::SetPickableEffectorDOF(bool bSet)
 {
 	m_bPickableDOF = bSet;

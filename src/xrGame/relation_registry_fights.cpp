@@ -6,10 +6,6 @@
 #include "stdafx.h"
 #include "relation_registry.h"
 
-
-
-//////////////////////////////////////////////////////////////////////////
-
 RELATION_REGISTRY::FIGHT_DATA::FIGHT_DATA			()
 {
 	attacker = defender = 0xffff;
@@ -20,8 +16,6 @@ RELATION_REGISTRY::FIGHT_DATA::FIGHT_DATA			()
 	defender_to_attacker = ALife::eRelationTypeDummy;
 }
 
-//////////////////////////////////////////////////////////////////////////
-extern bool	IsGameTypeSingle();
 void RELATION_REGISTRY::FightRegister (u16 attacker, u16 defender, ALife::ERelationType defender_to_attacker, float hit_amount)
 {
 	UpdateFightRegister();

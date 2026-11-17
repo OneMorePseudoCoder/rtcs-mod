@@ -83,11 +83,8 @@ protected:
 //	CUIStatic			UIPsyHealthIcon;
 	CUIStatic*			UIInvincibleIcon;
 //	CUIStatic			UISleepIcon;
-	CUIStatic*			UIArtefactIcon;
 
 	CUIScrollView*		m_UIIcons;
-	CUIWindow*			m_pMPChatWnd;
-	CUIWindow*			m_pMPLogWnd;
 
 public:
 	
@@ -102,10 +99,7 @@ public:
 //		ewiPsyHealth,
 //		ewiSleep,
 		ewiInvincible,
-		ewiArtefact,
 	};
-
-	void				SetMPChatLog					(CUIWindow* pChat, CUIWindow* pLog);
 
 	// Задаем цвет соответствующей иконке
 	void				SetWarningIconColor				(EWarningIcons icon, const u32 cl);

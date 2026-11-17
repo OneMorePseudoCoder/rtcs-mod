@@ -41,8 +41,7 @@ void CActor::IR_OnKeyboardPress(int cmd)
 {
 	if (hud_adj_mode && pInput->iGetAsyncKeyState(DIK_LSHIFT))
 	{
-		if (pInput->iGetAsyncKeyState(DIK_RETURN) || pInput->iGetAsyncKeyState(DIK_BACKSPACE) ||
-			pInput->iGetAsyncKeyState(DIK_DELETE))
+		if (pInput->iGetAsyncKeyState(DIK_RETURN) || pInput->iGetAsyncKeyState(DIK_BACKSPACE) || pInput->iGetAsyncKeyState(DIK_DELETE))
 			g_player_hud->tune(Ivector().set(0, 0, 0));
 
 		return;
@@ -64,12 +63,10 @@ void CActor::IR_OnKeyboardPress(int cmd)
 	{
 	case kWPN_FIRE:
 	{
-		if ((mstate_wishful & mcLookout) && !IsGameTypeSingle()) return;
-
 		u16 slot = inventory().GetActiveSlot();
 		if (inventory().ActiveItem() && (slot == INV_SLOT_3 || slot == INV_SLOT_2))
 			mstate_wishful &= ~mcSprint;
-		//-----------------------------
+
 		if (OnServer())
 		{
 			NET_Packet P;
@@ -83,16 +80,19 @@ void CActor::IR_OnKeyboardPress(int cmd)
 	}break;
 	}
 
-	if (!g_Alive()) return;
+	if (!g_Alive())
+		return;
 
 	if (m_holder && kUSE != cmd)
 	{
 		m_holder->OnKeyboardPress(cmd);
-		if (m_holder->allowWeapon() && inventory().Action((u16)cmd, CMD_START))		return;
+		if (m_holder->allowWeapon() && inventory().Action((u16)cmd, CMD_START))
+			return;
 		return;
 	}
 	else
-		if (inventory().Action((u16)cmd, CMD_START))					return;
+		if (inventory().Action((u16)cmd, CMD_START))
+			return;
 
 #ifdef DEBUG
 	if (psActorFlags.test(AF_NO_CLIP))
@@ -187,14 +187,7 @@ void CActor::IR_OnKeyboardPress(int cmd)
 
 			if (itm)
 			{
-				if (IsGameTypeSingle())
-				{
-					inventory().Eat(itm);
-				}
-				else
-				{
-					inventory().ClientEat(itm);
-				}
+				inventory().Eat(itm);
 
 				StaticDrawableWrapper* _s = CurrentGameUI()->AddCustomStatic("item_used", true);
 				string1024					str;
@@ -448,31 +441,26 @@ void CActor::ActorUse()
 	{
 		if (m_pPersonWeLookingAt)
 		{
-			CEntityAlive* pEntityAliveWeLookingAt =
-				smart_cast<CEntityAlive*>(m_pPersonWeLookingAt);
+			CEntityAlive* pEntityAliveWeLookingAt = smart_cast<CEntityAlive*>(m_pPersonWeLookingAt);
 
 			VERIFY(pEntityAliveWeLookingAt);
 
-			if (IsGameTypeSingle())
+			if (pEntityAliveWeLookingAt->g_Alive())
 			{
-
-				if (pEntityAliveWeLookingAt->g_Alive())
+				TryToTalk();
+			}
+			else
+			{
+				//только если находимся в режиме single
+				CUIGameSP* pGameSP = smart_cast<CUIGameSP*>(CurrentGameUI());
+				if (pGameSP)
 				{
-					TryToTalk();
-				}
-				else
-				{
-					//только если находимся в режиме single
-					CUIGameSP* pGameSP = smart_cast<CUIGameSP*>(CurrentGameUI());
-					if (pGameSP)
+					if (!m_pPersonWeLookingAt->deadbody_closed_status())
 					{
-						if (!m_pPersonWeLookingAt->deadbody_closed_status())
-						{
-							if (pEntityAliveWeLookingAt->AlreadyDie() &&
-								pEntityAliveWeLookingAt->GetLevelDeathTime() + 3000 < Device.dwTimeGlobal)
-								// 99.9% dead
-								pGameSP->StartCarBody(this, m_pPersonWeLookingAt);
-						}
+						if (pEntityAliveWeLookingAt->AlreadyDie() &&
+							pEntityAliveWeLookingAt->GetLevelDeathTime() + 3000 < Device.dwTimeGlobal)
+							// 99.9% dead
+							pGameSP->StartCarBody(this, m_pPersonWeLookingAt);
 					}
 				}
 			}

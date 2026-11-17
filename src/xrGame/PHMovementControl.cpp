@@ -4,13 +4,6 @@
 #include "../xrEngine/cl_intersect.h"
 #include "../xrserverentities/alife_space.h"
 
-//#include "entity.h"
-//#include "PHDynamicData.h"
-//#include "Physics.h"
-
-//#include "PHAICharacter.h"
-//#include "PHActorCharacter.h"
-
 #include "../xrphysics/phCharacter.h"
 #include "../xrphysics/IPHCapture.h"
 #include "../xrphysics/iphysicsshellholder.h"
@@ -20,7 +13,6 @@
 #include "../xrphysics/phvalide.h"
 #include "../xrphysics/physicsshell.h"
 #include "../xrphysics/iphworld.h"
-//#include "../xrserverentities/ai_space.h"
 #include "detail_path_manager.h"
 #include "../xrEngine/gamemtllib.h"
 #include "../xrEngine/xr_object.h"
@@ -31,7 +23,6 @@
 #include "phdebug.h"
 #endif
 
-//#include	"../Include/xrRender/KinematicsAnimated.h"
 #include "../Include/xrRender/Kinematics.h"
 
 #define GROUND_FRICTION	10.0f
@@ -94,8 +85,6 @@ CPHMovementControl::CPHMovementControl(CObject* parent)
 	block_damage_step_end = u64(-1);
 }
 
-
-
 CPHMovementControl::~CPHMovementControl(void)
 {
 	if(m_character)
@@ -104,25 +93,20 @@ CPHMovementControl::~CPHMovementControl(void)
 	phcapture_destroy(m_capture);
 }
 
-
-
 static ALife::EHitType	 DefineCollisionHitType	( u16 material_idx )	
 {
-	if(GMLib.GetMaterialByIdx( material_idx )->Flags.test(SGameMtl::flInjurious)&&IsGameTypeSingle())
+	if(GMLib.GetMaterialByIdx( material_idx )->Flags.test(SGameMtl::flInjurious))
 		return ALife::eHitTypeRadiation;
 	else									
 		return ALife::eHitTypeStrike;
-//	return (GameID() == eGameIDSingle) ? ALife::eHitTypeStrike : ALife::eHitTypePhysicStrike;
-}//
+}
 
-
-//static Fvector old_pos={0,0,0};
-//static bool bFirst=true;
 void CPHMovementControl::AddControlVel	(const Fvector& vel)
 {
 	vExternalImpulse.add(vel);
 	bExernalImpulse=true;
 }
+
 void CPHMovementControl::ApplyImpulse(const Fvector& dir,const float P)
 {
 	VERIFY( m_character );
@@ -997,9 +981,7 @@ void	CPHMovementControl::AllocateCharacterObject(CharacterType type)
 {
 	switch(type)
 	{
-		case actor:		m_character = create_actor_character( IsGameTypeSingle() )	;	break;
-		//case actor:	m_character = xr_new<CPHActorCharacter>	()					;	break;
-		//case ai:		m_character = xr_new<CPHAICharacter>	()					;	break;
+		case actor:		m_character = create_actor_character()	;	break;
 		case ai:		m_character = create_ai_character()							;	break;
 		default:		NODEFAULT;
 	}

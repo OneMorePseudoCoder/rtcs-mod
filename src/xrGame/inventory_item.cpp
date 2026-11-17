@@ -6,12 +6,10 @@
 //	Description : Inventory item
 ////////////////////////////////////////////////////////////////////////////
 
-//#include "stdafx.h"
 #include "pch_script.h"
 #include "inventory_item.h"
 #include "inventory_item_impl.h"
 #include "inventory.h"
-//#include "Physics.h"
 #include "physicsshellholder.h"
 #include "entity_alive.h"
 #include "Level.h"
@@ -22,7 +20,6 @@
 #include "ai_object_location.h"
 #include "object_broker.h"
 #include "../xrEngine/igame_persistent.h"
-
 
 #ifdef DEBUG
 #	include "debug_renderer.h"
@@ -225,12 +222,7 @@ void CInventoryItem::UpdateCL()
 			Device.seqRender.Remove(this);
 		}
 	}
-
 #endif
-	if (!IsGameTypeSingle())
-	{
-		Interpolate();
-	}
 }
 
 void CInventoryItem::OnEvent (NET_Packet& P, u16 type)
@@ -322,26 +314,21 @@ BOOL CInventoryItem::net_Spawn			(CSE_Abstract* DC)
 
 	m_flags.set						(FInInterpolation, FALSE);
 	m_flags.set						(FInInterpolate,	FALSE);
-//	m_bInInterpolation				= false;
-//	m_bInterpolate					= false;
 
 	m_flags.set						(Fuseful_for_NPC, TRUE);
 	CSE_Abstract					*e	= (CSE_Abstract*)(DC);
 	CSE_ALifeObject					*alife_object = smart_cast<CSE_ALifeObject*>(e);
-	if (alife_object)	{
+	if (alife_object)	
+	{
 		m_flags.set(Fuseful_for_NPC, alife_object->m_flags.test(CSE_ALifeObject::flUsefulForAI));
 	}
 
 	CSE_ALifeInventoryItem			*pSE_InventoryItem = smart_cast<CSE_ALifeInventoryItem*>(e);
 	if (!pSE_InventoryItem)			return TRUE;
 
-	//!!!
 	m_fCondition = pSE_InventoryItem->m_fCondition;
 	
-	if ( IsGameTypeSingle() )
-	{
-		net_Spawn_install_upgrades( pSE_InventoryItem->m_upgrades );
-	}
+	net_Spawn_install_upgrades( pSE_InventoryItem->m_upgrades );
 
 	if (GameID() != eGameIDSingle)
 		object().processing_activate();
@@ -355,21 +342,19 @@ BOOL CInventoryItem::net_Spawn			(CSE_Abstract* DC)
 
 void CInventoryItem::net_Destroy		()
 {
-	if(m_pInventory){
+	if(m_pInventory)
+	{
 		VERIFY(std::find(m_pInventory->m_all.begin(), m_pInventory->m_all.end(), this)==m_pInventory->m_all.end() );
 	}
-
-	//инвентарь которому мы принадлежали
-//.	m_pInventory = NULL;
 }
 
 void CInventoryItem::save(NET_Packet &packet)
 {
 	packet.w_u16			(m_ItemCurrPlace.value);
 	packet.w_float			(m_fCondition);
-//--	save_data				(m_upgrades, packet);
 
-	if (object().H_Parent()) {
+	if (object().H_Parent()) 
+	{
 		packet.w_u8			(0);
 		return;
 	}
@@ -503,27 +488,19 @@ void CInventoryItem::net_Import			(NET_Packet& P)
 
 void CInventoryItem::net_Import_PH_Params(NET_Packet& P, net_update_IItem& N, mask_inv_num_items& num_items)
 {
-	
-	//N.State.force.set			(0.f,0.f,0.f);
-	//N.State.torque.set			(0.f,0.f,0.f);
-	//UI().Font().pFontStat->OutSet(100.0f,100.0f);
-	P.r_vec3					(N.State.force);
-	//Msg("Import N.State.force.y:%4.6f",N.State.force.y);
-	P.r_vec3					(N.State.torque);
-
-	P.r_vec3					(N.State.position);
-	//Msg("Import N.State.position.y:%4.6f",N.State.position.y);
+	P.r_vec3(N.State.force);
+	P.r_vec3(N.State.torque);
+	P.r_vec3(N.State.position);
 
 	P.r_float(N.State.quaternion.x);
 	P.r_float(N.State.quaternion.y);
 	P.r_float(N.State.quaternion.z);
 	P.r_float(N.State.quaternion.w);
 
-
-
 	N.State.enabled				= num_items.mask & CSE_ALifeInventoryItem::inventory_item_state_enabled;
-	//UI().Font().pFontStat->OutNext("Import N.State.enabled:%i",int(N.State.enabled));
-	if (!(num_items.mask & CSE_ALifeInventoryItem::inventory_item_angular_null)) {
+
+	if (!(num_items.mask & CSE_ALifeInventoryItem::inventory_item_angular_null)) 
+	{
 		N.State.angular_vel.x	= P.r_float();
 		N.State.angular_vel.y	= P.r_float();
 		N.State.angular_vel.z	= P.r_float();
@@ -531,228 +508,65 @@ void CInventoryItem::net_Import_PH_Params(NET_Packet& P, net_update_IItem& N, ma
 	else
 		N.State.angular_vel.set	(0.f,0.f,0.f);
 
-	if (!(num_items.mask & CSE_ALifeInventoryItem::inventory_item_linear_null)) {
+	if (!(num_items.mask & CSE_ALifeInventoryItem::inventory_item_linear_null)) 
+	{
 		N.State.linear_vel.x	= P.r_float();
 		N.State.linear_vel.y	= P.r_float();
 		N.State.linear_vel.z	= P.r_float();
 	}
 	else
 		N.State.linear_vel.set	(0.f,0.f,0.f);
-	//Msg("Import N.State.linear_vel.y:%4.6f",N.State.linear_vel.y);
 	
 	N.State.previous_position	= N.State.position;
 	N.State.previous_quaternion	= N.State.quaternion;
 }
 
-void CInventoryItem::net_Export_PH_Params(NET_Packet& P, SPHNetState& State, mask_inv_num_items&	num_items)
+void CInventoryItem::net_Export_PH_Params(NET_Packet& P, SPHNetState& State, mask_inv_num_items& num_items)
 {
-	//UI().Font().pFontStat->OutSet(100.0f,100.0f);
-	P.w_vec3				(State.force);
-	//Msg("Export State.force.y:%4.6f",State.force.y);
-	P.w_vec3				(State.torque);
-	//UI().Font().pFontStat->OutNext("Export State.torque:%4.6f",State.torque.magnitude());
-	P.w_vec3				(State.position);
-	//Msg("Export State.position.y:%4.6f",State.position.y);
-	//Msg("Export State.enabled:%i",int(State.enabled));
+	P.w_vec3(State.force);
+	P.w_vec3(State.torque);
+	P.w_vec3(State.position);
 
-	float					magnitude = _sqrt(State.quaternion.magnitude());
-	if (fis_zero(magnitude)) {
-		magnitude			= 1;
+	float magnitude = _sqrt(State.quaternion.magnitude());
+	if (fis_zero(magnitude)) 
+	{
+		magnitude = 1;
 		State.quaternion.x	= 0.f;
 		State.quaternion.y	= 0.f;
 		State.quaternion.z	= 1.f;
 		State.quaternion.w	= 0.f;
 	}
-	else {
-		/*		float				invert_magnitude = 1.f/magnitude;
 
-		State.quaternion.x	*= invert_magnitude;
-		State.quaternion.y	*= invert_magnitude;
-		State.quaternion.z	*= invert_magnitude;
-		State.quaternion.w	*= invert_magnitude;
+	P.w_float(State.quaternion.x);
+	P.w_float(State.quaternion.y);
+	P.w_float(State.quaternion.z);
+	P.w_float(State.quaternion.w);
 
-		clamp				(State.quaternion.x,-1.f,1.f);
-		clamp				(State.quaternion.y,-1.f,1.f);
-		clamp				(State.quaternion.z,-1.f,1.f);
-		clamp				(State.quaternion.w,-1.f,1.f);*/
-	}
-
-	P.w_float			(State.quaternion.x);
-	P.w_float			(State.quaternion.y);
-	P.w_float			(State.quaternion.z);
-	P.w_float			(State.quaternion.w);
-
-	if (!(num_items.mask & CSE_ALifeInventoryItem::inventory_item_angular_null)) {
-		/*	clamp				(State.angular_vel.x,-10.f*PI_MUL_2,10.f*PI_MUL_2);
-		clamp				(State.angular_vel.y,-10.f*PI_MUL_2,10.f*PI_MUL_2);
-		clamp				(State.angular_vel.z,-10.f*PI_MUL_2,10.f*PI_MUL_2);*/
-
+	if (!(num_items.mask & CSE_ALifeInventoryItem::inventory_item_angular_null)) 
+	{
 		P.w_float		(State.angular_vel.x);
 		P.w_float		(State.angular_vel.y);
 		P.w_float		(State.angular_vel.z);
 	}
 
-	if (!(num_items.mask & CSE_ALifeInventoryItem::inventory_item_linear_null)) {
-		/*clamp				(State.linear_vel.x,-32.f,32.f);
-		clamp				(State.linear_vel.y,-32.f,32.f);
-		clamp				(State.linear_vel.z,-32.f,32.f);*/
-
+	if (!(num_items.mask & CSE_ALifeInventoryItem::inventory_item_linear_null)) 
+	{
 		P.w_float		(State.linear_vel.x);
 		P.w_float		(State.linear_vel.y);
 		P.w_float		(State.linear_vel.z);
-		//Msg("Export State.linear_vel.y:%4.6f",State.linear_vel.y);
-	}
-	else
-	{
-		//Msg("Export State.linear_vel.y:%4.6f",0.0f);
 	}
 }
 
-void CInventoryItem::net_Export			(NET_Packet& P) 
+void CInventoryItem::net_Export(NET_Packet& P) 
 {	
-	//copy from CPhysicObject
-	if (object().H_Parent() || IsGameTypeSingle()) 
-	{
-		P.w_u8				(0);
-		return;
-	}
-
-	CPHSynchronize* pSyncObj				= NULL;
-	SPHNetState								State;
-	pSyncObj = object().PHGetSyncItem		(0);
-
-	if (pSyncObj && !object().H_Parent()) 
-		pSyncObj->get_State					(State);
-	else 	
-		State.position.set					(object().Position());
-
-
-	mask_inv_num_items			num_items;
-	num_items.mask			= 0;
-	u16						temp = object().PHGetSyncItemsNumber();
-	R_ASSERT				(temp < (u16(1) << 5));
-	num_items.num_items		= u8(temp);
-
-	if (State.enabled)									num_items.mask |= CSE_ALifeInventoryItem::inventory_item_state_enabled;
-	if (fis_zero(State.angular_vel.square_magnitude()))	num_items.mask |= CSE_ALifeInventoryItem::inventory_item_angular_null;
-	if (fis_zero(State.linear_vel.square_magnitude()))	num_items.mask |= CSE_ALifeInventoryItem::inventory_item_linear_null;
-	//if (m_pPhysicsShell->PPhysicsShellAnimator())		{num_items.mask |= CSE_ALifeObjectPhysic::animated;}
-
-	P.w_u8					(num_items.common);
-	if (!num_items.common)
-	{
-#ifdef DEBUG
-		Msg("--- Number of sync items of inv item object is 0");
-#endif // #ifdef DEBUG
-		return;
-	}
-
-	/*if (num_items.mask&CSE_ALifeObjectPhysic::animated)
-	{
-		net_Export_Anim_Params(P);
-	}*/
-	net_Export_PH_Params(P,State,num_items);
-	
-	if (object().PPhysicsShell() && object().PPhysicsShell()->isEnabled())
-	{
-		P.w_u8(1);	//not freezed
-	} else
-	{
-		P.w_u8(0);  //freezed
-	}
-
-	/*if (object().H_Parent() || IsGameTypeSingle()) 
-	{
-		P.w_u8				(0);
-		return;
-	}
-	CPHSynchronize* pSyncObj				= NULL;
-	SPHNetState								State;
-	pSyncObj = object().PHGetSyncItem		(0);
-
-	if (pSyncObj && !object().H_Parent()) 
-		pSyncObj->get_State					(State);
-	else 	
-		State.position.set					(object().Position());
-
-
-	mask_num_items			num_items;
-	num_items.mask			= 0;
-	u16						temp = object().PHGetSyncItemsNumber();
-	R_ASSERT				(temp < (u16(1) << 5));
-	num_items.num_items		= u8(temp);
-
-	if (State.enabled)									num_items.mask |= CSE_ALifeInventoryItem::inventory_item_state_enabled;
-	if (fis_zero(State.angular_vel.square_magnitude()))	num_items.mask |= CSE_ALifeInventoryItem::inventory_item_angular_null;
-	if (fis_zero(State.linear_vel.square_magnitude()))	num_items.mask |= CSE_ALifeInventoryItem::inventory_item_linear_null;
-
-	P.w_u8					(num_items.common);
-
-	P.w_vec3				(State.position);
-
-	float					magnitude = _sqrt(State.quaternion.magnitude());
-	if (fis_zero(magnitude)) {
-		magnitude			= 1;
-		State.quaternion.x	= 0.f;
-		State.quaternion.y	= 0.f;
-		State.quaternion.z	= 1.f;
-		State.quaternion.w	= 0.f;
-	}
-	else {
-		float				invert_magnitude = 1.f/magnitude;
-		
-		State.quaternion.x	*= invert_magnitude;
-		State.quaternion.y	*= invert_magnitude;
-		State.quaternion.z	*= invert_magnitude;
-		State.quaternion.w	*= invert_magnitude;
-
-		clamp				(State.quaternion.x, -1.f, 1.f);
-		clamp				(State.quaternion.y, -1.f, 1.f);
-		clamp				(State.quaternion.z, -1.f, 1.f);
-		clamp				(State.quaternion.w, -1.f, 1.f);
-	}
-
-	P.w_float_q8			(State.quaternion.x, -1.f, 1.f);
-	P.w_float_q8			(State.quaternion.y, -1.f, 1.f);
-	P.w_float_q8			(State.quaternion.z, -1.f, 1.f);
-	P.w_float_q8			(State.quaternion.w, -1.f, 1.f);
-
-	if (!(num_items.mask & CSE_ALifeInventoryItem::inventory_item_angular_null)) {
-		clamp				(State.angular_vel.x,0.f,10.f*PI_MUL_2);
-		clamp				(State.angular_vel.y,0.f,10.f*PI_MUL_2);
-		clamp				(State.angular_vel.z,0.f,10.f*PI_MUL_2);
-
-		P.w_float_q8		(State.angular_vel.x,0.f,10.f*PI_MUL_2);
-		P.w_float_q8		(State.angular_vel.y,0.f,10.f*PI_MUL_2);
-		P.w_float_q8		(State.angular_vel.z,0.f,10.f*PI_MUL_2);
-	}
-
-	if (!(num_items.mask & CSE_ALifeInventoryItem::inventory_item_linear_null)) {
-		clamp				(State.linear_vel.x,-32.f,32.f);
-		clamp				(State.linear_vel.y,-32.f,32.f);
-		clamp				(State.linear_vel.z,-32.f,32.f);
-
-		P.w_float_q8		(State.linear_vel.x,-32.f,32.f);
-		P.w_float_q8		(State.linear_vel.y,-32.f,32.f);
-		P.w_float_q8		(State.linear_vel.z,-32.f,32.f);
-	}
-
-	if (object().PPhysicsShell() && object().PPhysicsShell()->isEnabled())
-	{
-		P.w_u8(1);	//not freezed
-	} else
-	{
-		P.w_u8(0);  //freezed
-	}*/
+	P.w_u8(0);
+	return;
 };
 
 void CInventoryItem::load(IReader &packet)
 {
 	m_ItemCurrPlace.value	= packet.r_u16();
 	m_fCondition			= packet.r_float();
-
-//--	load_data( m_upgrades, packet );
-//--	install_loaded_upgrades();
 
 	u8						tmp = packet.r_u8();
 	if (!tmp)
@@ -1304,70 +1118,6 @@ void CInventoryItem::OnRender()
 		Fmatrix	M = object().XFORM();
 		M.c.add (bc);
 		Level().debug_renderer().draw_obb			(M,bd,color_rgba(0,0,255,255));
-/*
-		u32 Color;
-		if (processing_enabled())
-		{
-			if (m_bInInterpolation)
-				Color = color_rgba(0,255,255, 255);
-			else
-				Color = color_rgba(0,255,0, 255);
-		}
-		else
-		{
-			if (m_bInInterpolation)
-				Color = color_rgba(255,0,255, 255);
-			else
-				Color = color_rgba(255, 0, 0, 255);
-		};
-
-//		Level().debug_renderer().draw_obb			(M,bd,Color);
-		float size = 0.01f;
-		if (!H_Parent())
-		{
-			Level().debug_renderer().draw_aabb			(Position(), size, size, size, color_rgba(0, 255, 0, 255));
-
-			Fvector Pos1, Pos2;
-			VIS_POSITION_it It = LastVisPos.begin();
-			Pos1 = *It;
-			for (; It != LastVisPos.end(); It++)
-			{
-				Pos2 = *It;
-				Level().debug_renderer().draw_line(Fidentity, Pos1, Pos2, color_rgba(255, 255, 0, 255));
-				Pos1 = Pos2;
-			};
-
-		}
-		//---------------------------------------------------------
-		if (OnClient() && !H_Parent() && m_bInInterpolation)
-		{
-
-			Fmatrix xformI;
-
-			xformI.rotation(IRecRot);
-			xformI.c.set(IRecPos);
-			Level().debug_renderer().draw_aabb			(IRecPos, size, size, size, color_rgba(255, 0, 255, 255));
-
-			xformI.rotation(IEndRot);
-			xformI.c.set(IEndPos);
-			Level().debug_renderer().draw_obb			(xformI,bd,color_rgba(0, 255, 0, 255));
-
-			///////////////////////////////////////////////////////////////////////////
-			Fvector point0 = IStartPos, point1;			
-			
-			float c = 0;
-			for (float i=0.1f; i<1.1f; i+= 0.1f)
-			{
-				c = i;// * 0.1f;
-				for (u32 k=0; k<3; k++)
-				{
-					point1[k] = c*(c*(c*SCoeff[k][0]+SCoeff[k][1])+SCoeff[k][2])+SCoeff[k][3];
-				};
-				Level().debug_renderer().draw_line(Fidentity, point0, point1, color_rgba(0, 0, 255, 255));
-				point0.set(point1);
-			};
-		};
-		*/
 	};
 }
 #endif
@@ -1387,22 +1137,12 @@ void CInventoryItem::modify_holder_params	(float &range, float &fov) const
 
 bool CInventoryItem::NeedToDestroyObject()	const
 {
-	if (GameID() == eGameIDSingle)
-		return false;
-
-	if (GameID() == eGameIDCaptureTheArtefact)
-		return false;
-
-	if (object().Remote()) return false;
-	if (TimePassedAfterIndependant() > ITEM_REMOVE_TIME)
-		return true;
-
 	return false;
 }
 
 ALife::_TIME_ID	 CInventoryItem::TimePassedAfterIndependant()	const
 {
-	if(!object().H_Parent() && m_dwItemIndependencyTime != 0)
+	if (!object().H_Parent() && m_dwItemIndependencyTime != 0) 
 		return Level().timeServer() - m_dwItemIndependencyTime;
 	else
 		return 0;
@@ -1477,26 +1217,9 @@ u16 CInventoryItem::parent_id() const
 void CInventoryItem::SetDropManual(BOOL val)
 {
 	m_flags.set(FdropManual, val);
-	
-#ifdef DEBUG
-	if (!IsGameTypeSingle())
-	{
-		if (!!m_name)
-		{
-			Msg("! WARNING: trying to set drop manual flag to item [%d][%s] to %d", object_id(), m_name.c_str(), val);
-		}
-	}
-#endif // #ifdef DEBUG
-	if (!IsGameTypeSingle())
-	{
-		if (val == TRUE)
-			DenyTrade();
-		else
-			AllowTrade();
-	}
 }
 
-bool CInventoryItem::has_network_synchronization	() const
+bool CInventoryItem::has_network_synchronization() const
 {
 	return false;
 }

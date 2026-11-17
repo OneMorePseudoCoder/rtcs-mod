@@ -32,7 +32,6 @@
 
 void  CActor::AddGameNews			 (GAME_NEWS_DATA& news_data)
 {
-
 	GAME_NEWS_VECTOR& news_vector	= game_news_registry->registry().objects();
 	news_data.receive_time			= Level().GetGameTime();
 	news_vector.push_back			(news_data);
@@ -42,7 +41,6 @@ void  CActor::AddGameNews			 (GAME_NEWS_DATA& news_data)
 		CurrentGameUI()->UIMainIngameWnd->ReceiveNews(&news_data);
 	}
 }
-
 
 bool CActor::OnReceiveInfo(shared_str info_id) const
 {
@@ -65,10 +63,8 @@ bool CActor::OnReceiveInfo(shared_str info_id) const
 		pGameSP->TalkMenu->NeedUpdateQuestions();
 	}
 
-
 	return true;
 }
-
 
 void CActor::OnDisableInfo(shared_str info_id) const
 {
@@ -129,7 +125,6 @@ void CActor::RunTalkDialog(CInventoryOwner* talk_partner, bool disable_break)
 		if(CurrentGameUI()->TopInputReceiver())
 			CurrentGameUI()->TopInputReceiver()->HideDialog();
 
-//		smart_cast<CUIGameSP*>(CurrentGameUI())->StartTalk(disable_break);
 		smart_cast<CUIGameSP*>(CurrentGameUI())->StartTalk(talk_partner->bDisableBreakDialog);
 	}
 }
@@ -143,15 +138,12 @@ void CActor::StartTalk (CInventoryOwner* talk_partner)
 		det->HideDetector				(true);
 	}
 
-
 	CGameObject* GO = smart_cast<CGameObject*>(talk_partner); VERIFY(GO);
 	CInventoryOwner::StartTalk(talk_partner);
 }
 
 void CActor::NewPdaContact		(CInventoryOwner* pInvOwner)
 {	
-	if(!IsGameTypeSingle()) return;
-
 	bool b_alive = !!(smart_cast<CEntityAlive*>(pInvOwner))->g_Alive();
 	CurrentGameUI()->UIMainIngameWnd->AnimateContacts(b_alive);
 
@@ -175,7 +167,6 @@ void CActor::LostPdaContact		(CInventoryOwner* pInvOwner)
 void CActor::AddGameNews_deffered	 (GAME_NEWS_DATA& news_data, u32 delay)
 {
 	GAME_NEWS_DATA * d = xr_new<GAME_NEWS_DATA>(news_data);
-	//*d = news_data;
 	m_defferedMessages.push_back( SDefNewsMsg() );
 	m_defferedMessages.back().news_data = d;
 	m_defferedMessages.back().time = Device.dwTimeGlobal+delay;

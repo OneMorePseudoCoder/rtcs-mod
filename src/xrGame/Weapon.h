@@ -10,7 +10,6 @@
 #include "../Include/xrRender/KinematicsAnimated.h"
 #include "firedeps.h"
 #include "game_cl_single.h"
-#include "first_bullet_controller.h"
 
 #include "CameraRecoil.h"
 
@@ -559,7 +558,7 @@ protected:
 	SPDM					m_pdm;
 
 	float					m_crosshair_inertion;
-	first_bullet_controller	m_first_bullet_controller;
+
 protected:
 	//для отдачи оружия
 	Fvector					m_vRecoilDeltaAngle;
@@ -602,7 +601,7 @@ public:
 	virtual	float			Get_PDM_Crouch()	const { return m_pdm.m_fPDM_disp_crouch; };
 	virtual	float			Get_PDM_Crouch_NA()	const { return m_pdm.m_fPDM_disp_crouch_no_acc; };
 	virtual	float			GetCrosshairInertion()	const { return m_crosshair_inertion; };
-	float			GetFirstBulletDisp()	const { return m_first_bullet_controller.get_fire_dispertion(); };
+
 protected:
 	int						iAmmoElapsed;		// ammo in magazine, currently
 	int						iMagazineSize;		// size (in bullets) of magazine

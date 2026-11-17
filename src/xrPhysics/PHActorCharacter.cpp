@@ -2,33 +2,23 @@
 #include "phactorcharacter.h"
 #include "Extendedgeom.h"
 #include "PhysicsCommon.h"
-//#include "GameObject.h"
 #include "IPhysicsShellHolder.h"
-//#include "ai/stalker/ai_stalker.h"
-//#include "Actor.h"
 #include "../xrEngine/gamemtllib.h"
-//#include "level.h"
 
-//const float JUMP_HIGHT=0.5;
-const float JUMP_UP_VELOCITY=6.0f;//5.6f;
+const float JUMP_UP_VELOCITY=6.0f;
 const float JUMP_INCREASE_VELOCITY_RATE=1.2f;
-//#ifdef DEBUG
-//XRPHYSICS_API BOOL use_controllers_separation = TRUE;
-//#endif
-CPHActorCharacter::CPHActorCharacter( bool single_game ): b_single_game(single_game)
+
+CPHActorCharacter::CPHActorCharacter()
 {
 	SetRestrictionType(rtActor);
 
-	//std::fill(m_restrictors_index,m_restrictors_index+CPHCharacter::rtNone,end(m_restrictors));
-	//m_restrictors_index[CPHCharacter::rtStalker]		=begin(m_restrictors)+0;
-	//m_restrictors_index[CPHCharacter::rtMonsterMedium]	=begin(m_restrictors)+1;
-	
 	{
 		m_restrictors.resize(3);
 		m_restrictors[0]=(xr_new<stalker_restrictor>());
 		m_restrictors[1]=xr_new<stalker_small_restrictor>();
 		m_restrictors[2]=(xr_new<medium_monster_restrictor>());
 	}
+	m_speed_goal = 0.0f;
 }
 
 CPHActorCharacter::~CPHActorCharacter(void)
@@ -40,10 +30,7 @@ void CPHActorCharacter::Create(dVector3 sizes)
 {
 	if(b_exist) return;
 	inherited::Create(sizes);
-	if(!b_single_game)
-	{
-		ClearRestrictors();
-	}
+
 	RESTRICTOR_I i=begin(m_restrictors),e=end(m_restrictors);
 	for(;e!=i;++i)
 	{
@@ -316,53 +303,30 @@ void CPHActorCharacter::InitContact(dContact* c,bool &do_collide,u16 material_id
 	SGameMtl*	material_2=GMLibrary().GetMaterialByIdx(material_idx_2);
 	if((material_1&&material_1->Flags.test(SGameMtl::flActorObstacle))||(material_2&&material_2->Flags.test(SGameMtl::flActorObstacle)))
 		do_collide=true;
-	if(b_single_game)
+
+	if(b_restrictor)
 	{
-	
-		if(b_restrictor)
-		{
-			b_side_contact=true;
-			//MulSprDmp(c->surface.soft_cfm,c->surface.soft_erp,def_spring_rate,def_dumping_rate);
-			c->surface.mu		=0.00f;
-		}
-		else
-			inherited::InitContact(c,do_collide,material_idx_1,material_idx_2);
-		if(b_restrictor&&
-			do_collide&&
-			!(b1 ? static_cast<CPHCharacter*>(retrieveGeomUserData(c->geom.g2)->ph_object)->ActorMovable():static_cast<CPHCharacter*>(retrieveGeomUserData(c->geom.g1)->ph_object)->ActorMovable())
-			)
-		{
-			dJointID contact_joint	= dJointCreateContactSpecial(0, ContactGroup, c);
-			Enable();
-			CPHObject::Island().DActiveIsland()->ConnectJoint(contact_joint);
-			if(b1)
-				dJointAttach			(contact_joint, dGeomGetBody(c->geom.g1), 0);
-			else
-				dJointAttach			(contact_joint, 0, dGeomGetBody(c->geom.g2));
-			do_collide=false;
-			m_friction_factor*=0.1f;
-			
-		}
-		//BigVelSeparate( c, do_collide );
+		b_side_contact=true;
+		//MulSprDmp(c->surface.soft_cfm,c->surface.soft_erp,def_spring_rate,def_dumping_rate);
+		c->surface.mu		=0.00f;
 	}
 	else
+		inherited::InitContact(c,do_collide,material_idx_1,material_idx_2);
+	if(b_restrictor&&
+		do_collide&&
+		!(b1 ? static_cast<CPHCharacter*>(retrieveGeomUserData(c->geom.g2)->ph_object)->ActorMovable():static_cast<CPHCharacter*>(retrieveGeomUserData(c->geom.g1)->ph_object)->ActorMovable())
+		)
 	{
+		dJointID contact_joint	= dJointCreateContactSpecial(0, ContactGroup, c);
+		Enable();
+		CPHObject::Island().DActiveIsland()->ConnectJoint(contact_joint);
+		if(b1)
+			dJointAttach			(contact_joint, dGeomGetBody(c->geom.g1), 0);
+		else
+			dJointAttach			(contact_joint, 0, dGeomGetBody(c->geom.g2));
+		do_collide=false;
+		m_friction_factor*=0.1f;
 		
-		dxGeomUserData* D1=retrieveGeomUserData(c->geom.g1);
-		dxGeomUserData* D2=retrieveGeomUserData(c->geom.g2);
-		if(D1&&D2)
-		{
-			IPhysicsShellHolder* A1=(D1->ph_ref_object);
-			IPhysicsShellHolder* A2=(D2->ph_ref_object);
-			if( A1 && A2 && A1->IsActor() && A2->IsActor() )
-			{
-				do_collide=do_collide&&!b_restrictor&&(A1->ObjectPPhysicsShell()==0)==(A2->ObjectPPhysicsShell()==0);
-				c->surface.mu=1.f;
-			}
-		}
-		
-		if(do_collide)inherited::InitContact(c,do_collide,material_idx_1,material_idx_2);
-		BigVelSeparate( c, do_collide );
 	}
 }
 

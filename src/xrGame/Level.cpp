@@ -444,7 +444,7 @@ void CLevel::OnFrame()
             Device.seqParallel.push_back(fastdelegate::FastDelegate0<>(m_map_manager, &CMapManager::Update));
         else
             MapManager().Update();
-        if (IsGameTypeSingle() && Device.dwPrecacheFrame == 0)
+        if (Device.dwPrecacheFrame == 0)
         {
             // XXX nitrocaster: was enabled in x-ray 1.5; to be restored or removed
             //if (g_mt_config.test(mtMap)) 

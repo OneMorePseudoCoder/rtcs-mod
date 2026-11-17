@@ -23,7 +23,6 @@
 #include "script_process.h"
 #include "xrServer_Objects.h"
 #include "ui/UIMainIngameWnd.h"
-//#include "../xrphysics/PhysicsGamePars.h"
 #include "../xrphysics/iphworld.h"
 #include "string_table.h"
 #include "autosave_manager.h"
@@ -40,7 +39,6 @@
 #include "MainMenu.h"
 #include "saved_game_wrapper.h"
 #include "level_graph.h"
-//#include "../xrEngine/resourcemanager.h"
 #include "../xrEngine/doug_lea_memory_allocator.h"
 #include "cameralook.h"
 #include "character_hit_animations_params.h"
@@ -541,21 +539,12 @@ void get_files_list( xr_vector<shared_str>& files, LPCSTR dir, LPCSTR file_ext )
 
 #include "UIGameCustom.h"
 
-class CCC_ALifeSave : public IConsole_Command {
+class CCC_ALifeSave : public IConsole_Command 
+{
 public:
 	CCC_ALifeSave(LPCSTR N) : IConsole_Command(N)  { bEmptyArgsHandled = true; };
-	virtual void Execute(LPCSTR args) {
-		
-#if 0
-		if (!Level().autosave_manager().ready_for_autosave()) {
-			Msg		("! Cannot save the game right now!");
-			return;
-		}
-#endif
-		if(!IsGameTypeSingle()){
-			Msg("for single-mode only");
-			return;
-		}
+	virtual void Execute(LPCSTR args) 
+	{
 		if(!g_actor || !Actor()->g_Alive())
 		{
 			Msg("cannot make saved game because actor is dead :(");
@@ -572,15 +561,19 @@ public:
 		CTimer					timer;
 		timer.Start				();
 #endif
-		if (!xr_strlen(S)){
+		if (!xr_strlen(S))
+		{
 			strconcat			(sizeof(S),S,Core.UserName," - ","quicksave");
 			NET_Packet			net_packet;
 			net_packet.w_begin	(M_SAVE_GAME);
 			net_packet.w_stringZ(S);
 			net_packet.w_u8		(0);
 			Level().Send		(net_packet,net_flags(TRUE));
-		}else{
-			if(!valid_saved_game_name(S)){
+		}
+		else
+		{
+			if(!valid_saved_game_name(S))
+			{
 				Msg("! Save failed: invalid file name - %s", S);
 				return;
 			}
