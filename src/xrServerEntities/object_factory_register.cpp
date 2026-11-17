@@ -132,7 +132,7 @@
 #	include "torridZone.h"
 #	include "ZoneVisual.h"
 #	include "hairszone.h"
-//. #	include "amebazone.h"
+#	include "AmebaZone.h"
 #	include "nogravityzone.h"
 #	include "simpledetector.h"
 #	include "elitedetector.h"
@@ -177,8 +177,8 @@ void CObjectFactory::register_classes	()
 	add<CLevel>													(CLSID_GAME_LEVEL				,"level");
 	add<CGamePersistent>										(CLSID_GAME_PERSISTANT			,"game");
 	add<CHUDManager>											(CLSID_HUDMANAGER				,"hud_manager");
+
 	//Server Game type
-	
 #ifndef NO_SINGLE
 	add<game_sv_Single>											(CLSID_SV_GAME_SINGLE			,"game_sv_single");
 	add<game_cl_Single>											(CLSID_CL_GAME_SINGLE			,"game_cl_single");
@@ -333,7 +333,7 @@ void CObjectFactory::register_classes	()
 	ADD(CTeamBaseZone			,CSE_ALifeTeamBaseZone			,CLSID_Z_TEAM_BASE				,"team_base_zone");
 	ADD(CTorridZone				,CSE_ALifeTorridZone			,CLSID_Z_TORRID					,"torrid_zone");
 	ADD(CSpaceRestrictor		,CSE_ALifeSpaceRestrictor		,CLSID_SPACE_RESTRICTOR			,"space_restrictor");
-//.	ADD(CAmebaZone				,CSE_ALifeZoneVisual			,CLSID_Z_AMEBA					,"ameba_zone");
+	ADD(CAmebaZone				,CSE_ALifeZoneVisual			,CLSID_Z_AMEBA					,"ameba_zone");
 	ADD(CNoGravityZone			,CSE_ALifeAnomalousZone			,CLSID_Z_NOGRAVITY				,"nogravity_zone");
 	ADD(CZoneCampfire			,CSE_ALifeAnomalousZone			,CLSID_Z_CAMPFIRE				,"zone_campfire");
 	// Detectors
@@ -399,6 +399,8 @@ void CObjectFactory::register_classes	()
 	ADD(CMosquitoBald			,CSE_ALifeAnomalousZone			,TEXT2CLSID("ZS_MBALD")			,"zone_mbald_s");
 	ADD(CMincer					,CSE_ALifeAnomalousZone			,TEXT2CLSID("ZS_GALAN")			,"zone_galant_s");
 	ADD(CMincer					,CSE_ALifeAnomalousZone			,TEXT2CLSID("ZS_MINCE")			,"zone_mincer_s");
+	ADD(CAmebaZone				,CSE_ALifeZoneVisual			,TEXT2CLSID("ZS_AMEBA")			,"zone_ameba_s");
+	ADD(CNoGravityZone			,CSE_ALifeAnomalousZone			,TEXT2CLSID("ZS_NGRAV")			,"zone_nograv_s");
 	ADD(CSpaceRestrictor		,CSE_ALifeSpaceRestrictor		,TEXT2CLSID("SPC_RS_S")			,"script_restr");
 #endif // NO_XR_GAME
 }
