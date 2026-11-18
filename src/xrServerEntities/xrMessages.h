@@ -71,7 +71,6 @@ enum {
 	M_SV_MAP_NAME,				//request and responce
 	M_SV_DIGEST,				//request and responce
 
-	M_FILE_TRANSFER,
 	M_MAKE_SCREENSHOT,
 	M_SECURE_KEY_SYNC,
 	M_SECURE_MESSAGE,

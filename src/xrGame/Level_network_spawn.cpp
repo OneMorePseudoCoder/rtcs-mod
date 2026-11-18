@@ -16,12 +16,9 @@ void CLevel::cl_Process_Spawn(NET_Packet& P)
 	shared_str			s_name;
 	P.r_stringZ			(s_name);
 
-	//Msg("Spawn object %s [%d]b", s_name.c_str(), P.B.count);
-
 	// Create DC (xrSE)
 	CSE_Abstract*	E	= F_entity_Create	(*s_name);
 	R_ASSERT2(E, *s_name);
-
 
 	E->Spawn_Read		(P);
 	if (E->s_flags.is(M_SPAWN_UPDATE))
@@ -32,22 +29,16 @@ void CLevel::cl_Process_Spawn(NET_Packet& P)
 		F_entity_Destroy(E);
 		return;
 	}
-//-------------------------------------------------
-//.	Msg ("M_SPAWN - %s[%d][%x] - %d %d", *s_name,  E->ID, E,E->ID_Parent, Device.dwFrame);
-//-------------------------------------------------
+
 	//force object to be local for server client
-	if (OnServer())		{
+	if (OnServer())		
+	{
 		E->s_flags.set(M_SPAWN_OBJECT_LOCAL, TRUE);
 	};
 
-	/*
-	game_spawn_queue.push_back(E);
-	if (g_bDebugEvents)		ProcessGameSpawns();
-	/*/
 	g_sv_Spawn					(E);
 
 	F_entity_Destroy			(E);
-	//*/
 };
 
 void CLevel::g_cl_Spawn		(LPCSTR name, u8 rp, u16 flags, Fvector pos)
@@ -59,7 +50,6 @@ void CLevel::g_cl_Spawn		(LPCSTR name, u8 rp, u16 flags, Fvector pos)
 	// Fill
 	E->s_name			= name;
 	E->set_name_replace	("");
-//.	E->s_gameid			=	u8(GameID());
 	E->s_RP				=	rp;
 	E->ID				=	0xffff;
 	E->ID_Parent		=	0xffff;
@@ -87,38 +77,28 @@ void CLevel::g_sv_Spawn		(CSE_Abstract* E)
 {
 #ifdef DEBUG_MEMORY_MANAGER
 	size_t							E_mem = 0;
-	if (g_bMEMO)	{
+	if (g_bMEMO)	
+	{
 		lua_gc					(ai().script_engine().lua(),LUA_GCCOLLECT,0);
 		lua_gc					(ai().script_engine().lua(),LUA_GCCOLLECT,0);
 		E_mem					= Memory.mem_usage();	
 		Memory.stat_calls		= 0;
 	}
 #endif // DEBUG_MEMORY_MANAGER
-	//-----------------------------------------------------------------
-//	CTimer		T(false);
-
-#ifdef DEBUG
-//	Msg					("* CLIENT: Spawn: %s, ID=%d", *E->s_name, E->ID);
-#endif
 
 	// Optimization for single-player only	- minimize traffic between client and server
-	if	(GameID()	== eGameIDSingle)		psNET_Flags.set	(NETFLAG_MINIMIZEUPDATES,TRUE);
-	else								psNET_Flags.set	(NETFLAG_MINIMIZEUPDATES,FALSE);
+	psNET_Flags.set	(NETFLAG_MINIMIZEUPDATES,TRUE);
 
 	// Client spawn
-//	T.Start		();
 	CObject*	O		= Objects.Create	(*E->s_name);
-	// Msg				("--spawn--CREATE: %f ms",1000.f*T.GetAsync());
 
-//	T.Start		();
 #ifdef DEBUG_MEMORY_MANAGER
 	mem_alloc_gather_stats		(false);
 #endif // DEBUG_MEMORY_MANAGER
 	if (0==O || (!O->net_Spawn	(E))) 
 	{
-		O->net_Destroy			( );
-		if(!g_dedicated_server)
-			client_spawn_manager().clear(O->ID());
+		O->net_Destroy			();
+		client_spawn_manager().clear(O->ID());
 		Objects.Destroy			(O);
 		Msg						("! Failed to spawn entity '%s'",*E->s_name);
 #ifdef DEBUG_MEMORY_MANAGER
@@ -128,12 +108,10 @@ void CLevel::g_sv_Spawn		(CSE_Abstract* E)
 #ifdef DEBUG_MEMORY_MANAGER
 		mem_alloc_gather_stats	(!!psAI_Flags.test(aiDebugOnFrameAllocs));
 #endif // DEBUG_MEMORY_MANAGER
-		if(!g_dedicated_server)
-			client_spawn_manager().callback(O);
-		//Msg			("--spawn--SPAWN: %f ms",1000.f*T.GetAsync());
-		
-		if ((E->s_flags.is(M_SPAWN_OBJECT_LOCAL)) && 
-			(E->s_flags.is(M_SPAWN_OBJECT_ASPLAYER)) )	
+
+		client_spawn_manager().callback(O);
+
+		if ((E->s_flags.is(M_SPAWN_OBJECT_LOCAL)) && (E->s_flags.is(M_SPAWN_OBJECT_ASPLAYER)) )	
 		{
 			if (CurrentEntity() != NULL) 
 			{
@@ -146,35 +124,13 @@ void CLevel::g_sv_Spawn		(CSE_Abstract* E)
 
 		if (0xffff != E->ID_Parent)	
 		{
-			/*
-			// Generate ownership-event
-			NET_Packet			GEN;
-			GEN.w_begin			(M_EVENT);
-			GEN.w_u32			(E->m_dwSpawnTime);//-NET_Latency);
-			GEN.w_u16			(GE_OWNERSHIP_TAKE);
-			GEN.w_u16			(E->ID_Parent);
-			GEN.w_u16			(u16(O->ID()));
-			game_events->insert	(GEN);
-			/*/
 			NET_Packet	GEN;
 			GEN.write_start();
 			GEN.read_start();
 			GEN.w_u16			(u16(O->ID()));
 			cl_Process_Event(E->ID_Parent, GE_OWNERSHIP_TAKE, GEN);
-			//*/
 		}
 	}
-
-	/*if (E->s_flags.is(M_SPAWN_UPDATE)) {
-		NET_Packet				temp;
-		temp.B.count			= 0;
-		E->UPDATE_Write			(temp);
-		if (temp.B.count > 0)
-		{
-			temp.r_seek				(0);
-			O->net_Import			(temp);
-		}
-		}*/ //:(
 
 	//---------------------------------------------------------
 	Game().OnSpawn				(O);

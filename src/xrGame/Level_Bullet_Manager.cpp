@@ -9,7 +9,6 @@
 #include "Actor.h"
 #include "gamepersistent.h"
 #include "mt_config.h"
-#include "game_cl_base_weapon_usage_statistic.h"
 
 #include "../Include/xrRender/UIRender.h"
 #include "../Include/xrRender/Kinematics.h"
@@ -694,7 +693,7 @@ BOOL CBulletManager::firetrace_callback	(collide::rq_result& result, LPVOID para
 	Fvector& collide_position		= data.collide_position;
 	collide_position				= Fvector().mad(bullet.bullet_pos, bullet.dir, result.range);
 	
-	float const	air_resistance		= (GameID() == eGameIDSingle) ? Level().BulletManager().m_fAirResistanceK : bullet.air_resistance;
+	float const	air_resistance		= Level().BulletManager().m_fAirResistanceK;
 
 	CBulletManager& bullet_manager	= Level().BulletManager();
 	Fvector const gravity			= { 0.f, -bullet_manager.m_fGravityConst, 0.f };
@@ -806,43 +805,25 @@ static bool try_update_bullet				(SBullet& bullet, Fvector const& gravity, float
 	return						(true);
 }
 
-
 bool CBulletManager::process_bullet			(collide::rq_results & storage, SBullet& bullet, u32 const delta_time)
 {
 	float const time_delta		= float(delta_time)/1000.f;
 	Fvector const gravity		= Fvector().set( 0.f, -m_fGravityConst, 0.f);
 
-	float const	air_resistance	= (GameID() == eGameIDSingle) ? m_fAirResistanceK : bullet.air_resistance;
-	bullet.tracer_start_position= bullet.bullet_pos;
-
-#if 0//def DEBUG
-	extern BOOL g_bDrawBulletHit;
-	if (g_bDrawBulletHit)
-	{
-		Msg	(
-			"free fly velocity: %f",
-			trajectory_velocity(
-				bullet.start_velocity,
-				gravity,
-				air_resistance,
-				fis_zero(air_resistance) ?
-				0.f :
-				(1.f/air_resistance - air_resistance_epsilon)
-			).magnitude()
-		);
-	}
-#endif
+	float const	air_resistance	= m_fAirResistanceK;
+	bullet.tracer_start_position = bullet.bullet_pos;
 
 	Fvector const&start_position= bullet.bullet_pos;
 	Fvector	previous_position	= start_position;
 	float low					= bullet.life_time;
 	float high					= bullet.life_time + time_delta;
-//	Msg							("process_bullet0: low[%f], high[%f]", low, high);
 
 	bullet.change_rajectory_count	= 0;
 
-	for (;;) {
-		for (;;) {
+	for (;;) 
+	{
+		for (;;) 
+		{
 			if ( bullet.speed < 1.f )
 				return			(false);
 
@@ -855,10 +836,10 @@ bool CBulletManager::process_bullet			(collide::rq_results & storage, SBullet& b
 
 			float safe_time		= time;
 			VERIFY2				( safe_time <= high, make_string("safe_time[%f], high[%f]", safe_time, high) );
-			if ( !trajectory_check_error(previous_position, storage, bullet, low, time, gravity, air_resistance) ) {
+			if ( !trajectory_check_error(previous_position, storage, bullet, low, time, gravity, air_resistance) ) 
+			{
 				VERIFY2			( safe_time >= time, make_string("safe_time[%f], time[%f]", safe_time, time) );
 				VERIFY2			( safe_time <= high, make_string("safe_time[%f], high[%f]", safe_time, high) );
-//				clamp			(safe_time, time, high);
 				high			= high - safe_time + time;
 				VERIFY2			( low <= high, make_string("start_low[%f] high[%f]", low, high) );
 				if ( fsimilar(low, high) )
@@ -1032,8 +1013,6 @@ void CBulletManager::CommitEvents			()	// @ the start of frame
 			}break;
 		case EVENT_REMOVE:
 			{
-				if (E.bullet.flags.allow_sendhit && GameID() != eGameIDSingle)
-					Game().m_WeaponUsageStatistic->OnBullet_Remove(&E.bullet);
 				m_Bullets[E.tgt_material] = m_Bullets.back();
 				m_Bullets.pop_back();
 			}break;
@@ -1044,14 +1023,6 @@ void CBulletManager::CommitEvents			()	// @ the start of frame
 
 void CBulletManager::RegisterEvent			(EventType Type, BOOL _dynamic, SBullet* bullet, const Fvector& end_point, collide::rq_result& R, u16 tgt_material)
 {
-#if 0//def DEBUG
-	if (m_Events.size() > 1000) {
-		static bool breakpoint = true;
-		if (breakpoint)
-			__asm int 3;
-	}
-#endif // #ifdef DEBUG
-
 	m_Events.push_back	(_event())		;
 	_event&	E		= m_Events.back()	;
 	E.Type			= Type				;
@@ -1070,28 +1041,15 @@ void CBulletManager::RegisterEvent			(EventType Type, BOOL _dynamic, SBullet* bu
 			
 			if (_dynamic)	
 			{
-				//	E.Repeated = (R.O->ID() == E.bullet.targetID);
-				//	bullet->targetID = R.O->ID();
-
 				E.Repeated = (R.O->ID() == E.bullet.targetID);
-				if (GameID() == eGameIDSingle)
-				{
-					bullet->targetID = R.O->ID();
-				}
-				else
-				{
-					if (bullet->targetID != R.O->ID())
-					{
-						CGameObject* pGO = smart_cast<CGameObject*>(R.O);
-						if (!pGO || !pGO->BonePassBullet(R.element))
-							bullet->targetID = R.O->ID();						
-					}
-				}
+				bullet->targetID = R.O->ID();
 			};
-		}break;
+		}
+		break;
 	case EVENT_REMOVE:
 		{
-			E.tgt_material	= tgt_material		;
-		}break;
+			E.tgt_material	= tgt_material;
+		}
+		break;
 	}	
 }

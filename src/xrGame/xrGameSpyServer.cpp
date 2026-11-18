@@ -72,9 +72,7 @@ void			xrGameSpyServer::Update				()
 
 int				xrGameSpyServer::GetPlayersCount()
 {
-	int NumPlayers = net_players.ClientsCount();
-	if (!g_dedicated_server || NumPlayers < 1) return NumPlayers;
-	return NumPlayers - 1;
+	return net_players.ClientsCount();
 };
 
 void			xrGameSpyServer::OnCL_Disconnected	(IClient* _CL)

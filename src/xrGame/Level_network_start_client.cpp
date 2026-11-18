@@ -6,7 +6,6 @@
 #include "ai_space.h"
 #include "game_cl_base.h"
 #include "NET_Queue.h"
-#include "file_transfer.h"
 #include "hudmanager.h"
 
 #include "../xrphysics/iphworld.h"
@@ -200,20 +199,16 @@ void CLevel::ClientSendProfileData	()
 
 bool	CLevel::net_start_client5				()
 {
-	if(connected_to_server){
-		// HUD
-
+	if (connected_to_server)
+	{
 		// Textures
-		if	(!g_dedicated_server)
-		{
-//			g_pGamePersistent->LoadTitle		("st_loading_textures");
-			g_pGamePersistent->LoadTitle		();
-			//Device.Resources->DeferredLoad	(FALSE);
-			Device.m_pRender->DeferredLoad		(FALSE);
-			//Device.Resources->DeferredUpload	();
-			Device.m_pRender->ResourcesDeferredUpload();
-			LL_CheckTextures					();
-		}
+//		g_pGamePersistent->LoadTitle		("st_loading_textures");
+		g_pGamePersistent->LoadTitle		();
+		//Device.Resources->DeferredLoad	(FALSE);
+		Device.m_pRender->DeferredLoad		(FALSE);
+		//Device.Resources->DeferredUpload	();
+		Device.m_pRender->ResourcesDeferredUpload();
+		LL_CheckTextures					();
 		sended_request_connection_data	= FALSE;
 		deny_m_spawn					= TRUE;
 	}
@@ -232,11 +227,9 @@ bool	CLevel::net_start_client6				()
 			pApp->LoadEnd						(); 
 			return true;
 		}
-		if (!g_dedicated_server)
-		{
-			g_hud->Load						();
-			g_hud->OnConnected				();
-		}
+
+		g_hud->Load						();
+		g_hud->OnConnected				();
 
 #ifdef DEBUG
 		Msg("--- net_start_client6");
@@ -245,10 +238,6 @@ bool	CLevel::net_start_client6				()
 		if (game)
 		{
 			game->OnConnected				();
-			if (game->Type() != eGameIDSingle)
-			{
-				m_file_transfer = xr_new<file_transfer::client_site>();
-			}
 		}
 
 //		g_pGamePersistent->LoadTitle		("st_client_synchronising");

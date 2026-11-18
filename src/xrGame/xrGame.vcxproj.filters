@@ -1915,9 +1915,6 @@
     <Filter Include="Core\Client\Objects\zones\ScriptZone">
       <UniqueIdentifier>{7a237c3f-7ca2-4dc7-844f-0928be1848ff}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Core\Client\Objects\zones\TeamBaseZone">
-      <UniqueIdentifier>{2c1927e0-4d35-480c-a656-19a7114163cd}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Core\Client\Objects\zones\TorridZone">
       <UniqueIdentifier>{482cfc75-8689-4af7-ac85-7fb1215aaa8b}</UniqueIdentifier>
     </Filter>
@@ -1962,12 +1959,6 @@
     </Filter>
     <Filter Include="Core\Client\Particles">
       <UniqueIdentifier>{63cdfe35-ce42-4b4a-a114-6488fbcfdfc5}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Core\Client\Spectator">
-      <UniqueIdentifier>{00648882-1250-4ade-b893-27055b6d57ea}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Core\Client\Spectator\Cameras">
-      <UniqueIdentifier>{0ac178c9-6f29-48e3-8ce5-7bf8a399318d}</UniqueIdentifier>
     </Filter>
     <Filter Include="Core\Common">
       <UniqueIdentifier>{f5555d92-4e46-4fe0-a196-969d339d6c53}</UniqueIdentifier>
@@ -2103,9 +2094,6 @@
     </Filter>
     <Filter Include="Core\Server\xrGameSpyServer">
       <UniqueIdentifier>{963eebca-4495-44e2-8fb5-bee1a28330af}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Core\Server\filetransfer">
-      <UniqueIdentifier>{bf990cd5-6464-445f-88f1-c3f61d940651}</UniqueIdentifier>
     </Filter>
     <Filter Include="Core\Server\ServerConnect">
       <UniqueIdentifier>{7511649f-4c16-42db-9516-70367199c4dd}</UniqueIdentifier>
@@ -5799,9 +5787,6 @@
     <ClInclude Include="script_zone.h">
       <Filter>Core\Client\Objects\zones\ScriptZone</Filter>
     </ClInclude>
-    <ClInclude Include="team_base_zone.h">
-      <Filter>Core\Client\Objects\zones\TeamBaseZone</Filter>
-    </ClInclude>
     <ClInclude Include="TorridZone.h">
       <Filter>Core\Client\Objects\zones\TorridZone</Filter>
     </ClInclude>
@@ -5852,12 +5837,6 @@
     </ClInclude>
     <ClInclude Include="ParticlesObject.h">
       <Filter>Core\Client\Particles</Filter>
-    </ClInclude>
-    <ClInclude Include="Spectator.h">
-      <Filter>Core\Client\Spectator</Filter>
-    </ClInclude>
-    <ClInclude Include="spectator_camera_first_eye.h">
-      <Filter>Core\Client\Spectator\Cameras</Filter>
     </ClInclude>
     <ClInclude Include="date_time.h">
       <Filter>Core\Common\DateTime</Filter>
@@ -5994,16 +5973,10 @@
     <ClInclude Include="static_cast_checked.hpp">
       <Filter>Core\Common\debug\static_cast_checked</Filter>
     </ClInclude>
-    <ClInclude Include="screenshot_server.h">
-      <Filter>Core\Server</Filter>
-    </ClInclude>
     <ClInclude Include="xrClientsPool.h">
       <Filter>Core\Server</Filter>
     </ClInclude>
     <ClInclude Include="xrServer.h">
-      <Filter>Core\Server</Filter>
-    </ClInclude>
-    <ClInclude Include="xrServer_info.h">
       <Filter>Core\Server</Filter>
     </ClInclude>
     <ClInclude Include="..\xrServerEntities\xrServer_Space.h">
@@ -6036,12 +6009,6 @@
     <ClInclude Include="game_base.h">
       <Filter>Core\Server\Games</Filter>
     </ClInclude>
-    <ClInclude Include="game_base_kill_type.h">
-      <Filter>Core\Server\Games</Filter>
-    </ClInclude>
-    <ClInclude Include="game_base_menu_events.h">
-      <Filter>Core\Server\Games</Filter>
-    </ClInclude>
     <ClInclude Include="..\xrServerEntities\game_base_space.h">
       <Filter>Core\Server\Games</Filter>
     </ClInclude>
@@ -6049,9 +6016,6 @@
       <Filter>Core\Server\Games\client\single</Filter>
     </ClInclude>
     <ClInclude Include="game_cl_base.h">
-      <Filter>Core\Server\Games\client\base</Filter>
-    </ClInclude>
-    <ClInclude Include="game_cl_base_weapon_usage_statistic.h">
       <Filter>Core\Server\Games\client\base</Filter>
     </ClInclude>
     <ClInclude Include="game_sv_event_queue.h">
@@ -6116,18 +6080,6 @@
     </ClInclude>
     <ClInclude Include="xrGameSpyServer.h">
       <Filter>Core\Server\xrGameSpyServer</Filter>
-    </ClInclude>
-    <ClInclude Include="file_transfer.h">
-      <Filter>Core\Server\filetransfer</Filter>
-    </ClInclude>
-    <ClInclude Include="filereceiver_node.h">
-      <Filter>Core\Server\filetransfer</Filter>
-    </ClInclude>
-    <ClInclude Include="filetransfer_common.h">
-      <Filter>Core\Server\filetransfer</Filter>
-    </ClInclude>
-    <ClInclude Include="filetransfer_node.h">
-      <Filter>Core\Server\filetransfer</Filter>
     </ClInclude>
     <ClInclude Include="ui_base.h">
       <Filter>UI</Filter>
@@ -8846,9 +8798,6 @@
     <ClCompile Include="script_zone_script.cpp">
       <Filter>Core\Client\Objects\zones\ScriptZone</Filter>
     </ClCompile>
-    <ClCompile Include="team_base_zone.cpp">
-      <Filter>Core\Client\Objects\zones\TeamBaseZone</Filter>
-    </ClCompile>
     <ClCompile Include="TorridZone.cpp">
       <Filter>Core\Client\Objects\zones\TorridZone</Filter>
     </ClCompile>
@@ -8936,12 +8885,6 @@
     <ClCompile Include="ParticlesObject.cpp">
       <Filter>Core\Client\Particles</Filter>
     </ClCompile>
-    <ClCompile Include="Spectator.cpp">
-      <Filter>Core\Client\Spectator</Filter>
-    </ClCompile>
-    <ClCompile Include="spectator_camera_first_eye.cpp">
-      <Filter>Core\Client\Spectator\Cameras</Filter>
-    </ClCompile>
     <ClCompile Include="console_commands.cpp">
       <Filter>Core\Common\Console Commands</Filter>
     </ClCompile>
@@ -8996,9 +8939,6 @@
     <ClCompile Include="static_cast_checked_test.cpp">
       <Filter>Core\Common\debug\static_cast_checked</Filter>
     </ClCompile>
-    <ClCompile Include="screenshot_server.cpp">
-      <Filter>Core\Server</Filter>
-    </ClCompile>
     <ClCompile Include="xrClientsPool.cpp">
       <Filter>Core\Server</Filter>
     </ClCompile>
@@ -9009,9 +8949,6 @@
       <Filter>Core\Server</Filter>
     </ClCompile>
     <ClCompile Include="xrServer_balance.cpp">
-      <Filter>Core\Server</Filter>
-    </ClCompile>
-    <ClCompile Include="xrServer_info.cpp">
       <Filter>Core\Server</Filter>
     </ClCompile>
     <ClCompile Include="xrServer_updates_compressor.cpp">
@@ -9027,12 +8964,6 @@
       <Filter>Core\Server\Games\client\single</Filter>
     </ClCompile>
     <ClCompile Include="game_cl_base.cpp">
-      <Filter>Core\Server\Games\client\base</Filter>
-    </ClCompile>
-    <ClCompile Include="game_cl_base_weapon_usage_statistic.cpp">
-      <Filter>Core\Server\Games\client\base</Filter>
-    </ClCompile>
-    <ClCompile Include="game_cl_base_weapon_usage_statistic_save.cpp">
       <Filter>Core\Server\Games\client\base</Filter>
     </ClCompile>
     <ClCompile Include="game_sv_event_queue.cpp">
@@ -9166,15 +9097,6 @@
     </ClCompile>
     <ClCompile Include="xrGameSpyServer.cpp">
       <Filter>Core\Server\xrGameSpyServer</Filter>
-    </ClCompile>
-    <ClCompile Include="file_transfer.cpp">
-      <Filter>Core\Server\filetransfer</Filter>
-    </ClCompile>
-    <ClCompile Include="filereceiver_node.cpp">
-      <Filter>Core\Server\filetransfer</Filter>
-    </ClCompile>
-    <ClCompile Include="filetransfer_node.cpp">
-      <Filter>Core\Server\filetransfer</Filter>
     </ClCompile>
     <ClCompile Include="xrServer_CL_connect.cpp">
       <Filter>Core\Server\ServerConnect</Filter>

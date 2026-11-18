@@ -17,162 +17,154 @@
 #include "clsid_game.h"
 
 // client entities includes
-#ifndef NO_XR_GAME
-#	include "../xrEngine/std_classes.h"
-#	include "level.h"
-#	include "gamepersistent.h"
-#	include "hudmanager.h"
-#	include "actor.h"
-#	include "spectator.h"
+#include "../xrEngine/std_classes.h"
+#include "level.h"
+#include "gamepersistent.h"
+#include "hudmanager.h"
+#include "actor.h"
 
-#	include "ai/monsters/flesh/flesh.h"
-#	include "ai/monsters/chimera/chimera.h"
-#	include "ai/monsters/dog/dog.h"
-#	include "ai/stalker/ai_stalker.h"
-#	include "ai/monsters/bloodsucker/bloodsucker.h"
-#	include "ai/monsters/boar/boar.h"
-#	include "ai/monsters/pseudodog/pseudodog.h"
-#	include "ai/monsters/pseudodog/psy_dog.h"
-#	include "ai/monsters/Burer/burer.h"
-#	include "ai/monsters/PseudoGigant/pseudo_gigant.h"
-#	include "ai/monsters/controller/controller.h"
-#	include "ai/monsters/poltergeist/poltergeist.h"
-#	include "ai/monsters/zombie/zombie.h"
-#	include "ai/monsters/fracture/fracture.h"
-#	include "ai/monsters/snork/snork.h"
-#	include "ai/monsters/cat/cat.h"
-#	include "ai/monsters/tushkano/tushkano.h"
-#	include "ai/monsters/rats/ai_rat.h"
+#include "ai/monsters/flesh/flesh.h"
+#include "ai/monsters/chimera/chimera.h"
+#include "ai/monsters/dog/dog.h"
+#include "ai/stalker/ai_stalker.h"
+#include "ai/monsters/bloodsucker/bloodsucker.h"
+#include "ai/monsters/boar/boar.h"
+#include "ai/monsters/pseudodog/pseudodog.h"
+#include "ai/monsters/pseudodog/psy_dog.h"
+#include "ai/monsters/Burer/burer.h"
+#include "ai/monsters/PseudoGigant/pseudo_gigant.h"
+#include "ai/monsters/controller/controller.h"
+#include "ai/monsters/poltergeist/poltergeist.h"
+#include "ai/monsters/zombie/zombie.h"
+#include "ai/monsters/fracture/fracture.h"
+#include "ai/monsters/snork/snork.h"
+#include "ai/monsters/cat/cat.h"
+#include "ai/monsters/tushkano/tushkano.h"
+#include "ai/monsters/rats/ai_rat.h"
 
-#	include "ai/phantom/phantom.h"
+#include "ai/phantom/phantom.h"
 
-#	include "ai/trader/ai_trader.h"
+#include "ai/trader/ai_trader.h"
 
-#	include "ai/crow/ai_crow.h"
+#include "ai/crow/ai_crow.h"
 
-#	ifdef DEBUG
-#		include "../xrEngine/StatGraph.h"
-#		include "PHDebug.h"
-#	endif // DEBUG
+#ifdef DEBUG
+#	include "../xrEngine/StatGraph.h"
+#	include "PHDebug.h"
+#endif // DEBUG
 
-#	include "hit.h"
-#	include "PHDestroyable.h"
-#	include "car.h"
+#include "hit.h"
+#include "PHDestroyable.h"
+#include "car.h"
 
-#	include "helicopter.h"
+#include "helicopter.h"
 
-#	include "MercuryBall.h"
-#	include "BlackDrops.h"
-#	include "BlackGraviArtifact.h"
-#	include "BastArtifact.h"
-#	include "DummyArtifact.h"
-#	include "ZudaArtifact.h"
-#	include "ThornArtifact.h"
-#	include "FadedBall.h"
-#	include "ElectricBall.h"
-#	include "RustyHairArtifact.h"
-#	include "GalantineArtifact.h"
-#	include "GraviArtifact.h"
+#include "MercuryBall.h"
+#include "BlackDrops.h"
+#include "BlackGraviArtifact.h"
+#include "BastArtifact.h"
+#include "DummyArtifact.h"
+#include "ZudaArtifact.h"
+#include "ThornArtifact.h"
+#include "FadedBall.h"
+#include "ElectricBall.h"
+#include "RustyHairArtifact.h"
+#include "GalantineArtifact.h"
+#include "GraviArtifact.h"
 
-#	include "weaponFN2000.h"
-#	include "weaponAK74.h"
-#	include "weaponLR300.h"
-#	include "weaponHPSA.h"
-#	include "weaponPM.h"
-#	include "weaponAMMO.h"
-#	include "weaponFORT.h"
-#	include "weaponBINOCULARS.h"
-#	include "weaponShotgun.h"
-#	include "weaponsvd.h"
-#	include "weaponsvu.h"
-#	include "weaponrpg7.h"
-#	include "weaponval.h"
-#	include "weaponvintorez.h"
-#	include "weaponwalther.h"
-#	include "weaponusp45.h"
-#	include "weapongroza.h"
-#	include "weaponknife.h"
-#	include "weaponBM16.h"
-#	include "weaponRG6.h"
-#	include "WeaponStatMgun.h"
+#include "weaponFN2000.h"
+#include "weaponAK74.h"
+#include "weaponLR300.h"
+#include "weaponHPSA.h"
+#include "weaponPM.h"
+#include "weaponAMMO.h"
+#include "weaponFORT.h"
+#include "weaponBINOCULARS.h"
+#include "weaponShotgun.h"
+#include "weaponsvd.h"
+#include "weaponsvu.h"
+#include "weaponrpg7.h"
+#include "weaponval.h"
+#include "weaponvintorez.h"
+#include "weaponwalther.h"
+#include "weaponusp45.h"
+#include "weapongroza.h"
+#include "weaponknife.h"
+#include "weaponBM16.h"
+#include "weaponRG6.h"
+#include "WeaponStatMgun.h"
 
-#	include "scope.h"
-#	include "silencer.h"
-#	include "grenadelauncher.h"
+#include "scope.h"
+#include "silencer.h"
+#include "grenadelauncher.h"
 
-#	include "bolt.h"
-#	include "medkit.h"
-#	include "antirad.h"
-#	include "fooditem.h"
-#	include "bottleitem.h"
-#	include "explosiveitem.h"
+#include "bolt.h"
+#include "medkit.h"
+#include "antirad.h"
+#include "fooditem.h"
+#include "bottleitem.h"
+#include "explosiveitem.h"
 
-#	include "infodocument.h"
-#	include "attachable_item.h"
+#include "infodocument.h"
+#include "attachable_item.h"
 
-#	include "ScientificOutfit.h"
-#	include "StalkerOutfit.h"
-#	include "MilitaryOutfit.h"
-#	include "ExoOutfit.h"
-#	include "ActorHelmet.h"
+#include "ScientificOutfit.h"
+#include "StalkerOutfit.h"
+#include "MilitaryOutfit.h"
+#include "ExoOutfit.h"
+#include "ActorHelmet.h"
 
-#	include "f1.h"
-#	include "rgd5.h"
+#include "f1.h"
+#include "rgd5.h"
 
-#	include "explosiverocket.h"
+#include "explosiverocket.h"
 
-#	include "customzone.h"
-#	include "mosquitobald.h"
-#	include "mincer.h"
-#	include "gravizone.h"
-#	include "radioactivezone.h"
-#	include "level_changer.h"
-#	include "script_zone.h"
-#	include "team_base_zone.h"
-#	include "torridZone.h"
-#	include "ZoneVisual.h"
-#	include "hairszone.h"
-#	include "AmebaZone.h"
-#	include "nogravityzone.h"
-#	include "simpledetector.h"
-#	include "elitedetector.h"
-#	include "advanceddetector.h"
-#	include "zonecampfire.h"
+#include "customzone.h"
+#include "mosquitobald.h"
+#include "mincer.h"
+#include "gravizone.h"
+#include "radioactivezone.h"
+#include "level_changer.h"
+#include "script_zone.h"
+#include "torridZone.h"
+#include "ZoneVisual.h"
+#include "hairszone.h"
+#include "AmebaZone.h"
+#include "nogravityzone.h"
+#include "simpledetector.h"
+#include "elitedetector.h"
+#include "advanceddetector.h"
+#include "zonecampfire.h"
 
-#	include "torch.h"
-#	include "pda.h"
-#	include "flare.h"
+#include "torch.h"
+#include "pda.h"
+#include "flare.h"
 
-#	include "searchlight.h"
+#include "searchlight.h"
 
-#	include "HangingLamp.h"
-#	include "physicobject.h"
-#	include "script_object.h"
-#	include "BreakableObject.h"
-#	include "PhysicsSkeletonObject.h"
-#	include "DestroyablePhysicsObject.h"
+#include "HangingLamp.h"
+#include "physicobject.h"
+#include "script_object.h"
+#include "BreakableObject.h"
+#include "PhysicsSkeletonObject.h"
+#include "DestroyablePhysicsObject.h"
 
-#	include "game_sv_single.h"
+#include "game_sv_single.h"
 
-#	include "game_cl_single.h"
+#include "game_cl_single.h"
 
-#	include "UIGameSP.h"
-#	include	"climableobject.h"
-#	include "space_restrictor.h"
-#	include "smart_zone.h"
-#	include "InventoryBox.h"
+#include "UIGameSP.h"
+#include	"climableobject.h"
+#include "space_restrictor.h"
+#include "smart_zone.h"
+#include "InventoryBox.h"
 
-#	include "smart_cover_object.h"
-#endif // NO_XR_GAME
+#include "smart_cover_object.h"
 
-#ifndef NO_XR_GAME
-	ENGINE_API					bool g_dedicated_server;
-#	define ADD(a,b,c,d)			add<a,b>(c,d)
-#endif
+#define ADD(a,b,c,d)			add<a,b>(c,d)
 
 void CObjectFactory::register_classes	()
 {
-#ifndef NO_XR_GAME
 	// client entities
 	add<CLevel>													(CLSID_GAME_LEVEL				,"level");
 	add<CGamePersistent>										(CLSID_GAME_PERSISTANT			,"game");
@@ -187,7 +179,6 @@ void CObjectFactory::register_classes	()
 	add<CUIGameSP>												(CLSID_GAME_UI_SINGLE			,"game_ui_single");
 
 	ADD(CActor					,CSE_ALifeCreatureActor			,CLSID_OBJECT_ACTOR				,"actor");
-#endif // NO_XR_GAME
 
 	// server entities
 #ifndef NO_SINGLE
@@ -197,9 +188,6 @@ void CObjectFactory::register_classes	()
 	add<CSE_ALifeOnlineOfflineGroup>							(CLSID_ONLINE_OFFLINE_GROUP		,"online_offline_group");
 #endif // #ifndef NO_SINGLE
 	
-	// client and server entities
-	ADD(CSpectator				,CSE_Spectator					,CLSID_SPECTATOR				,"spectator");
-
 #ifndef NO_SINGLE
 	ADD(CAI_Flesh				,CSE_ALifeMonsterBase			,CLSID_AI_FLESH					,"flesh");
 	ADD(CChimera				,CSE_ALifeMonsterBase			,CLSID_AI_CHIMERA				,"chimera");
@@ -330,7 +318,6 @@ void CObjectFactory::register_classes	()
 #endif	//	BENCHMARK_BUILD
 	ADD(CScriptZone				,CSE_ALifeSpaceRestrictor		,CLSID_SCRIPT_ZONE				,"script_zone");
 	ADD(CSmartZone				,CSE_ALifeSmartZone				,CLSID_SMART_ZONE				,"smart_zone");
-	ADD(CTeamBaseZone			,CSE_ALifeTeamBaseZone			,CLSID_Z_TEAM_BASE				,"team_base_zone");
 	ADD(CTorridZone				,CSE_ALifeTorridZone			,CLSID_Z_TORRID					,"torrid_zone");
 	ADD(CSpaceRestrictor		,CSE_ALifeSpaceRestrictor		,CLSID_SPACE_RESTRICTOR			,"space_restrictor");
 	ADD(CAmebaZone				,CSE_ALifeZoneVisual			,CLSID_Z_AMEBA					,"ameba_zone");
@@ -365,42 +352,4 @@ void CObjectFactory::register_classes	()
 #ifndef NO_SINGLE
 	ADD(smart_cover::object		,CSE_SmartCover					,TEXT2CLSID("SMRTCOVR")			,"smart_cover");
 #endif // #ifndef NO_SINGLE
-
-#ifndef NO_XR_GAME
-	// hack, for dedicated server only
-	// because we do not have scripts
-	// and script functionality is not
-	// needed here
-	if (!g_dedicated_server)
-		return;
-
-	ADD(CElectricBall			,CSE_ALifeItemArtefact			,TEXT2CLSID("SCRPTART")			,"artefact_s");
-	ADD(CTorch					,CSE_ALifeItemTorch				,TEXT2CLSID("TORCH_S")			,"device_torch_s");
-	ADD(CStalkerOutfit			,CSE_ALifeItemCustomOutfit		,TEXT2CLSID("E_STLK")			,"equ_stalker_s");
-	ADD(CScope					,CSE_ALifeItem					,TEXT2CLSID("WP_SCOPE")			,"wpn_scope_s");
-	ADD(CWeaponAK74				,CSE_ALifeItemWeaponMagazinedWGL,TEXT2CLSID("WP_AK74")			,"wpn_ak74_s");
-	ADD(CWeaponLR300			,CSE_ALifeItemWeaponMagazined	,TEXT2CLSID("WP_LR300")			,"wpn_lr300_s");
-	ADD(CWeaponBinoculars		,CSE_ALifeItemWeaponMagazined	,TEXT2CLSID("WP_BINOC")			,"wpn_binocular_s");
-	ADD(CWeaponBM16				,CSE_ALifeItemWeaponShotGun		,TEXT2CLSID("WP_BM16")			,"wpn_bm16_s");
-	ADD(CWeaponGroza			,CSE_ALifeItemWeaponMagazinedWGL,TEXT2CLSID("WP_GROZA")			,"wpn_groza_s");
-	ADD(CWeaponSVD				,CSE_ALifeItemWeaponMagazined	,TEXT2CLSID("WP_SVD")			,"wpn_svd_s");
-	ADD(CWeaponHPSA				,CSE_ALifeItemWeaponMagazined	,TEXT2CLSID("WP_HPSA")			,"wpn_hpsa_s");
-	ADD(CWeaponKnife			,CSE_ALifeItemWeapon			,TEXT2CLSID("WP_KNIFE")			,"wpn_knife_s");
-	ADD(CWeaponPM				,CSE_ALifeItemWeaponMagazined	,TEXT2CLSID("WP_PM")			,"wpn_pm_s");
-	ADD(CWeaponRG6				,CSE_ALifeItemWeaponShotGun		,TEXT2CLSID("WP_RG6")			,"wpn_rg6_s");
-	ADD(CWeaponRPG7				,CSE_ALifeItemWeaponMagazined	,TEXT2CLSID("WP_RPG7")			,"wpn_rpg7_s");
-	ADD(CWeaponShotgun			,CSE_ALifeItemWeaponShotGun		,TEXT2CLSID("WP_SHOTG")			,"wpn_shotgun_s");
-	ADD(CWeaponSVU				,CSE_ALifeItemWeaponMagazined	,TEXT2CLSID("WP_SVU")			,"wpn_svu_s");
-	ADD(CWeaponUSP45			,CSE_ALifeItemWeaponMagazined	,TEXT2CLSID("WP_USP45")			,"wpn_usp45_s");
-	ADD(CWeaponVal				,CSE_ALifeItemWeaponMagazined	,TEXT2CLSID("WP_VAL")			,"wpn_val_s");
-	ADD(CWeaponVintorez			,CSE_ALifeItemWeaponMagazined	,TEXT2CLSID("WP_VINT")			,"wpn_vintorez_s");
-	ADD(CWeaponWalther			,CSE_ALifeItemWeaponMagazined	,TEXT2CLSID("WP_WALTH")			,"wpn_walther_s");
-	ADD(CHairsZone				,CSE_ALifeZoneVisual			,TEXT2CLSID("ZS_BFUZZ")			,"zone_bfuzz_s");
-	ADD(CMosquitoBald			,CSE_ALifeAnomalousZone			,TEXT2CLSID("ZS_MBALD")			,"zone_mbald_s");
-	ADD(CMincer					,CSE_ALifeAnomalousZone			,TEXT2CLSID("ZS_GALAN")			,"zone_galant_s");
-	ADD(CMincer					,CSE_ALifeAnomalousZone			,TEXT2CLSID("ZS_MINCE")			,"zone_mincer_s");
-	ADD(CAmebaZone				,CSE_ALifeZoneVisual			,TEXT2CLSID("ZS_AMEBA")			,"zone_ameba_s");
-	ADD(CNoGravityZone			,CSE_ALifeAnomalousZone			,TEXT2CLSID("ZS_NGRAV")			,"zone_nograv_s");
-	ADD(CSpaceRestrictor		,CSE_ALifeSpaceRestrictor		,TEXT2CLSID("SPC_RS_S")			,"script_restr");
-#endif // NO_XR_GAME
 }

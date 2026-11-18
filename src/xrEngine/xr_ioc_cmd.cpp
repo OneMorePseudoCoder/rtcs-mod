@@ -564,7 +564,7 @@ public:
     }
 
 };
-#ifndef DEDICATED_SERVER
+
 class CCC_soundDevice : public CCC_Token
 {
     typedef CCC_Token inherited;
@@ -600,8 +600,7 @@ public:
         inherited::Save(F);
     }
 };
-#endif
-//-----------------------------------------------------------------------
+
 class CCC_ExclusiveMode : public IConsole_Command
 {
 private:
@@ -770,8 +769,6 @@ void CCC_Register()
     CMD2(CCC_Gamma, "rs_c_gamma", &ps_gamma);
     CMD2(CCC_Gamma, "rs_c_brightness", &ps_brightness);
     CMD2(CCC_Gamma, "rs_c_contrast", &ps_contrast);
-    // CMD4(CCC_Integer, "rs_vb_size", &rsDVB_Size, 32, 4096);
-    // CMD4(CCC_Integer, "rs_ib_size", &rsDIB_Size, 32, 4096);
 
     // Texture manager
     CMD4(CCC_Integer, "texture_lod", &psTextureLOD, 0, 4);
@@ -817,9 +814,7 @@ void CCC_Register()
 
     CMD1(CCC_r2, "renderer");
 
-#ifndef DEDICATED_SERVER
     CMD1(CCC_soundDevice, "snd_device");
-#endif
 
     psSoundOcclusionScale = pSettings->r_float("sound", "occlusion_scale");
     clamp(psSoundOcclusionScale, 0.1f, .5f);

@@ -8,7 +8,6 @@
 
 #include "../xrphysics/PhysicsShell.h"
 #include "entity.h"
-//#include "PSObject.h"
 #include "ParticlesObject.h"
 
 //для вызова статических функций поражения осколками
@@ -26,9 +25,7 @@
 #	include "PHDebug.h"
 #endif
 
-//#include "Physics.h"
 #include "../xrphysics/MathUtils.h"
-//#include "../xrphysics/phvalidevalues.h"
 #include "../xrphysics/iActivationShape.h"
 #include "../xrphysics/iphworld.h"
 #include "game_base_space.h"
@@ -49,19 +46,13 @@ CExplosive::CExplosive(void)
 	m_fFragHit				= 50.0f;
 	m_fUpThrowFactor		= 0.f;
 
-
 	m_eSoundExplode			= ESoundTypes(SOUND_TYPE_WEAPON_SHOOTING);
-
 
 	m_eHitTypeBlast			= ALife::eHitTypeExplosion;
 	m_eHitTypeFrag			= ALife::eHitTypeFireWound;
 
-
 	m_iCurrentParentID		= 0xffff;
 
-//	m_bReadyToExplode		= false;
-//	m_bExploding			= false;
-//	m_bExplodeEventSent		= false;
 	m_explosion_flags.assign(0);
 	m_vExplodeSize.set		(0.001f,0.001f,0.001f);
 
@@ -725,7 +716,8 @@ void CExplosive::ExplodeWaveProcess()
 	m_blasted_objects.erase	(I,m_blasted_objects.end());
 	rq_storage.r_clear		();
 	u16						i = BLASTED_OBJ_PROCESSED_PER_FRAME	;
-	while (m_blasted_objects.size()&&0!=i) {
+	while (m_blasted_objects.size()&&0!=i) 
+	{
 		ExplodeWaveProcessObject	(rq_storage,m_blasted_objects.back());
 		m_blasted_objects.pop_back	();
 		--i;
@@ -736,13 +728,12 @@ void CExplosive::GetExplosionBox(Fvector	&size)
 {
 	size.set(m_vExplodeSize);
 }
+
 void CExplosive::SetExplosionSize(const Fvector	&new_size)
 {
 	m_vExplodeSize.set(new_size);
 	
 }
-
-
 
 void CExplosive::ActivateExplosionBox(const Fvector &size,Fvector &in_out_pos)
 {
@@ -752,13 +743,11 @@ void CExplosive::ActivateExplosionBox(const Fvector &size,Fvector &in_out_pos)
 	ActivateShapeExplosive( self_obj, size, m_vExplodeSize, in_out_pos );
 	if(self_shell&&self_shell->isActive())self_shell->EnableCollision();
 }
+
 void CExplosive::net_Relcase(CObject* O)
 {
-	if (GameID() == eGameIDSingle)
-	{
-		if(O->ID()==m_iCurrentParentID)
-			m_iCurrentParentID=u16(-1);
-	}
+	if (O->ID() == m_iCurrentParentID)
+		m_iCurrentParentID = u16(-1);
 	
 	BLASTED_OBJECTS_I I=std::find(m_blasted_objects.begin(),m_blasted_objects.end(),smart_cast<CPhysicsShellHolder*>(O));
 	if(m_blasted_objects.end()!=I)

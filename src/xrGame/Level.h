@@ -44,11 +44,6 @@ class CFogOfWarMngr;
 class CBulletManager;
 class CMapManager;
 
-namespace file_transfer
-{
-class client_site;
-}
-
 class CLevel :
     public IGame_Level,
     public IPureClient
@@ -308,7 +303,6 @@ public:
 
 public:
     void remove_objects();
-    file_transfer::client_site* m_file_transfer = nullptr;
     compression::ppmd_trained_stream* m_trained_stream = nullptr;
     compression::lzo_dictionary_buffer m_lzo_dictionary;
     // aligned to 16 bytes m_lzo_working_buffer

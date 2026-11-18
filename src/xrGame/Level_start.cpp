@@ -101,12 +101,12 @@ bool CLevel::net_start1				()
 			
 			map_data.m_name				= game_sv_GameState::parse_level_name(m_caServerOptions);
 			
-			if (!g_dedicated_server)
-				g_pGamePersistent->LoadTitle(true, map_data.m_name);
+			g_pGamePersistent->LoadTitle(true, map_data.m_name);
 
 			int							id = pApp->Level_ID(map_data.m_name.c_str(), l_ver.c_str(), true);
 
-			if (id<0) {
+			if (id<0) 
+			{
 				Log						("Can't find level: ",map_data.m_name.c_str());
 				net_start_result_total	= FALSE;
 				return true;
@@ -132,8 +132,7 @@ bool CLevel::net_start2				()
 		}
 		Server->SLS_Default		();
 		map_data.m_name			= Server->level_name(m_caServerOptions);
-		if (!g_dedicated_server)
-			g_pGamePersistent->LoadTitle(true, map_data.m_name);
+		g_pGamePersistent->LoadTitle(true, map_data.m_name);
 	}
 	return true;
 }
@@ -232,13 +231,13 @@ bool CLevel::net_start6				()
 	}else{
 		Msg				("! Failed to start client. Check the connection or level existance.");
 		
-		if (m_connect_server_err==xrServer::ErrConnect&&!psNET_direct_connect && !g_dedicated_server) 
+		if (m_connect_server_err==xrServer::ErrConnect&&!psNET_direct_connect) 
 		{
 			DEL_INSTANCE	(g_pGameLevel);
 			Console->Execute("main_menu on");
 		}
 		else
-		if (!map_data.m_map_loaded && map_data.m_name.size() && m_bConnectResult)	//if (map_data.m_name == "") - level not loaded, see CLevel::net_start_client3
+		if (!map_data.m_map_loaded && map_data.m_name.size() && m_bConnectResult)
 		{
 			LPCSTR level_id_string = NULL;
 			LPCSTR dialog_string = NULL;
@@ -279,11 +278,8 @@ bool CLevel::net_start6				()
 		return true;
 	}
 
-	if	(!g_dedicated_server)
-	{
-		if (CurrentGameUI())
-			CurrentGameUI()->OnConnected();
-	}
+	if (CurrentGameUI())
+		CurrentGameUI()->OnConnected();
 
 	return true;
 }

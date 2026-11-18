@@ -5,8 +5,6 @@
 #include "game_cl_single.h"
 #include "MainMenu.h"
 #include "../xrEngine/x_ray.h"
-#include "file_transfer.h"
-#include "screenshot_server.h"
 #include "../xrNetServer/NET_AuthCheck.h"
 #pragma warning(push)
 #pragma warning(disable:4995)
@@ -48,25 +46,17 @@ xrServer::EConnect xrServer::Connect(shared_str &session_name, GameDescriptionDa
 	string1024				type;
 	R_ASSERT2(xr_strlen(options) <= sizeof(type), "session_name too BIIIGGG!!!");
 	xr_strcpy					(type,options);
-	if (strchr(type,'/'))	*strchr(type,'/') = 0;
+	if (strchr(type,'/'))
+		*strchr(type,'/') = 0;
 	game					= NULL;
 
 	CLASS_ID clsid			= game_GameState::getCLASS_ID(type,true);
 	game					= smart_cast<game_sv_GameState*> (NEW_INSTANCE(clsid));
 	
 	// Options
-	if (0==game)			return ErrConnect;
-//	game->type				= type_id;
-	if (game->Type() != eGameIDSingle)
-	{
-		m_file_transfers	= xr_new<file_transfer::server_site>();
-		initialize_screenshot_proxies();
-		LoadServerInfo();
-		xr_auth_strings_t	tmp_ignore;
-		xr_auth_strings_t	tmp_check;
-		fill_auth_check_params	(tmp_ignore, tmp_check);
-		FS.auth_generate		(tmp_ignore, tmp_check);
-	}
+	if (0==game)
+		return ErrConnect;
+
 #ifdef DEBUG
 	Msg("* Created server_game %s",game->type_name());
 #endif
@@ -80,7 +70,6 @@ xrServer::EConnect xrServer::Connect(shared_str &session_name, GameDescriptionDa
 
 	return IPureServer::Connect(*session_name, game_descr);
 }
-
 
 IClient* xrServer::new_client( SClientConnectData* cl_data )
 {

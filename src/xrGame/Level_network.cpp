@@ -15,13 +15,11 @@
 #include "seniority_hierarchy_holder.h"
 #include "UIGameCustom.h"
 #include "string_table.h"
-#include "file_transfer.h"
 #include "UI/UIGameTutorial.h"
 #include "ui/UIPdaWnd.h"
 #include "../xrNetServer/NET_AuthCheck.h"
 
 #include "../xrphysics/physicscommon.h"
-ENGINE_API bool g_dedicated_server;
 
 const int max_objects_size			= 2*1024;
 const int max_objects_size_in_save	= 8*1024;
@@ -75,14 +73,12 @@ void CLevel::remove_objects	()
 	ph_commander().clear		();
 	ph_commander_scripts().clear();
 
-	if(!g_dedicated_server)
-		space_restriction_manager().clear	();
+	space_restriction_manager().clear	();
 
 	psDeviceFlags.set			(rsDisableObjectsAsCrows, b_stored);
 	g_b_ClearGameCaptions		= true;
 
-	if (!g_dedicated_server)
-		ai().script_engine().collect_all_garbage	();
+	ai().script_engine().collect_all_garbage	();
 
 	stalker_animation_data_storage().clear		();
 	
@@ -92,15 +88,13 @@ void CLevel::remove_objects	()
 	Render->clear_static_wallmarks				();
 
 #ifdef DEBUG
-	if(!g_dedicated_server)
-		if (!client_spawn_manager().registry().empty())
-			client_spawn_manager().dump				();
+	if (!client_spawn_manager().registry().empty())
+		client_spawn_manager().dump				();
 #endif // DEBUG
-	if(!g_dedicated_server)
-	{
-		VERIFY										(client_spawn_manager().registry().empty());
-		client_spawn_manager().clear			();
-	}
+
+	VERIFY										(client_spawn_manager().registry().empty());
+	client_spawn_manager().clear			();
+
 
 	g_pGamePersistent->destroy_particles		(false);
 }
@@ -131,9 +125,6 @@ void CLevel::net_Stop		()
 	bReady						= false;
 	m_bGameConfigStarted		= FALSE;
 
-	if (m_file_transfer)
-		xr_delete(m_file_transfer);
-
 	remove_objects				();
 	
 	//WARNING ! remove_objects() uses this flag, so position of this line must e here ..
@@ -148,60 +139,50 @@ void CLevel::net_Stop		()
 		xr_delete				(Server);
 	}
 
-	if (!g_dedicated_server)
-		ai().script_engine().collect_all_garbage	();
+	ai().script_engine().collect_all_garbage	();
 
 #ifdef DEBUG
 	show_animation_stats		();
 #endif // DEBUG
 }
 
-
 void CLevel::ClientSend()
 {
-	if (GameID() != eGameIDSingle && OnClient())
+	if (OnClient())
 	{
 		if ( !net_HasBandwidth() ) return;
 	};
 
 	NET_Packet				P;
 	u32						start	= 0;
-	//----------- for E3 -----------------------------
-//	if () 
+
+	if (CurrentControlEntity()) 
 	{
-//		if (!(Game().local_player) || Game().local_player->testFlag(GAME_PLAYER_FLAG_VERY_VERY_DEAD)) return;
-		if (CurrentControlEntity()) 
-		{
-			CObject* pObj = CurrentControlEntity();
-			if (!pObj->getDestroy() && pObj->net_Relevant())
-			{				
-				P.w_begin		(M_CL_UPDATE);
-				
+		CObject* pObj = CurrentControlEntity();
+		if (!pObj->getDestroy() && pObj->net_Relevant())
+		{				
+			P.w_begin		(M_CL_UPDATE);
+			
 
-				P.w_u16			(u16(pObj->ID()));
-				P.w_u32			(0);	//reserved place for client's ping
+			P.w_u16			(u16(pObj->ID()));
+			P.w_u32			(0);	//reserved place for client's ping
 
-				pObj->net_Export			(P);
+			pObj->net_Export			(P);
 
-				if (P.B.count>9)				
-				{
-					if (!OnServer())
-						Send	(P, net_flags(FALSE));
-				}				
-			}			
-		}		
-	};
-	if (m_file_transfer)
-	{
-		m_file_transfer->update_transfer();
-		m_file_transfer->stop_obsolete_receivers();
-	}
+			if (P.B.count>9)				
+			{
+				if (!OnServer())
+					Send	(P, net_flags(FALSE));
+			}				
+		}			
+	}		
+
 	if (OnClient()) 
 	{
 		Flush_Send_Buffer();
 		return;
 	}
-	//-------------------------------------------------
+
 	while (1)
 	{
 		P.w_begin						(M_UPDATE);

@@ -5,14 +5,12 @@
 #include "xrServer_Objects_Alife_Monsters.h"
 #include "Level.h"
 
-
 void xrServer::Perform_connect_spawn(CSE_Abstract* E, xrClientData* CL, NET_Packet& P)
 {
 	P.B.count = 0;
 	xr_vector<u16>::iterator it = std::find(conn_spawned_ids.begin(), conn_spawned_ids.end(), E->ID);
 	if(it != conn_spawned_ids.end())
 	{
-//.		Msg("Rejecting redundant SPAWN data [%d]", E->ID);
 		return;
 	}
 	
@@ -20,8 +18,6 @@ void xrServer::Perform_connect_spawn(CSE_Abstract* E, xrClientData* CL, NET_Pack
 	
 	if (E->net_Processed)						return;
 	if (E->s_flags.is(M_SPAWN_OBJECT_PHANTOM))	return;
-
-//.	Msg("Perform connect spawn [%d][%s]", E->ID, E->s_name.c_str());
 
 	// Connectivity order
 	CSE_Abstract* Parent = ID_to_entity	(E->ID_Parent);
@@ -53,11 +49,8 @@ void xrServer::Perform_connect_spawn(CSE_Abstract* E, xrClientData* CL, NET_Pack
 	{
 		E->Spawn_Write	(P, FALSE);
 		E->UPDATE_Write	(P);
-//		CSE_ALifeObject*	object = smart_cast<CSE_ALifeObject*>(E);
-//		VERIFY				(object);
-//		VERIFY				(object->client_data.empty());
 	}
-	//-----------------------------------------------------
+
 	E->s_flags			= save;
 	SendTo				(CL->ID,P,net_flags(TRUE,TRUE));
 	E->net_Processed	= TRUE;
@@ -79,19 +72,9 @@ void xrServer::SendConnectionData(IClient* _CL)
 	xrS_entities::iterator	I=entities.begin(),E=entities.end();
 	for (; I!=E; ++I)						I->second->net_Processed	= FALSE;
 	for (I=entities.begin(); I!=E; ++I)		Perform_connect_spawn		(I->second,CL,P);
-
+	
 	// Start to send server logo and rules
 	SendServerInfoToClient			(CL->ID);
-
-/*
-	Msg("--- Our sended SPAWN IDs:");
-	xr_vector<u16>::iterator it = conn_spawned_ids.begin();
-	for (; it != conn_spawned_ids.end(); ++it)
-	{
-		Msg("%d", *it);
-	}
-	Msg("---- Our sended SPAWN END");
-*/
 };
 
 void xrServer::OnCL_Connected		(IClient* _CL)

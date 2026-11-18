@@ -3,7 +3,6 @@
 #define CLSID_OBJECT_ACTOR			MK_CLSID('O','_','A','C','T','O','R',' ')
 #define CLSID_OBJECT_HLAMP			MK_CLSID('O','_','H','L','A','M','P',' ')
 #define CLSID_ENTITY				MK_CLSID('E','N','T','I','T','Y',' ',' ')
-#define CLSID_SPECTATOR				MK_CLSID('S','P','E','C','T',' ',' ',' ')
 #define CLSID_OBJECT_PROJECTOR		MK_CLSID('O','_','S','E','A','R','C','H')
 
 // all the monsters
@@ -150,7 +149,6 @@
 #define CLSID_Z_DEAD  				MK_CLSID('Z','_','D','E','A','D',' ',' ')
 #define CLSID_LEVEL_CHANGER			MK_CLSID('L','V','L','C','H','N','G','R')
 #define CLSID_SCRIPT_ZONE			MK_CLSID('S','C','R','I','P','T','Z','N')
-#define CLSID_Z_TEAM_BASE  			MK_CLSID('Z','_','T','E','A','M','B','S')
 #define CLSID_Z_TORRID  			MK_CLSID('Z','_','T','O','R','R','I','D')
 #define CLSID_SPACE_RESTRICTOR 		MK_CLSID('S','P','A','C','E','_','R','S')
 #define CLSID_SMART_ZONE			MK_CLSID('S','M','R','T','Z','O','N','E')

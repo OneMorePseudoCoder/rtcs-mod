@@ -8,7 +8,6 @@
 #include "stdafx.h"
 #include "igame_level.h"
 #include "igame_persistent.h"
-#include "dedicated_server_only.h"
 #include "no_single.h"
 #include "../xrNetServer/NET_AuthCheck.h"
 
@@ -58,19 +57,15 @@ static int start_month = 2; // January
 static int start_year = 2019; // 1999
 
 // binary hash, mainly for copy-protection
-
-#ifndef DEDICATED_SERVER
-
 #include "md5.h"
 #include <ctype.h>
 
-//#include <wincodec.h>
 #include <thread>
 
 #define DEFAULT_MODULE_HASH "3CAABCFCFF6F3A810019C6A72180F166"
 static char szEngineHash[33] = DEFAULT_MODULE_HASH;
 
-PROTECT_API char* ComputeModuleHash(char* pszHash)
+char* ComputeModuleHash(char* pszHash)
 {
     char szModuleFileName[MAX_PATH];
     HANDLE hModuleHandle = NULL, hFileMapping = NULL;
@@ -121,7 +116,6 @@ PROTECT_API char* ComputeModuleHash(char* pszHash)
 
     return pszHash;
 }
-#endif // DEDICATED_SERVER
 
 void compute_build_id()
 {
@@ -219,11 +213,9 @@ void InitConfig(T& config, pcstr name, bool fatal = true,
 		make_string("Cannot find file %s.\nReinstalling application may fix this problem.", fname));
 }
 
-PROTECT_API void InitSettings()
+void InitSettings()
 {
-#ifndef DEDICATED_SERVER
     Msg("EH: %s\n", ComputeModuleHash(szEngineHash));
-#endif // DEDICATED_SERVER
 
     string_path fname;
     FS.update_path(fname, "$game_config$", "system.ltx");
@@ -241,18 +233,11 @@ PROTECT_API void InitSettings()
 	InitConfig(pFFSettings, "stcop_config.ltx", false, true, true, false);
 	InitConfig(pGameIni, "game.ltx");
 }
-PROTECT_API void InitConsole()
+
+void InitConsole()
 {
-#ifdef DEDICATED_SERVER
-    {
-        Console = xr_new<CTextConsole>();
-    }
-#else
-    // else
-    {
-        Console = xr_new<CConsole>();
-    }
-#endif
+    Console = xr_new<CConsole>();
+
     Console->Initialize();
 
     xr_strcpy(Console->ConfigFile, "user.ltx");
@@ -264,23 +249,23 @@ PROTECT_API void InitConsole()
     }
 }
 
-PROTECT_API void InitInput()
+void InitInput()
 {
     BOOL bCaptureInput = !strstr(Core.Params, "-i");
-
     pInput = xr_new<CInput>(bCaptureInput);
 }
+
 void destroyInput()
 {
     xr_delete(pInput);
 }
 
-PROTECT_API void InitSound1()
+void InitSound1()
 {
     CSound_manager_interface::_create(0);
 }
 
-PROTECT_API void InitSound2()
+void InitSound2()
 {
     CSound_manager_interface::_create(1);
 }
@@ -330,6 +315,7 @@ void slowdownthread(void*)
         if (0 == pApp) return;
     }
 }
+
 void CheckPrivilegySlowdown()
 {
 #ifdef DEBUG
@@ -686,19 +672,13 @@ struct damn_keys_filter
 
 //#define RUSSIAN_BUILD
 
-ENGINE_API bool g_dedicated_server = false;
-
-#ifndef DEDICATED_SERVER
 // forward declaration for Parental Control checks
 BOOL IsPCAccessAllowed();
-#endif // DEDICATED_SERVER
 
 int APIENTRY WinMain_impl(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* lpCmdLine, int nCmdShow)
 {
     Debug._initialize(false);
     
-#ifndef DEDICATED_SERVER
-
     // Check for another instance
 #ifdef NO_MULTI_INSTANCES
 #define STALKER_PRESENCE_MUTEX "Local\\STALKER-COP"
@@ -720,16 +700,13 @@ int APIENTRY WinMain_impl(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* lp
         return 1;
     }
 #endif
-#else // DEDICATED_SERVER
-    g_dedicated_server = true;
-#endif // DEDICATED_SERVER
+
     RegisterWindowClass(hInstance);
 
     logoWindow = ShowSplash(hInstance, nCmdShow);
 
     SendMessage(logoWindow, WM_DESTROY, 0, 0);
 
-   
     g_bIntroFinished = TRUE;
 
     g_sLaunchOnExit_app[0] = NULL;
@@ -755,11 +732,9 @@ int APIENTRY WinMain_impl(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* lp
         xr_strcpy(Core.CompName, sizeof(Core.CompName), "Computer");
     }
 
-#ifndef DEDICATED_SERVER
     {
         damn_keys_filter filter;
         (void)filter;
-#endif // DEDICATED_SERVER
 
         FPU::m24r();
         InitEngine();
@@ -799,7 +774,6 @@ int APIENTRY WinMain_impl(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* lp
                 return 0;
         };
 
-#ifndef DEDICATED_SERVER
         if (strstr(Core.Params, "-r2a"))
             Console->Execute("renderer renderer_r2a");
         else if (strstr(Core.Params, "-r2"))
@@ -810,9 +784,7 @@ int APIENTRY WinMain_impl(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* lp
             pTmp->Execute(Console->ConfigFile);
             xr_delete(pTmp);
         }
-#else
-        Console->Execute("renderer renderer_r1");
-#endif
+
         Engine.External.Initialize();
         Console->Execute("stat_memory");
 
@@ -831,16 +803,13 @@ int APIENTRY WinMain_impl(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* lp
             //We use CreateProcess to setup working folder
             char const* temp_wf = (xr_strlen(g_sLaunchWorkingFolder) > 0) ? g_sLaunchWorkingFolder : NULL;
             CreateProcess(g_sLaunchOnExit_app, g_sLaunchOnExit_params, NULL, NULL, FALSE, 0, NULL, temp_wf, &si, &pi);
-
         }
-#ifndef DEDICATED_SERVER
 #ifdef NO_MULTI_INSTANCES
         // Delete application presence mutex
         CloseHandle(hCheckPresenceMutex);
 #endif
     }
     // here damn_keys_filter class instanse will be destroyed
-#endif // DEDICATED_SERVER
 
     return 0;
 }
@@ -1085,7 +1054,7 @@ void CApplication::OnEvent(EVENT E, u64 P1, u64 P2)
         //-----------------------------------------------------------
 
         pApp->LoadBegin();
-        g_pGamePersistent->Start("");//server_options.c_str()); - no prefetch !
+        g_pGamePersistent->Start("");
         g_pGameLevel->net_StartPlayDemo();
         pApp->LoadEnd();
 
@@ -1103,11 +1072,10 @@ void CApplication::LoadBegin()
     {
         g_appLoaded = FALSE;
 
-#ifndef DEDICATED_SERVER
         _InitializeFont(pFontSystem, "ui_font_letterica18_russian", 0);
 
         m_pRender->LoadBegin();
-#endif
+
         phase_timer.Start();
         load_stage = 0;
     }
@@ -1132,7 +1100,7 @@ void CApplication::destroy_loading_shaders()
 
 #include "Render.h"
 
-PROTECT_API void CApplication::LoadDraw()
+void CApplication::LoadDraw()
 {
     if (g_appLoaded)
 		return;
@@ -1144,12 +1112,10 @@ PROTECT_API void CApplication::LoadDraw()
 	Render->currentViewPort = MAIN_VIEWPORT;
 	Render->needPresenting = true;
 
-    if (!Device.Begin()) return;
+    if (!Device.Begin())
+		return;
 
-    if (g_dedicated_server)
-        Console->OnRender();
-    else
-        load_draw_internal();
+    load_draw_internal();
 
     Device.End();
 }
@@ -1160,6 +1126,7 @@ void CApplication::LoadTitleInt(LPCSTR str1, LPCSTR str2, LPCSTR str3)
     xr_strcpy(ls_tip_number, str2);
     xr_strcpy(ls_tip, str3);
 }
+
 void CApplication::LoadStage()
 {
     load_stage++;
@@ -1344,7 +1311,6 @@ void CApplication::LoadAllArchives()
     }
 }
 
-#ifndef DEDICATED_SERVER
 // Parential control for Vista and upper
 typedef BOOL(*PCCPROC)(CHAR*);
 
@@ -1393,10 +1359,10 @@ BOOL IsPCAccessAllowed()
 
     return bAllowed;
 }
-#endif // DEDICATED_SERVER
 
 //launcher stuff----------------------------
-extern "C" {
+extern "C" 
+{
     typedef int __cdecl LauncherFunc(int);
 }
 HMODULE hLauncher = NULL;

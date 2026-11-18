@@ -8,7 +8,6 @@
 #include "xrServer_Objects_ALife_All.h"
 #include "level.h"
 #include "game_cl_base.h"
-#include "game_cl_base_weapon_usage_statistic.h"
 #include "ai_space.h"
 #include "../xrEngine/IGame_Persistent.h"
 #include "string_table.h"
@@ -16,9 +15,6 @@
 
 #include "../xrEngine/XR_IOConsole.h"
 #include "ui/UIInventoryUtilities.h"
-#include "file_transfer.h"
-#include "screenshot_server.h"
-#include "xrServer_info.h"
 #include <functional>
 
 using namespace std::placeholders;
@@ -30,8 +26,7 @@ using namespace std::placeholders;
 
 u32 g_sv_traffic_optimization_level = eto_none;
 
-xrClientData::xrClientData	() :
-	IClient(Device.GetTimerGlobal())
+xrClientData::xrClientData() : IClient(Device.GetTimerGlobal())
 {
 	ps = NULL;
 	Clear		();
@@ -48,16 +43,13 @@ void	xrClientData::Clear()
 	m_admin_rights.m_has_admin_rights		= FALSE;
 };
 
-
 xrClientData::~xrClientData()
 {
 	xr_delete(ps);
 }
 
-
-xrServer::xrServer() : IPureServer(Device.GetTimerGlobal(), g_dedicated_server)
+xrServer::xrServer() : IPureServer(Device.GetTimerGlobal())
 {
-	m_file_transfers	= NULL;
 	m_aDelayedPackets.clear();
 	m_server_logo		= NULL;
 	m_server_rules		= NULL;
@@ -82,7 +74,6 @@ xrServer::~xrServer()
 	}
 	m_aDelayedPackets.clear();
 	entities.clear();
-	delete_data(m_info_uploaders);
 	xr_delete(m_server_logo);
 	xr_delete(m_server_rules);
 }
@@ -91,7 +82,6 @@ xrServer::~xrServer()
 
 CSE_Abstract*	xrServer::ID_to_entity		(u16 ID)
 {
-	// #pragma todo("??? to all : ID_to_entity - must be replaced to 'game->entity_from_eid()'")	
 	if (0xffff==ID)				return 0;
 	xrS_entities::iterator	I	= entities.find	(ID);
 	if (entities.end()!=I)		return I->second;
@@ -137,9 +127,6 @@ IClient*	xrServer::client_Find_Get	(ClientID ID)
 
 void		xrServer::client_Destroy	(IClient* C)
 {
-	// Delete assosiated entity
-	// xrClientData*	D = (xrClientData*)C;
-	// CSE_Abstract* E = D->owner;
 	IClient* alife_client = net_players.FindAndEraseClient(
 		std::bind(std::equal_to<IClient*>(), C, _1)
 	);
@@ -393,10 +380,6 @@ u32 xrServer::OnDelayedMessage	(NET_Packet& P, ClientID sender)			// Non-Zero me
 				SendTo				(sender,P_answ,net_flags(TRUE,TRUE));
 			}
 		}break;
-		case M_FILE_TRANSFER:
-		{
-			m_file_transfers->on_message(&P, sender);
-		}break;
 	}
 	VERIFY							(verify_entities());
 
@@ -615,10 +598,6 @@ u32 xrServer::OnMessage	(NET_Packet& P, ClientID sender)			// Non-Zero means bro
 	case M_BATTLEYE:
 		{
 		}break;
-	case M_FILE_TRANSFER:
-		{
-			AddDelayedPacket(P, sender);
-		}break;
 	case M_SECURE_KEY_SYNC:
 		{
 			PerformSecretKeysSyncAck(CL, P);
@@ -776,8 +755,7 @@ void			xrServer::Server_Client_Check	( IClient* CL )
 
 bool		xrServer::OnCL_QueryHost		() 
 {
-	if (game->Type() == eGameIDSingle) return false;
-	return (GetClientsCount() != 0); 
+	return false;
 };
 
 CSE_Abstract*	xrServer::GetEntity			(u32 Num)
@@ -1007,55 +985,10 @@ void xrServer::KickCheaters			()
 }
 
 void xrServer::MakeScreenshot(ClientID const & admin_id, ClientID const & cheater_id)
-{
-	if ((cheater_id == SV_Client->ID) && g_dedicated_server)
-	{
-		return;
-	}
-	for (int i = 0; i < sizeof(m_screenshot_proxies)/sizeof(clientdata_proxy*); ++i)
-	{
-		if (!m_screenshot_proxies[i]->is_active())
-		{
-			m_screenshot_proxies[i]->make_screenshot(admin_id, cheater_id);
-			Msg("* admin [%d] is making screeshot of client [%d]", admin_id, cheater_id);
-			return;
-		}
-	}
-	Msg("! ERROR: SV: not enough file transfer proxies for downloading screenshot, please try later ...");
-}
+{}
+
 void xrServer::MakeConfigDump(ClientID const & admin_id, ClientID const & cheater_id)
-{
-	if ((cheater_id == SV_Client->ID) && g_dedicated_server)
-	{
-		return;
-	}
-	for (int i = 0; i < sizeof(m_screenshot_proxies)/sizeof(clientdata_proxy*); ++i)
-	{
-		if (!m_screenshot_proxies[i]->is_active())
-		{
-			m_screenshot_proxies[i]->make_config_dump(admin_id, cheater_id);
-			Msg("* admin [%d] is making config dump of client [%d]", admin_id, cheater_id);
-			return;
-		}
-	}
-	Msg("! ERROR: SV: not enough file transfer proxies for downloading file, please try later ...");
-}
-
-
-void xrServer::initialize_screenshot_proxies()
-{
-	for (int i = 0; i < sizeof(m_screenshot_proxies)/sizeof(clientdata_proxy*); ++i)
-	{
-		m_screenshot_proxies[i] = xr_new<clientdata_proxy>(m_file_transfers);
-	}
-}
-void xrServer::deinitialize_screenshot_proxies()
-{
-	for (int i = 0; i < sizeof(m_screenshot_proxies)/sizeof(clientdata_proxy*); ++i)
-	{
-		xr_delete(m_screenshot_proxies[i]);
-	}
-}
+{}
 
 struct PlayerInfoWriter
 {
@@ -1081,4 +1014,10 @@ void xrServer::SendPlayersInfo(ClientID const & to_client)
 	tmp_functor.dest	= &tmp_packet;
 	ForEachClientDo		(tmp_functor);
 	SendTo				(to_client, tmp_packet, net_flags(TRUE, TRUE));
+}
+
+void xrServer::SendServerInfoToClient(ClientID const & new_client) //WARNING ! this function is thread unsafe !!!
+{
+	SendConfigFinished(new_client);
+	return;
 }

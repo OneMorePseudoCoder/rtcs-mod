@@ -102,12 +102,10 @@ bool IGame_Level::Load(u32 dwNum)
     // g_pGamePersistent->LoadTitle ("st_loading_cform");
     g_pGamePersistent->LoadTitle();
     ObjectSpace.Load(build_callback);
-    //Sound->set_geometry_occ ( &Static );
     Sound->set_geometry_occ(ObjectSpace.GetStaticModel());
     Sound->set_handler(_sound_event);
 
     pApp->LoadSwitch();
-
 
     // HUD + Environment
     if (!g_hud)
@@ -115,22 +113,18 @@ bool IGame_Level::Load(u32 dwNum)
 
     // Render-level Load
     Render->level_Load(LL_Stream);
-    // tscreate.FrameEnd ();
-    // Msg ("* S-CREATE: %f ms, %d times",tscreate.result,tscreate.count);
 
     // Objects
     g_pGamePersistent->Environment().mods_load();
     R_ASSERT(Load_GameSpecific_Before());
     Objects.Load();
-    //. ANDY R_ASSERT (Load_GameSpecific_After ());
 
     // Done
     FS.r_close(LL_Stream);
     bReady = true;
-    if (!g_dedicated_server) IR_Capture();
-#ifndef DEDICATED_SERVER
+	IR_Capture();
+
     Device.seqRender.Add (this);
-#endif
 
     Device.seqFrame.Add(this);
 
@@ -140,9 +134,6 @@ bool IGame_Level::Load(u32 dwNum)
 int psNET_DedicatedSleep = 5;
 void IGame_Level::OnRender()
 {
-#ifndef DEDICATED_SERVER
-    // if (_abs(Device.fTimeDelta)<EPS_S) return;
-
 #ifdef _GPA_ENABLED
     TAL_ID rtID = TAL_MakeID( 1 , Core.dwFrame , 0);
     TAL_CreateID( rtID );
@@ -152,31 +143,16 @@ void IGame_Level::OnRender()
 #endif // _GPA_ENABLED
 
     // Level render, only when no client output required
-    if (!g_dedicated_server)
-    {
-        Render->Calculate ();
-        Render->Render ();
-    }
-    else
-    {
-        Sleep (psNET_DedicatedSleep);
-    }
+    Render->Calculate ();
+    Render->Render ();
 
 #ifdef _GPA_ENABLED
     TAL_RetireID( rtID );
 #endif // _GPA_ENABLED
-
-    // Font
-    // pApp->pFontSystem->SetSizeI(0.023f);
-    // pApp->pFontSystem->OnRender ();
-#endif
 }
 
 void IGame_Level::OnFrame()
 {
-    // Log ("- level:on-frame: ",u32(Device.dwFrame));
-    // if (_abs(Device.fTimeDelta)<EPS_S) return;
-
     // Update all objects
     VERIFY(bReady);
     Objects.Update(false);
@@ -208,9 +184,7 @@ void CServerInfo::AddItem(LPCSTR name_, LPCSTR value_, u32 color_)
 void CServerInfo::AddItem(shared_str& name_, LPCSTR value_, u32 color_)
 {
     SItem_ServerInfo it;
-    // shared_str s_name = CStringTable().translate( name_ );
 
-    // xr_strcpy( it.name, s_name.c_str() );
     xr_strcpy(it.name, name_.c_str());
     xr_strcat(it.name, " = ");
     xr_strcat(it.name, value_);

@@ -10,13 +10,11 @@
 #include "game_base_space.h"
 #include "level.h"
 #include "ParticlesObject.h"
-#include "game_base_space.h"
 #include "stalker_animation_data_storage.h"
 #include "stalker_velocity_holder.h"
 
 #include "ActorEffector.h"
 #include "actor.h"
-#include "spectator.h"
 
 #include "UI/UItextureMaster.h"
 
@@ -62,12 +60,7 @@ CGamePersistent::CGamePersistent(void)
 	m_frame_counter				= 0;
 	m_last_stats_frame			= u32(-2);
 #endif
-	// 
-	//dSetAllocHandler			(ode_alloc		);
-	//dSetReallocHandler			(ode_realloc	);
-	//dSetFreeHandler				(ode_free		);
 
-	// 
 	BOOL	bDemoMode	= (0!=strstr(Core.Params,"-demomode "));
 	if (bDemoMode)
 	{
@@ -201,11 +194,7 @@ void CGamePersistent::UpdateGameType			()
 
 	m_game_params.m_e_game_type = ParseStringToGameType(m_game_params.m_game_type);
 
-
-	if (m_game_params.m_e_game_type == eGameIDSingle)
-		g_current_keygroup = _sp;
-	else
-		g_current_keygroup = _mp;
+	g_current_keygroup = _sp;
 }
 
 void CGamePersistent::OnGameEnd	()
@@ -218,7 +207,7 @@ void CGamePersistent::OnGameEnd	()
 
 void CGamePersistent::WeathersUpdate()
 {
-	if (g_pGameLevel && !g_dedicated_server)
+	if (g_pGameLevel)
 	{
 		CActor* actor				= smart_cast<CActor*>(Level().CurrentViewEntity());
 		BOOL bIndoor				= TRUE;
@@ -400,7 +389,7 @@ void CGamePersistent::start_logo_intro()
 	if(Device.dwPrecacheFrame==0)
 	{
 		m_intro_event.bind		(this, &CGamePersistent::update_logo_intro);
-		if (!g_dedicated_server && 0==xr_strlen(m_game_params.m_game_or_spawn) && NULL==g_pGameLevel)
+		if (0==xr_strlen(m_game_params.m_game_or_spawn) && NULL==g_pGameLevel)
 		{
 			VERIFY				(NULL==m_intro);
 			m_intro				= xr_new<CUISequencer>();
@@ -413,14 +402,14 @@ void CGamePersistent::start_logo_intro()
 
 void CGamePersistent::update_logo_intro()
 {
-	if(m_intro && (false==m_intro->IsActive()))
+	if (m_intro && (false==m_intro->IsActive()))
 	{
 		m_intro_event			= 0;
 		xr_delete				(m_intro);
 		Msg("intro_delete ::update_logo_intro");
 		Console->Execute		("main_menu on");
-	}else
-	if(!m_intro)
+	}
+	else if (!m_intro)
 	{
 		m_intro_event			= 0;
 	}
@@ -429,13 +418,9 @@ void CGamePersistent::update_logo_intro()
 extern int g_keypress_on_start;
 void CGamePersistent::game_loaded()
 {
-	if(Device.dwPrecacheFrame<=2)
+	if (Device.dwPrecacheFrame<=2)
 	{
-		if(	g_pGameLevel							&&
-			g_pGameLevel->bReady					&&
-			(allow_intro() && g_keypress_on_start)	&&
-			load_screen_renderer.b_need_user_input	&& 
-			m_game_params.m_e_game_type == eGameIDSingle)
+		if (g_pGameLevel && g_pGameLevel->bReady && (allow_intro() && g_keypress_on_start) && load_screen_renderer.b_need_user_input)
 		{
 			VERIFY				(NULL==m_intro);
 			m_intro				= xr_new<CUISequencer>();
@@ -516,9 +501,9 @@ void CGamePersistent::OnFrame	()
 #ifdef DEBUG
 	++m_frame_counter;
 #endif
-	if (!g_dedicated_server && !m_intro_event.empty())	m_intro_event();
+	if (!m_intro_event.empty())	m_intro_event();
 	
-	if(!g_dedicated_server && Device.dwPrecacheFrame==0 && !m_intro && m_intro_event.empty())
+	if(Device.dwPrecacheFrame==0 && !m_intro && m_intro_event.empty())
 		load_screen_renderer.stop();
 
 	if( !m_pMainMenu->IsActive() )
@@ -687,7 +672,6 @@ void CGamePersistent::Statistics	(CGameFont* F)
 #ifdef DEBUG
 #	ifndef _EDITOR
 		m_last_stats_frame		= m_frame_counter;
-		//profiler().show_stats	(F,!!psAI_Flags.test(aiStats));
 #	endif
 #endif
 }
@@ -699,41 +683,23 @@ float CGamePersistent::MtlTransparent(u32 mtl_idx)
 static BOOL bRestorePause	= FALSE;
 static BOOL bEntryFlag		= TRUE;
 
-void CGamePersistent::OnAppActivate		()
+void CGamePersistent::OnAppActivate()
 {
-	bool bIsMP = (g_pGameLevel && Level().game && GameID() != eGameIDSingle);
-	bIsMP		&= !Device.Paused();
-
-	if( !bIsMP )
-	{
-		Device.Pause			(FALSE, !bRestorePause, TRUE, "CGP::OnAppActivate");
-	}else
-	{
-		Device.Pause			(FALSE, TRUE, TRUE, "CGP::OnAppActivate MP");
-	}
-
+	Device.Pause(FALSE, !bRestorePause, TRUE, "CGP::OnAppActivate");
 	bEntryFlag = TRUE;
 }
 
-void CGamePersistent::OnAppDeactivate	()
+void CGamePersistent::OnAppDeactivate()
 {
-	if(!bEntryFlag) return;
+	if (!bEntryFlag)
+		return;
 
-	bool bIsMP = (g_pGameLevel && Level().game && GameID() != eGameIDSingle);
+	bRestorePause = Device.Paused();
 
-	bRestorePause = FALSE;
+	Device.Pause(TRUE, TRUE, TRUE, "CGP::OnAppDeactivate");
 
-	if ( !bIsMP )
-	{
-		bRestorePause			= Device.Paused();
-		Device.Pause			(TRUE, TRUE, TRUE, "CGP::OnAppDeactivate");
-	}else
-	{
-		Device.Pause			(TRUE, FALSE, TRUE, "CGP::OnAppDeactivate MP");
-	}
 	bEntryFlag = FALSE;
 }
-
 
 bool CGamePersistent::OnRenderPPUI_query()
 {
@@ -753,6 +719,7 @@ void CGamePersistent::OnRenderPPUI_PP()
 {
 	MainMenu()->OnRenderPPUI_PP();
 }
+
 #include "string_table.h"
 #include "../xrEngine/x_ray.h"
 void CGamePersistent::LoadTitle(bool change_tip, shared_str map_name)

@@ -11,11 +11,10 @@
 
 struct SLuaWpnParams
 {
-	luabind::functor<float>		m_functorRPM;
-	luabind::functor<float>		m_functorAccuracy;
-	luabind::functor<float>		m_functorDamage;
-	luabind::functor<float>		m_functorDamageMP;
-	luabind::functor<float>		m_functorHandling;
+	luabind::functor<float> m_functorRPM;
+	luabind::functor<float> m_functorAccuracy;
+	luabind::functor<float> m_functorDamage;
+	luabind::functor<float> m_functorHandling;
 
 	SLuaWpnParams();
 	~SLuaWpnParams();
@@ -23,12 +22,15 @@ struct SLuaWpnParams
 
 SLuaWpnParams::SLuaWpnParams()
 {
-	bool	functor_exists;
-	functor_exists	= ai().script_engine().functor("ui_wpn_params.GetRPM",		m_functorRPM);		VERIFY(functor_exists);
-	functor_exists	= ai().script_engine().functor("ui_wpn_params.GetDamage",	m_functorDamage);	VERIFY(functor_exists);
-	functor_exists	= ai().script_engine().functor("ui_wpn_params.GetDamageMP", m_functorDamageMP);	VERIFY(functor_exists);
-	functor_exists	= ai().script_engine().functor("ui_wpn_params.GetHandling", m_functorHandling);	VERIFY(functor_exists);
-	functor_exists	= ai().script_engine().functor("ui_wpn_params.GetAccuracy", m_functorAccuracy);	VERIFY(functor_exists);
+	bool functor_exists;
+	functor_exists = ai().script_engine().functor("ui_wpn_params.GetRPM", m_functorRPM);
+	VERIFY(functor_exists);
+	functor_exists = ai().script_engine().functor("ui_wpn_params.GetDamage", m_functorDamage);
+	VERIFY(functor_exists);
+	functor_exists = ai().script_engine().functor("ui_wpn_params.GetHandling", m_functorHandling);
+	VERIFY(functor_exists);
+	functor_exists = ai().script_engine().functor("ui_wpn_params.GetAccuracy", m_functorAccuracy);
+	VERIFY(functor_exists);
 }
 
 SLuaWpnParams::~SLuaWpnParams()
@@ -140,9 +142,7 @@ void CUIWpnParams::SetInfo( CInventoryItem* slot_wpn, CInventoryItem& cur_wpn )
 	float cur_rpm    = iFloor(g_lua_wpn_params->m_functorRPM( cur_section, str_upgrades )*53.0f)/53.0f;
 	float cur_accur  = iFloor(g_lua_wpn_params->m_functorAccuracy( cur_section, str_upgrades )*53.0f)/53.0f;
 	float cur_hand   = iFloor(g_lua_wpn_params->m_functorHandling( cur_section, str_upgrades )*53.0f)/53.0f;
-	float cur_damage = ( GameID() == eGameIDSingle ) ?
-		iFloor(g_lua_wpn_params->m_functorDamage( cur_section, str_upgrades )*53.0f)/53.0f
-		: iFloor(g_lua_wpn_params->m_functorDamageMP( cur_section, str_upgrades )*53.0f)/53.0f;
+	float cur_damage = iFloor(g_lua_wpn_params->m_functorDamage( cur_section, str_upgrades )*53.0f)/53.0f;
 
 	float slot_rpm    = cur_rpm;
 	float slot_accur  = cur_accur;
@@ -158,9 +158,7 @@ void CUIWpnParams::SetInfo( CInventoryItem* slot_wpn, CInventoryItem& cur_wpn )
 		slot_rpm    = iFloor(g_lua_wpn_params->m_functorRPM( slot_section, str_upgrades )*53.0f)/53.0f;
 		slot_accur  = iFloor(g_lua_wpn_params->m_functorAccuracy( slot_section, str_upgrades )*53.0f)/53.0f;
 		slot_hand   = iFloor(g_lua_wpn_params->m_functorHandling( slot_section, str_upgrades )*53.0f)/53.0f;
-		slot_damage = ( GameID() == eGameIDSingle ) ?
-			iFloor(g_lua_wpn_params->m_functorDamage( slot_section, str_upgrades )*53.0f)/53.0f
-			: iFloor(g_lua_wpn_params->m_functorDamageMP( slot_section, str_upgrades )*53.0f)/53.0f;
+		slot_damage = iFloor(g_lua_wpn_params->m_functorDamage( slot_section, str_upgrades )*53.0f)/53.0f;
 
 		string128 str_value;
 		float adj_value = cur_accur - slot_accur;

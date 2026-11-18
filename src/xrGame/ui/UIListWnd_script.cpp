@@ -100,17 +100,6 @@ void CUIListWnd::script_register(lua_State *L)
 		.def("SetMapPic",				&CUIMapList::SetMapPic)
 		.def("SetMapInfo",				&CUIMapList::SetMapInfo)
 		.def("ClearList",				&CUIMapList::ClearList)
-		.def("IsEmpty",					&CUIMapList::IsEmpty),
-		
-		class_<enum_exporter<EGameIDs> >("GAME_TYPE")
-		.enum_("gametype")
-		[
-			value("GAME_UNKNOWN",			int(-1)),
-			value("eGameIDDeathmatch",		int(eGameIDDeathmatch)),
-			value("eGameIDTeamDeathmatch",	int(eGameIDTeamDeathmatch)),
-			value("eGameIDArtefactHunt",	int(eGameIDArtefactHunt)),
-			value("eGameIDCaptureTheArtefact",int(eGameIDCaptureTheArtefact))
-		]
-		
+		.def("IsEmpty",					&CUIMapList::IsEmpty)
 	];
 }

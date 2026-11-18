@@ -1062,10 +1062,6 @@
     <ClInclude Include="ExplosiveRocket.h" />
     <ClInclude Include="F1.h" />
     <ClInclude Include="FadedBall.h" />
-    <ClInclude Include="filereceiver_node.h" />
-    <ClInclude Include="filetransfer_common.h" />
-    <ClInclude Include="filetransfer_node.h" />
-    <ClInclude Include="file_transfer.h" />
     <ClInclude Include="fire_disp_controller.h" />
     <ClInclude Include="flare.h" />
     <ClInclude Include="FoodItem.h" />
@@ -1078,10 +1074,7 @@
     <ClInclude Include="GameTaskDefs.h" />
     <ClInclude Include="GametaskManager.h" />
     <ClInclude Include="game_base.h" />
-    <ClInclude Include="game_base_kill_type.h" />
-    <ClInclude Include="game_base_menu_events.h" />
     <ClInclude Include="game_cl_base.h" />
-    <ClInclude Include="game_cl_base_weapon_usage_statistic.h" />
     <ClInclude Include="game_cl_single.h" />
     <ClInclude Include="game_graph.h" />
     <ClInclude Include="game_graph_inline.h" />
@@ -1385,7 +1378,6 @@
     <ClInclude Include="saved_game_wrapper_inline.h" />
     <ClInclude Include="ScientificOutfit.h" />
     <ClInclude Include="Scope.h" />
-    <ClInclude Include="screenshot_server.h" />
     <ClInclude Include="ScriptXMLInit.h" />
     <ClInclude Include="script_abstract_action.h" />
     <ClInclude Include="script_abstract_action_inline.h" />
@@ -1520,8 +1512,6 @@
     <ClInclude Include="space_restriction_shape_inline.h" />
     <ClInclude Include="space_restrictor.h" />
     <ClInclude Include="space_restrictor_inline.h" />
-    <ClInclude Include="Spectator.h" />
-    <ClInclude Include="spectator_camera_first_eye.h" />
     <ClInclude Include="squad_hierarchy_holder.h" />
     <ClInclude Include="squad_hierarchy_holder_inline.h" />
     <ClInclude Include="StalkerOutfit.h" />
@@ -1607,7 +1597,6 @@
     <ClInclude Include="step_manager_defs.h" />
     <ClInclude Include="string_table.h" />
     <ClInclude Include="string_table_defs.h" />
-    <ClInclude Include="team_base_zone.h" />
     <ClInclude Include="team_hierarchy_holder.h" />
     <ClInclude Include="team_hierarchy_holder_inline.h" />
     <ClInclude Include="TeleWhirlwind.h" />
@@ -1790,7 +1779,6 @@
     <ClInclude Include="xrGameSpyServer.h" />
     <ClInclude Include="xrServer.h" />
     <ClInclude Include="xrServerMapSync.h" />
-    <ClInclude Include="xrServer_info.h" />
     <ClInclude Include="xrServer_svclient_validation.h" />
     <ClInclude Include="xrServer_updates_compressor.h" />
     <ClInclude Include="xr_dsa_signer.h" />
@@ -2556,9 +2544,6 @@
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
     <ClCompile Include="FadedBall.cpp" />
-    <ClCompile Include="filereceiver_node.cpp" />
-    <ClCompile Include="filetransfer_node.cpp" />
-    <ClCompile Include="file_transfer.cpp" />
     <ClCompile Include="fire_disp_controller.cpp" />
     <ClCompile Include="flare.cpp" />
     <ClCompile Include="FoodItem.cpp" />
@@ -2596,8 +2581,6 @@
       <PrecompiledHeaderFile>pch_script.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
-    <ClCompile Include="game_cl_base_weapon_usage_statistic.cpp" />
-    <ClCompile Include="game_cl_base_weapon_usage_statistic_save.cpp" />
     <ClCompile Include="game_cl_single.cpp">
       <PrecompiledHeaderFile>pch_script.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
@@ -2999,7 +2982,6 @@
       <PrecompiledHeaderFile>pch_script.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
-    <ClCompile Include="screenshot_server.cpp" />
     <ClCompile Include="ScriptXMLInit.cpp">
       <PrecompiledHeaderFile>pch_script.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
@@ -3299,8 +3281,6 @@
       <PrecompiledHeaderFile>pch_script.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)$(ProjectName)_script.pch</PrecompiledHeaderOutputFile>
     </ClCompile>
-    <ClCompile Include="Spectator.cpp" />
-    <ClCompile Include="spectator_camera_first_eye.cpp" />
     <ClCompile Include="squad_hierarchy_holder.cpp" />
     <ClCompile Include="StalkerOutfit.cpp">
       <PrecompiledHeaderFile>pch_script.h</PrecompiledHeaderFile>
@@ -3435,7 +3415,6 @@
     <ClCompile Include="steering_behaviour.cpp" />
     <ClCompile Include="step_manager.cpp" />
     <ClCompile Include="string_table.cpp" />
-    <ClCompile Include="team_base_zone.cpp" />
     <ClCompile Include="team_hierarchy_holder.cpp" />
     <ClCompile Include="TeleWhirlwind.cpp" />
     <ClCompile Include="ThornArtifact.cpp" />
@@ -3829,7 +3808,6 @@
     <ClCompile Include="xrServer_CL_disconnect.cpp" />
     <ClCompile Include="xrServer_Connect.cpp" />
     <ClCompile Include="xrServer_Disconnect.cpp" />
-    <ClCompile Include="xrServer_info.cpp" />
     <ClCompile Include="xrServer_perform_GameExport.cpp" />
     <ClCompile Include="xrServer_perform_migration.cpp" />
     <ClCompile Include="xrServer_perform_RPgen.cpp" />

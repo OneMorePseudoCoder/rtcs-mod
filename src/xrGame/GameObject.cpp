@@ -7,7 +7,6 @@
 #include "CustomMonster.h" 
 #include "physicobject.h"
 #include "HangingLamp.h"
-#include "../xrphysics/PhysicsShell.h"
 #include "game_sv_single.h"
 #include "level_graph.h"
 #include "ph_shell_interface.h"
@@ -24,12 +23,12 @@
 #include "level.h"
 #include "script_callback_ex.h"
 #include "../xrphysics/MathUtils.h"
-#include "game_cl_base_weapon_usage_statistic.h"
 #include "game_level_cross_table.h"
 #include "ai_obstacle.h"
 #include "magic_box3.h"
 #include "animation_movement_controller.h"
 #include "../xrengine/xr_collide_form.h"
+
 extern MagicBox3 MagicMinBox (int iQuantity, const Fvector* akPoint);
 
 #pragma warning(push)
@@ -42,8 +41,6 @@ extern MagicBox3 MagicMinBox (int iQuantity, const Fvector* akPoint);
 #	include "PHDebug.h"
 #endif
 
-ENGINE_API bool g_dedicated_server;
-
 CGameObject::CGameObject		()
 {
 	m_ai_obstacle				= 0;
@@ -53,7 +50,7 @@ CGameObject::CGameObject		()
 	m_bCrPr_Activated			= false;
 	m_dwCrPr_ActivationStep		= 0;
 	m_spawn_time				= 0;
-	m_ai_location				= !g_dedicated_server ? xr_new<CAI_ObjectLocation>() : 0;
+	m_ai_location				= xr_new<CAI_ObjectLocation>();
 	m_server_flags.one			();
 
 	m_callbacks					= xr_new<CALLBACK_MAP>();
@@ -83,9 +80,8 @@ void CGameObject::Load(LPCSTR section)
 {
 	inherited::Load			(section);
 	ISpatial*		self				= smart_cast<ISpatial*> (this);
-	if (self)	{
-		// #pragma todo("to Dima: All objects are visible for AI ???")
-		// self->spatial.type	|=	STYPE_VISIBLEFORAI;	
+	if (self)	
+	{
 		self->spatial.type	&= ~STYPE_REACTTOSOUND;
 	}
 }
@@ -93,8 +89,8 @@ void CGameObject::Load(LPCSTR section)
 void CGameObject::reinit	()
 {
 	m_visual_callback.clear	();
-	if (!g_dedicated_server)
-        ai_location().reinit	();
+
+    ai_location().reinit	();
 
 	// clear callbacks	
 	for (CALLBACK_MAP_IT it = m_callbacks->begin(); it != m_callbacks->end(); ++it) it->second.clear();
@@ -135,8 +131,6 @@ void CGameObject::net_Destroy	()
 
 	Level().RemoveObject_From_4CrPr(this);
 
-//.	Parent									= 0;
-
 	CScriptBinder::net_Destroy				();
 
 	xr_delete								(m_lua_game_object);
@@ -150,37 +144,9 @@ void CGameObject::OnEvent		(NET_Packet& P, u16 type)
 	case GE_HIT:
 	case GE_HIT_STATISTIC:
 		{
-/*
-			u16				id,weapon_id;
-			Fvector			dir;
-			float			power, impulse;
-			s16				element;
-			Fvector			position_in_bone_space;
-			u16				hit_type;
-			float			ap = 0.0f;
-
-			P.r_u16			(id);
-			P.r_u16			(weapon_id);
-			P.r_dir			(dir);
-			P.r_float		(power);
-			P.r_s16			(element);
-			P.r_vec3		(position_in_bone_space);
-			P.r_float		(impulse);
-			P.r_u16			(hit_type);	//hit type
-			if ((ALife::EHitType)hit_type == ALife::eHitTypeFireWound)
-			{
-				P.r_float	(ap);
-			}
-
-			CObject*	Hitter = Level().Objects.net_Find(id);
-			CObject*	Weapon = Level().Objects.net_Find(weapon_id);
-
-			SHit	HDS = SHit(power, dir, Hitter, element, position_in_bone_space, impulse, (ALife::EHitType)hit_type, ap);
-*/
 			SHit	HDS;
 			HDS.PACKET_TYPE = type;
 			HDS.Read_Packet_Cont(P);
-//			Msg("Hit received: %d[%d,%d]", HDS.whoID, HDS.weaponID, HDS.BulletID);
 			CObject*	Hitter = Level().Objects.net_Find(HDS.whoID);
 			CObject*	Weapon = Level().Objects.net_Find(HDS.weaponID);
 			HDS.who		= Hitter;
@@ -188,26 +154,9 @@ void CGameObject::OnEvent		(NET_Packet& P, u16 type)
 			{
 				Msg("! ERROR: hitter object [%d] is NULL on client.", HDS.whoID);
 			}
-			//-------------------------------------------------------
-			switch (HDS.PACKET_TYPE)
-			{
-			case GE_HIT_STATISTIC:
-				{
-					if (GameID() != eGameIDSingle)
-						Game().m_WeaponUsageStatistic->OnBullet_Check_Request(&HDS);
-				}break;
-			default:
-				{
-				}break;
-			}
+
 			SetHitInfo(Hitter, Weapon, HDS.bone(), HDS.p_in_bone_space, HDS.dir);
 			Hit				(&HDS);
-			//---------------------------------------------------------------------------
-			if (GameID() != eGameIDSingle)
-			{
-				Game().m_WeaponUsageStatistic->OnBullet_Check_Result(false);
-			}
-			//---------------------------------------------------------------------------
 		}
 		break;
 	case GE_DESTROY:
@@ -264,11 +213,8 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	
 	R_ASSERT(Level().Objects.net_Find(E->ID) == NULL);
 
-
 	setID							(E->ID);
-//	if (GameID() != eGameIDSingle)
-//		Msg ("CGameObject::net_Spawn -- object %s[%x] setID [%d]", *(E->s_name), this, E->ID);
-	
+
 	// XForm
 	XFORM().setXYZ					(E->o_Angle);
 	Position().set					(E->o_Position);
@@ -315,12 +261,12 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	}
 
 	reload						(*cNameSect());
-	if(!g_dedicated_server)
-		CScriptBinder::reload	(*cNameSect());
+
+	CScriptBinder::reload	(*cNameSect());
 	
 	reinit						();
-	if(!g_dedicated_server)
-		CScriptBinder::reinit	();
+
+	CScriptBinder::reinit	();
 #ifdef DEBUG
 	if(ph_dbg_draw_mask1.test(ph_m1_DbgTrackObject)&&stricmp(PH_DBG_ObjectTrackName(),*cName())==0)
 	{
@@ -330,12 +276,8 @@ BOOL CGameObject::net_Spawn		(CSE_Abstract*	DC)
 	//load custom user data from server
 	if(!E->client_data.empty())
 	{	
-//		Msg				("client data is present for object [%d][%s], load is processed",ID(),*cName());
 		IReader			ireader = IReader(&*E->client_data.begin(), E->client_data.size());
 		net_Load		(ireader);
-	}
-	else {
-//		Msg				("no client data for object [%d][%s], load is skipped",ID(),*cName());
 	}
 
 	// if we have a parent
@@ -805,11 +747,9 @@ void CGameObject::shedule_Update	(u32 dt)
 		DestroyObject			();
 	}
 
-	// Msg							("-SUB-:[%x][%s] CGameObject::shedule_Update",smart_cast<void*>(this),*cName());
 	inherited::shedule_Update	(dt);
 	
-	if(!g_dedicated_server)
-		CScriptBinder::shedule_Update(dt);
+	CScriptBinder::shedule_Update(dt);
 }
 
 BOOL CGameObject::net_SaveRelevant	()
@@ -858,7 +798,6 @@ u32	CGameObject::ef_weapon_type			() const
 	string16	temp; CLSID2TEXT(CLS_ID,temp);
 	R_ASSERT3	(false,"Invalid weapon type request, virtual function is not properly overridden!",temp);
 	return		(u32(-1));
-//	return		(u32(0));
 }
 
 u32	CGameObject::ef_detector_type		() const
@@ -871,8 +810,8 @@ u32	CGameObject::ef_detector_type		() const
 void CGameObject::net_Relcase			(CObject* O)
 {
 	inherited::net_Relcase		(O);
-	if(!g_dedicated_server)
-		CScriptBinder::net_Relcase	(O);
+
+	CScriptBinder::net_Relcase	(O);
 }
 
 CGameObject::CScriptCallbackExVoid &CGameObject::callback(GameObject::ECallbackType type) const

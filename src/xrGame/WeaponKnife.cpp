@@ -90,52 +90,34 @@ void CWeaponKnife::OnStateSwitch	(u32 S)
 		break;
 	case eFire:
 		{
-			//-------------------------------------------
 			m_eHitType		= m_eHitType_1;
-			//fHitPower		= fHitPower_1;
 			if (ParentIsActor())
 			{
-				if (GameID() == eGameIDSingle)
-				{
-					fCurrentHit			= fvHitPower_1[g_SingleGameDifficulty];
-				}
-				else
-				{
-					fCurrentHit			= fvHitPower_1[egdMaster];
-				}
+				fCurrentHit = fvHitPower_1[g_SingleGameDifficulty];
 			}
 			else
 			{
 				fCurrentHit			= fvHitPower_1[egdMaster];
 			}
 			fHitImpulse_cur	= fHitImpulse_1;
-			//-------------------------------------------
 			switch2_Attacking	(S);
-		}break;
+		}
+		break;
 	case eFire2:
 		{
-			//-------------------------------------------
 			m_eHitType		= m_eHitType_2;
-			//fHitPower		= fHitPower_2;
 			if (ParentIsActor())
 			{
-				if (GameID() == eGameIDSingle)
-				{
-					fCurrentHit			= fvHitPower_2[g_SingleGameDifficulty];
-				}
-				else
-				{
-					fCurrentHit			= fvHitPower_2[egdMaster];
-				}
+				fCurrentHit			= fvHitPower_2[g_SingleGameDifficulty];
 			}
 			else
 			{
 				fCurrentHit			= fvHitPower_2[egdMaster];
 			}
 			fHitImpulse_cur	= fHitImpulse_2;
-			//-------------------------------------------
 			switch2_Attacking	(S);
-		}break;
+		}
+		break;
 	}
 }
 

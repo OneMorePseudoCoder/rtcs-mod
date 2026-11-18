@@ -72,13 +72,7 @@ struct CheaterToKick
 };
 typedef xr_vector<CheaterToKick> cheaters_t;
 
-namespace file_transfer
-{
-	class server_site;
-};//namespace file_transfer
-
 class clientdata_proxy;
-class server_info_uploader;
 
 class xrServer	: public IPureServer  
 {
@@ -87,11 +81,6 @@ private:
 	xr_multiset<svs_respawn>	q_respawn;
 	xr_vector<u16>				conn_spawned_ids;
 	cheaters_t					m_cheaters;
-	
-	file_transfer::server_site*	m_file_transfers;
-	clientdata_proxy*			m_screenshot_proxies[MAX_PLAYERS_COUNT*2];
-	void	initialize_screenshot_proxies();
-	void	deinitialize_screenshot_proxies();
 	
 	typedef server_updates_compressor::send_ready_updates_t::const_iterator update_iterator_t;
 	update_iterator_t			m_update_begin;
@@ -103,15 +92,10 @@ private:
 	u32							m_last_updates_size;
 	u32							m_last_update_time;
 	
-	
 	void						SendServerInfoToClient		(ClientID const & new_client);
-	server_info_uploader&		GetServerInfoUploader		();
 
 	void						LoadServerInfo				();
 	
-	typedef xr_vector<server_info_uploader*>	info_uploaders_t;
-
-	info_uploaders_t			m_info_uploaders;
 	IReader*					m_server_logo;
 	IReader*					m_server_rules;
 
@@ -266,7 +250,6 @@ public:
 	static	LPCSTR			get_map_download_url(LPCSTR level_name, LPCSTR level_version);
 
 	void					create_direct_client();
-	BOOL					IsDedicated			() const	{return m_bDedicated;};
 
 	virtual void			Assign_ServerType	( string512& res ) {};
 	virtual bool			HasPassword			()	{ return false; }
@@ -284,7 +267,6 @@ public:
 			void			verify_entity		(const CSE_Abstract *entity) const;
 #endif
 };
-
 
 #ifdef DEBUG
 		enum e_dbg_net_Draw_Flags

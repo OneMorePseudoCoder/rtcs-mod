@@ -5,15 +5,12 @@
 #include "xrmessages.h"
 #include "game_cl_base.h"
 #include "net_queue.h"
-//#include "Physics.h"
 #include "xrServer.h"
 #include "Actor.h"
 #include "Artefact.h"
-#include "game_cl_base_weapon_usage_statistic.h"
 #include "ai_space.h"
 #include "saved_game_wrapper.h"
 #include "level_graph.h"
-#include "file_transfer.h"
 #include "message_filter.h"
 #include "../xrphysics/iphworld.h"
 
@@ -346,27 +343,6 @@ void CLevel::ClientReceive()
 					P->r_stringZ(LevelVersion);
 					P->r_stringZ(GameType);
 
-					/*
-					u32 str_start = P->r_tell();
-					P->skip_stringZ();
-					u32 str_end = P->r_tell();
-
-					u32 temp_str_size = str_end - str_start;
-					R_ASSERT2(temp_str_size < 256, "level name too big");
-					LevelName = static_cast<char*>(_alloca(temp_str_size + 1));
-					P->r_seek(str_start);
-					P->r_stringZ(LevelName);
-
-										
-					str_start = P->r_tell();
-					P->skip_stringZ();
-					str_end = P->r_tell();
-					temp_str_size = str_end - str_start;
-					R_ASSERT2(temp_str_size < 256, "incorect game type");
-					GameType = static_cast<char*>(_alloca(temp_str_size + 1));
-					P->r_seek(str_start);
-					P->r_stringZ(GameType);*/
-
 					string4096 NewServerOptions = "";
 					xr_sprintf(NewServerOptions, "%s/%s/%s%s",
 						LevelName.c_str(),
@@ -393,8 +369,6 @@ void CLevel::ClientReceive()
 		case M_BULLET_CHECK_RESPOND:
 			{
 				if (!game) break;
-				if (GameID() != eGameIDSingle)
-					Game().m_WeaponUsageStatistic->On_Check_Respond(P);
 			}break;
 		case M_STATISTIC_UPDATE:
 			{
@@ -405,15 +379,6 @@ void CLevel::ClientReceive()
 			}break;
 		case M_STATISTIC_UPDATE_RESPOND: //deprecated, see  xrServer::OnMessage
 			{
-				/*Msg("--- CL: On Update Respond");
-				if (!game) break;
-				if (GameID() != eGameIDSingle)
-					Game().m_WeaponUsageStatistic->OnUpdateRespond(P);*/
-			}break;
-		case M_FILE_TRANSFER:
-			{
-				game_events->insert		(*P);
-				if (g_bDebugEvents)		ProcessGameEvents();
 			}break;
 		case M_SECURE_KEY_SYNC:
 			{

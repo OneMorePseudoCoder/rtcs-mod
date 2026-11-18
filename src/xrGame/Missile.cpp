@@ -146,13 +146,7 @@ void CMissile::spawn_fake_missile()
 
 	if (!getDestroy())
 	{
-		CSE_Abstract		*object = Level().spawn_item(
-			*cNameSect(),
-			Position(),
-			(g_dedicated_server)?u32(-1):ai_location().level_vertex_id(),
-			ID(),
-			true
-		);
+		CSE_Abstract* object = Level().spawn_item(*cNameSect(), Position(), ai_location().level_vertex_id(), ID(), true);
 
 		CSE_ALifeObject				*alife_object = smart_cast<CSE_ALifeObject*>(object);
 		VERIFY						(alife_object);
@@ -168,11 +162,7 @@ void CMissile::spawn_fake_missile()
 void CMissile::OnH_A_Chield() 
 {
 	inherited::OnH_A_Chield();
-
-//	if(!m_fake_missile && !smart_cast<CMissile*>(H_Parent())) 
-//		spawn_fake_missile	();
 }
-
 
 void CMissile::OnH_B_Independent(bool just_before_destroy) 
 {

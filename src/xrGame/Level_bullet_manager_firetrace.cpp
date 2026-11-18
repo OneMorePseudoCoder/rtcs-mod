@@ -15,12 +15,10 @@
 #include "Actor.h"
 #include "AI/Stalker/ai_stalker.h"
 #include "character_info.h"
-#include "game_cl_base_weapon_usage_statistic.h"
 #include "../xrcdb/xr_collide_defs.h"
 #include "../xrengine/xr_collide_form.h"
 #include "weapon.h"
 #include "ik/math3d.h"
-#include "actor.h"
 #include "ai/monsters/basemonster/base_monster.h"
 
 //константы ShootFactor, определ€ющие 
@@ -148,13 +146,12 @@ void CBulletManager::FireShotmark (SBullet* bullet, const Fvector& vDir, const F
 			//добавить отметку на материале
 			Fvector p;
 			p.mad(bullet->bullet_pos,bullet->dir,R.range-0.01f);
-			if(!g_dedicated_server)
-				::Render->add_SkeletonWallmark	(	&R.O->renderable.xform, 
-													PKinematics(R.O->Visual()), 
-													&*mtl_pair->m_pCollideMarks,
-													p, 
-													bullet->dir, 
-													bullet->wallmark_size);
+			::Render->add_SkeletonWallmark	(	&R.O->renderable.xform, 
+												PKinematics(R.O->Visual()), 
+												&*mtl_pair->m_pCollideMarks,
+												p, 
+												bullet->dir, 
+												bullet->wallmark_size);
 		}
 */
 	} 
@@ -216,9 +213,7 @@ void CBulletManager::FireShotmark (SBullet* bullet, const Fvector& vDir, const F
 
 void CBulletManager::StaticObjectHit	(CBulletManager::_event& E)
 {
-//	Fvector hit_normal;
 	FireShotmark(&E.bullet, E.bullet.dir,	E.point, E.R, E.tgt_material, E.normal);
-//	ObjectHit	(&E.bullet,					E.point, E.R, E.tgt_material, hit_normal);
 }
 
 static bool g_clear = false;
@@ -235,9 +230,9 @@ void CBulletManager::DynamicObjectHit	(CBulletManager::_event& E)
 		}
 	}
 
-	if (g_clear) E.Repeated = false;
-	if (GameID() == eGameIDSingle) E.Repeated = false;
-	bool NeedShootmark = true;//!E.Repeated;
+	E.Repeated = false;
+
+	bool NeedShootmark = true;
 	
 	if (smart_cast<CActor*>(E.R.O))
 	{
@@ -253,11 +248,9 @@ void CBulletManager::DynamicObjectHit	(CBulletManager::_event& E)
 	}
 	
 	//визуальное обозначение попадание на объекте
-//	Fvector			hit_normal;
 	FireShotmark	(&E.bullet, E.bullet.dir, E.point, E.R, E.tgt_material, E.normal, NeedShootmark);
 	
 	Fvector original_dir = E.bullet.dir;
-	//ObjectHit(&E.bullet, E.end_point, E.R, E.tgt_material, hit_normal);
 
 	SBullet_Hit hit_param = E.hit_result;
 
@@ -287,19 +280,6 @@ void CBulletManager::DynamicObjectHit	(CBulletManager::_event& E)
 	//отправить хит пораженному объекту
 	if (E.bullet.flags.allow_sendhit && !E.Repeated)
 	{
-		//-------------------------------------------------
-		bool AddStatistic = false;
-		if (GameID() != eGameIDSingle && E.bullet.flags.allow_sendhit && smart_cast<CActor*>(E.R.O)
-			&& Game().m_WeaponUsageStatistic->CollectData())
-		{
-			CActor* pActor = smart_cast<CActor*>(E.R.O);
-			if (pActor)// && pActor->g_Alive())
-			{
-				Game().m_WeaponUsageStatistic->OnBullet_Hit(&E.bullet, E.R.O->ID(), (s16)E.R.element, E.point);
-				AddStatistic = true;
-			};
-		};
-
 		SHit	Hit = SHit(	hit_param.power,
 							original_dir,
 							NULL,
@@ -310,7 +290,7 @@ void CBulletManager::DynamicObjectHit	(CBulletManager::_event& E)
 							E.bullet.armor_piercing,
 							E.bullet.flags.aim_bullet);
 
-		Hit.GenHeader(u16((AddStatistic)? GE_HIT_STATISTIC : GE_HIT)&0xffff, E.R.O->ID());
+		Hit.GenHeader(u16(GE_HIT&0xffff), E.R.O->ID());
 		Hit.whoID			= E.bullet.parent_id;
 		Hit.weaponID		= E.bullet.weapon_id;
 		Hit.BulletID		= E.bullet.m_dwID;
@@ -318,7 +298,6 @@ void CBulletManager::DynamicObjectHit	(CBulletManager::_event& E)
 		NET_Packet			np;
 		Hit.Write_Packet	(np);
 		
-//		Msg("Hit sended: %d[%d,%d]", Hit.whoID, Hit.weaponID, Hit.BulletID);
 		CGameObject::u_EventSend(np);
 	}
 }
@@ -329,8 +308,7 @@ FvectorVec g_hit[3];
 
 extern void random_dir	(Fvector& tgt_dir, const Fvector& src_dir, float dispersion);
 
-bool CBulletManager::ObjectHit( SBullet_Hit* hit_res, SBullet* bullet, const Fvector& end_point, 
-							    collide::rq_result& R, u16 target_material, Fvector& hit_normal )
+bool CBulletManager::ObjectHit( SBullet_Hit* hit_res, SBullet* bullet, const Fvector& end_point, collide::rq_result& R, u16 target_material, Fvector& hit_normal )
 {
 	//----------- normal - start
 	if ( R.O )

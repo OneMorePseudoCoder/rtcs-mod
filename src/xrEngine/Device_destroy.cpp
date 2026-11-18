@@ -16,29 +16,25 @@ void CRenderDevice::_Destroy(BOOL bKeepTextures)
     Statistic->OnDeviceDestroy();
     ::Render->destroy();
     m_pRender->OnDeviceDestroy(bKeepTextures);
-    //Resources->OnDeviceDestroy (bKeepTextures);
-    //RCache.OnDeviceDestroy ();
 
     Memory.mem_compact();
 }
 
 void CRenderDevice::Destroy(void)
 {
-    if (!b_is_Ready) return;
+    if (!b_is_Ready)
+		return;
 
     Log("Destroying Direct3D...");
 
     ShowCursor(TRUE);
-	//ClipCursor(NULL);
+
     m_pRender->ValidateHW();
 
     _Destroy(FALSE);
 
     // real destroy
     m_pRender->DestroyHW();
-
-    //xr_delete (Resources);
-    //HW.DestroyDevice ();
 
     seqRender.R.clear();
     seqAppActivate.R.clear();
@@ -67,7 +63,6 @@ void CRenderDevice::Reset(bool precache)
     u32 tm_start = TimerAsync();
     if (g_pGamePersistent)
     {
-
         //. g_pGamePersistent->Environment().OnDeviceDestroy();
     }
 
@@ -86,8 +81,6 @@ void CRenderDevice::Reset(bool precache)
 
     if (g_pGamePersistent)
     {
-        //. g_pGamePersistent->Environment().OnDeviceCreate();
-        //bNeed_re_create_env = TRUE;
         g_pGamePersistent->Environment().bNeed_re_create_env = TRUE;
     }
     _SetupStates();
@@ -99,12 +92,7 @@ void CRenderDevice::Reset(bool precache)
     // TODO: Remove this! It may hide crash
     Memory.mem_compact();
 
-#ifndef DEDICATED_SERVER
     ShowCursor(FALSE);
-	//RECT winRect;
-	//GetWindowRect(m_hWnd, &winRect);
-	//ClipCursor(&winRect);
-#endif
 
     seqDeviceReset.Process(rp_DeviceReset);
 

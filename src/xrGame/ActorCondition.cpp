@@ -25,15 +25,12 @@
 #define MAX_SATIETY					1.0f
 #define START_SATIETY				0.5f
 
-BOOL	GodMode	()	
+BOOL GodMode()	
 { 
-	if (GameID() == eGameIDSingle) 
-		return psActorFlags.test(AF_GODMODE|AF_GODMODE_RT); 
-	return FALSE;	
+	return psActorFlags.test(AF_GODMODE|AF_GODMODE_RT); 
 }
 
-CActorCondition::CActorCondition(CActor *object) :
-	inherited	(object)
+CActorCondition::CActorCondition(CActor* object) : inherited(object)
 {
 	m_fJumpPower				= 0.f;
 	m_fStandPower				= 0.f;
@@ -917,8 +914,6 @@ void CActorDeathEffector::UpdateCL()
 void CActorDeathEffector::OnPPEffectorReleased()
 {
 	m_b_actual				= false;	
-	Msg("111");
-	//m_pParent->health()		= -1.0f;
 	m_pParent->SetHealth		(-1.0f);
 }
 
