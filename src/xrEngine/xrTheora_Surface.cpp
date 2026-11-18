@@ -125,7 +125,6 @@ BOOL CTheoraSurface::Load(const char* fname)
             VERIFY(m_rgb->t_info.pixelformat == m_alpha->t_info.pixelformat);
         }
 #endif
-        //. VERIFY3 (btwIsPow2(m_rgb->t_info.frame_width)&&btwIsPow2(m_rgb->t_info.frame_height),"Invalid size.",fname);
         tm_total = m_rgb->tm_total;
         VERIFY(0 != tm_total);
         // reset playback
@@ -141,45 +140,30 @@ BOOL CTheoraSurface::Load(const char* fname)
         xr_delete(m_rgb);
         xr_delete(m_alpha);
     }
+
     if (res)
     {
-        // TODO: get shader version here for theora surface
-        //VERIFY(0);
-
-        //u32 v_dev = CAP_VERSION(HW.Caps.raster_major, HW.Caps.raster_minor);
-        //u32 v_need = CAP_VERSION(2,0);
-        //bShaderYUV2RGB = (v_dev>=v_need);
-#ifndef _EDITOR
         R_ASSERT(Device.m_pRender);
         bShaderYUV2RGB = Device.m_pRender->HWSupportsShaderYUV2RGB();
-#else // _EDITOR
-        bShaderYUV2RGB = false;
-#endif // _EDITOR
-
     }
+
     return res;
 }
 
 u32 CTheoraSurface::Width(bool bRealSize)
 {
-    // return m_rgb->t_info.frame_width;
-
     if (bRealSize)
         return m_rgb->t_info.frame_width;
     else
         return btwPow2_Ceil((u32)m_rgb->t_info.frame_width);
-
 }
 
 u32 CTheoraSurface::Height(bool bRealSize)
 {
-    // return m_rgb->t_info.frame_height;
-
     if (bRealSize)
         return m_rgb->t_info.frame_height;
     else
         return btwPow2_Ceil((u32)m_rgb->t_info.frame_height);;
-
 }
 
 void CTheoraSurface::DecompressFrame(u32* data, u32 _width, int& _pos)
@@ -192,9 +176,6 @@ void CTheoraSurface::DecompressFrame(u32* data, u32 _width, int& _pos)
     u32 height = Height(true);
 
     static const float K = 0.256788f + 0.504129f + 0.097906f;
-
-    // we use ffmpeg2theora for encoding, so only OC_PF_420 valid
-    // u32 pixelformat = m_rgb->t_info.pixelformat;
 
     // rgb
     if (yuv_rgb)

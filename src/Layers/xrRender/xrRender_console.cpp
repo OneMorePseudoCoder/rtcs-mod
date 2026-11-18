@@ -244,7 +244,7 @@ xr_token ext_quality_token[] = { {"qt_off", 0}, {"qt_low", 1}, {"qt_medium", 2},
 //- Mad Max
 float		ps_r2_gloss_factor			= 4.0f;
 //- Mad Max
-#ifndef _EDITOR
+
 #include	"../../xrEngine/xr_ioconsole.h"
 #include	"../../xrEngine/xr_ioc_cmd.h"
 
@@ -929,5 +929,3 @@ void		xrRender_initconsole	()
 
 //	CMD3(CCC_Mask,		"r2_sun_ignore_portals",		&ps_r2_ls_flags,			R2FLAG_SUN_IGNORE_PORTALS);
 }
-
-#endif

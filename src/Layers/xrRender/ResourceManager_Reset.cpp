@@ -2,11 +2,7 @@
 #pragma hdrstop
 
 #include "ResourceManager.h"
-#ifndef _EDITOR
-#include	"../../xrEngine/Render.h"
-#else
-	#include "../../Include/xrAPI/xrAPI.h"
-#endif
+#include "../../xrEngine/Render.h"
 
 void	CResourceManager::reset_begin			()
 {
@@ -20,8 +16,6 @@ void	CResourceManager::reset_begin			()
 	// destroy RTs
 	for (map_RTIt rt_it=m_rtargets.begin(); rt_it!=m_rtargets.end(); rt_it++)
 		rt_it->second->reset_begin();
-//	DX10 cut 	for (map_RTCIt rtc_it=m_rtargets_c.begin(); rtc_it!=m_rtargets_c.end(); rtc_it++)
-//	DX10 cut 		rtc_it->second->reset_begin();
 
 	// destroy DStreams
  	RCache.old_QuadIB					= RCache.QuadIB;
@@ -33,7 +27,6 @@ void	CResourceManager::reset_begin			()
 }
 
 bool	cmp_rt	(const CRT* A,const CRT* B)		{ return A->_order < B->_order; }
-//	DX10 cut bool	cmp_rtc	(const CRTC* A,const CRTC* B)	{ return A->_order < B->_order; }
 
 void	CResourceManager::reset_end				()
 {

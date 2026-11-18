@@ -42,58 +42,26 @@ void BuildStackTrace	(struct _EXCEPTION_POINTERS *g_BlackBoxUIExPtrs)
 	CleanupSymEng();
 }
 
-#ifdef _EDITOR
-#	pragma auto_inline(off)
-	DWORD_PTR program_counter()
-	{
-		DWORD_PTR programcounter;
+extern "C" void * _ReturnAddress(void);
 
-		// Get the return address out of the current stack frame
-		__asm mov eax, [ebp + 4]
-		// Put the return address into the variable we'll return
-		__asm mov [programcounter], eax
+#pragma intrinsic(_ReturnAddress)
 
-		return programcounter;
-	}
-#	pragma auto_inline(on)
-#else // _EDITOR
-	extern "C" void * _ReturnAddress(void);
-
-#   pragma intrinsic(_ReturnAddress)
-
-#	pragma auto_inline(off)
-	DWORD_PTR program_counter()
-	{
-		return (DWORD_PTR)_ReturnAddress();
-	}
-#	pragma auto_inline(on)
-#endif // _EDITOR
+#pragma auto_inline(off)
+DWORD_PTR program_counter()
+{
+	return (DWORD_PTR)_ReturnAddress();
+}
+#pragma auto_inline(on)
 
 void BuildStackTrace	()
 {
     CONTEXT					context;
 	context.ContextFlags	= CONTEXT_FULL;
 
-#ifdef _EDITOR
-    DWORD                   *EBP = &context.Ebp;
-    DWORD                   *ESP = &context.Esp;
-#endif // _EDITOR
-
 	if (!GetThreadContext(GetCurrentThread(),&context))
 		return;
 
-#ifdef _M_X64
 	context.Rip = program_counter();
-#else
-	context.Eip				= program_counter();
-#  ifndef _EDITOR
-	__asm					mov context.Ebp, ebp
-	__asm					mov context.Esp, esp
-#  else // _EDITOR
-	__asm					mov EBP, ebp
-	__asm					mov ESP, esp
-#  endif // _EDITOR
-#endif
 
 	EXCEPTION_POINTERS		ex_ptrs;
 	ex_ptrs.ContextRecord	= &context;
@@ -102,10 +70,7 @@ void BuildStackTrace	()
 	BuildStackTrace			(&ex_ptrs);
 }
 
-#ifndef _EDITOR
-__declspec(noinline)
-#endif // _EDITOR
-void OutputDebugStackTrace	(const char *header)
+__declspec(noinline) void OutputDebugStackTrace	(const char *header)
 {
 	BuildStackTrace			();		
 

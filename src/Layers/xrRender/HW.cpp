@@ -10,18 +10,10 @@
 #include "HW.h"
 #include "../../xrEngine/XR_IOConsole.h"
 
-#ifndef _EDITOR
-void	fill_vid_mode_list(CHW* _hw);
-void	free_vid_mode_list();
-
-void	fill_render_mode_list();
-void	free_render_mode_list();
-#else
-void	fill_vid_mode_list(CHW* _hw) {}
-void	free_vid_mode_list() {}
-void	fill_render_mode_list() {}
-void	free_render_mode_list() {}
-#endif
+void fill_vid_mode_list(CHW* _hw);
+void free_vid_mode_list();
+void fill_render_mode_list();
+void free_render_mode_list();
 
 CHW HW;
 D3DCAPS9 caps;
@@ -54,7 +46,6 @@ void CHW::Reset(HWND hwnd)
 	_RELEASE(pBaseZB);
 	_RELEASE(pBaseRT);
 
-#ifndef _EDITOR
 	BOOL	bWindowed = !psDeviceFlags.is(rsFullscreen);
 
 	selectResolution(DevPP.BackBufferWidth, DevPP.BackBufferHeight, bWindowed);
@@ -71,9 +62,10 @@ void CHW::Reset(HWND hwnd)
 		DevPP.PresentationInterval = D3DPRESENT_INTERVAL_IMMEDIATE;
 		DevPP.FullScreen_RefreshRateInHz = D3DPRESENT_RATE_DEFAULT;
 	}
-#endif
+
 	bool bNoManagedTex = !!RImplementation.o.managed_tex_disabled;
-	while (TRUE) {
+	while (TRUE) 
+	{
 		HRESULT result;
 
 		if (bNoManagedTex)
@@ -87,7 +79,8 @@ void CHW::Reset(HWND hwnd)
 			result = HW.pDevice->Reset(&DevPP);
 		}
 
-		if (SUCCEEDED(result))					break;
+		if (SUCCEEDED(result))
+			break;
 		Msg("! ERROR: [%dx%d]: %s", DevPP.BackBufferWidth, DevPP.BackBufferHeight, Debug.error2string(result));
 		Sleep((bNoManagedTex ? 3000 : 100)); // xxx: it's better to crash the game
 	}
@@ -96,11 +89,9 @@ void CHW::Reset(HWND hwnd)
 #ifdef DEBUG
 	R_CHK(pDevice->CreateStateBlock(D3DSBT_ALL, &dwDebugSB));
 #endif
-#ifndef _EDITOR
-	updateWindowProps(hwnd);
-#endif
-}
 
+	updateWindowProps(hwnd);
+}
 
 #include "../../Include/xrAPI/xrAPI.h"
 
@@ -128,7 +119,8 @@ D3DFORMAT CHW::selectDepthStencil(D3DFORMAT fTarget)
 {
 	// R2 hack
 #pragma todo("R2 need to specify depth format")
-	if (psDeviceFlags.test(rsR2))	return D3DFMT_D24S8;
+	if (psDeviceFlags.test(rsR2))
+		return D3DFMT_D24S8;
 
 	// R1 usual
 	static	D3DFORMAT	fDS_Try1[6] =
@@ -137,14 +129,11 @@ D3DFORMAT CHW::selectDepthStencil(D3DFORMAT fTarget)
 	D3DFORMAT*	fDS_Try = fDS_Try1;
 	int			fDS_Cnt = 6;
 
-	for (int it = 0; it < fDS_Cnt; it++) {
-		if (SUCCEEDED(pD3D->CheckDeviceFormat(
-			DevAdapter, DevT, fTarget,
-			D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_SURFACE, fDS_Try[it])))
+	for (int it = 0; it < fDS_Cnt; it++) 
+	{
+		if (SUCCEEDED(pD3D->CheckDeviceFormat(DevAdapter, DevT, fTarget, D3DUSAGE_DEPTHSTENCIL, D3DRTYPE_SURFACE, fDS_Try[it])))
 		{
-			if (SUCCEEDED(pD3D->CheckDepthStencilMatch(
-				DevAdapter, DevT,
-				fTarget, fTarget, fDS_Try[it])))
+			if (SUCCEEDED(pD3D->CheckDepthStencilMatch(DevAdapter, DevT, fTarget, fTarget, fDS_Try[it])))
 			{
 				return fDS_Try[it];
 			}
@@ -153,7 +142,7 @@ D3DFORMAT CHW::selectDepthStencil(D3DFORMAT fTarget)
 	return D3DFMT_UNKNOWN;
 }
 
-void	CHW::DestroyDevice()
+void CHW::DestroyDevice()
 {
 	_SHOW_REF("refCount:pBaseZB", pBaseZB);
 	_RELEASE(pBaseZB);
@@ -164,18 +153,15 @@ void	CHW::DestroyDevice()
 	_SHOW_REF("refCount:dwDebugSB", dwDebugSB);
 	_RELEASE(dwDebugSB);
 #endif
-#ifdef _EDITOR
-	_RELEASE(HW.pDevice);
-#else
+
 	_SHOW_REF("DeviceREF:", HW.pDevice);
 	_RELEASE(HW.pDevice);
-#endif    
+  
 	DestroyD3D();
 
-#ifndef _EDITOR
 	free_vid_mode_list();
-#endif
 }
+
 void	CHW::selectResolution(u32 &dwWidth, u32 &dwHeight, BOOL bWindowed)
 {
 	fill_vid_mode_list(this);
@@ -285,7 +271,8 @@ void		CHW::CreateDevice(HWND m_hWnd, bool move_window)
 		fDepth = selectDepthStencil(fTarget);
 	}
 
-	if ((D3DFMT_UNKNOWN == fTarget)) {
+	if ((D3DFMT_UNKNOWN == fTarget)) 
+	{
 		Msg("Failed to initialize graphics hardware.\n"
 			"Please try to restart the game.\n"
 			"Can not find matching format for back buffer."
@@ -300,12 +287,9 @@ void		CHW::CreateDevice(HWND m_hWnd, bool move_window)
 	D3DPRESENT_PARAMETERS&	P = DevPP;
 	ZeroMemory(&P, sizeof(P));
 
-#ifndef _EDITOR
 	selectResolution(P.BackBufferWidth, P.BackBufferHeight, bWindowed);
-#endif
+
 	// Back buffer
-	//.	P.BackBufferWidth		= dwWidth;
-	//. P.BackBufferHeight		= dwHeight;
 	P.BackBufferFormat = fTarget;
 	P.BackBufferCount = 1;
 
@@ -321,7 +305,7 @@ void		CHW::CreateDevice(HWND m_hWnd, bool move_window)
 	// Depth/stencil
 	P.EnableAutoDepthStencil = TRUE;
 	P.AutoDepthStencilFormat = fDepth;
-	P.Flags = 0;	//. D3DPRESENTFLAG_DISCARD_DEPTHSTENCIL;
+	P.Flags = 0;
 
 	// Refresh rate
 	if (!bWindowed)
@@ -391,10 +375,8 @@ void		CHW::CreateDevice(HWND m_hWnd, bool move_window)
 	Msg("*   Max texture size: [%d]x[%d]", caps.MaxTextureWidth, caps.MaxTextureHeight);
 	Msg("*     Texture memory: %d M", memory / (1024 * 1024));
 	Msg("*          DDI-level: %2.1f", float(D3DXGetDriverLevel(pDevice)) / 100.f);
-#ifndef _EDITOR
 	updateWindowProps(m_hWnd);
 	fill_vid_mode_list(this);
-#endif
 }
 
 u32	CHW::selectPresentInterval()
@@ -564,7 +546,6 @@ struct _uniq_mode
 	bool operator() (LPCSTR _other) { return !stricmp(_val, _other); }
 };
 
-#ifndef _EDITOR
 void free_vid_mode_list()
 {
 	for (int i = 0; vid_mode_token[i].name; i++)
@@ -618,4 +599,3 @@ void fill_vid_mode_list(CHW* _hw)
 #endif // DEBUG
 	}
 }
-#endif

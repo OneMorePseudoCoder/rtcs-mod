@@ -6,14 +6,8 @@
 #include "LightTrack.h"
 #include "../../include/xrRender/RenderVisual.h"
 #include "../../xrEngine/xr_object.h"
-
-#ifdef _EDITOR
-#	include "igame_persistent.h"
-#	include "environment.h"
-#else
-#	include "../../xrEngine/igame_persistent.h"
-#	include "../../xrEngine/environment.h"
-#endif
+#include "../../xrEngine/igame_persistent.h"
+#include "../../xrEngine/environment.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -40,11 +34,7 @@ CROS_impl::CROS_impl	()
 	sky_rays_uptodate	= 0;
 #endif	// RENDER!=R_R1
 
-//#if RENDER==R_R1
-	MODE				= IRender_ObjectSpecific::TRACE_ALL											;
-//#else
-//	MODE				= IRender_ObjectSpecific::TRACE_HEMI + IRender_ObjectSpecific::TRACE_SUN	;
-//#endif
+	MODE = IRender_ObjectSpecific::TRACE_ALL;
 }
 
 void	CROS_impl::add		(light* source)

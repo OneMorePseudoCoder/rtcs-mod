@@ -2,10 +2,6 @@
 #define	_IPHYSICS_SCRIPTED_
 
 #pragma once
-//#include <boost/noncopyable.hpp>
-
-
-
 
 class iphysics_scripted;
 class iphysics_game_scripted
@@ -31,11 +27,7 @@ public:
 	//virtual	~iphysics_scripted_class		()	= 0;
 	virtual	iphysics_scripted &get_scripted	()	= 0;
 protected:
-#ifdef _EDITOR
-	 virtual ~iphysics_scripted_class		(){}
-#else
 	virtual ~iphysics_scripted_class		()=0{}
-#endif
 };
 
 namespace non_copy

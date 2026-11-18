@@ -37,9 +37,6 @@ IBlender* CResourceManager::_GetBlender		(LPCSTR Name)
 
 	LPSTR N = LPSTR(Name);
 	map_Blender::iterator I = m_blenders.find	(N);
-#ifdef _EDITOR
-	if (I==m_blenders.end())	return 0;
-#else
 //	TODO: DX10: When all shaders are ready switch to common path
 #if defined(USE_DX10) || defined(USE_DX11)
 	if (I==m_blenders.end())	
@@ -48,9 +45,13 @@ IBlender* CResourceManager::_GetBlender		(LPCSTR Name)
 		return 0;
 	}
 #endif
-	if (I==m_blenders.end())	{ Debug.fatal(DEBUG_INFO,"Shader '%s' not found in library.",Name); return 0; }
-#endif
-	else					return I->second;
+	if (I==m_blenders.end())
+	{ 
+		Debug.fatal(DEBUG_INFO,"Shader '%s' not found in library.",Name);
+		return 0; 
+	}
+	else
+		return I->second;
 }
 
 IBlender* CResourceManager::_FindBlender		(LPCSTR Name)
@@ -147,10 +148,6 @@ Shader*	CResourceManager::_cpp_Create	(IBlender* B, LPCSTR s_shader, LPCSTR s_te
 	C.BT				= B;
 	C.bEditor			= FALSE;
 	C.bDetail			= FALSE;
-#ifdef _EDITOR
-	if (!C.BT)			{ ELog.Msg(mtError,"Can't find shader '%s'",s_shader); return 0; }
-	C.bEditor			= TRUE;
-#endif
 
 	// Parse names
 	_ParseList			(C.L_textures,	s_textures	);
@@ -289,25 +286,6 @@ void CResourceManager::DeferredUnload()
 
 	tbb::parallel_for_each(m_textures, [&](auto m_tex) { m_tex.second->Unload(); });
 }
-#ifdef _EDITOR
-void	CResourceManager::ED_UpdateTextures(AStringVec* names)
-{
-	// 1. Unload
-	if (names){
-		for (u32 nid=0; nid<names->size(); nid++)
-		{
-			map_TextureIt I = m_textures.find	((*names)[nid].c_str());
-			if (I!=m_textures.end())	I->second->Unload();
-		}
-	}else{
-		for (map_TextureIt t=m_textures.begin(); t!=m_textures.end(); t++)
-			t->second->Unload();
-	}
-
-	// 2. Load
-	// DeferredUpload	();
-}
-#endif
 
 void	CResourceManager::_GetMemoryUsage(u32& m_base, u32& c_base, u32& m_lmaps, u32& c_lmaps)
 {

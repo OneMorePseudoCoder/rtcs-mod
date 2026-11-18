@@ -1,13 +1,8 @@
 #include "stdafx.h"
 #include "flod.h"
 
-#ifdef _EDITOR
-#include "igame_persistent.h"
-#include "environment.h"
-#else
 #include "../../xrEngine/igame_persistent.h"
 #include "../../xrEngine/environment.h"
-#endif
 
 extern float	r_ssaLOD_A;
 extern float	r_ssaLOD_B;
@@ -27,12 +22,7 @@ void R_dsgraph_structure::r_dsgraph_render_lods	(bool _setup_zb, bool _clear)
 	if (ssaRange<EPS_S)	ssaRange	= EPS_S;
 
 	const u32	uiVertexPerImposter	= 4;
-	const u32	uiImpostersFit		= RCache.Vertex.GetSize()
-		/ (firstV->geom->vb_stride*uiVertexPerImposter);
-
-	//Msg						("dbg_lods: shid[%d],firstV[%X]",shid,u32((void*)firstV));
-	//Msg						("dbg_lods: shader[%X]",u32((void*)firstV->shader._get()));
-	//Msg						("dbg_lods: shader_E[%X]",u32((void*)cur_S._get()));
+	const u32	uiImpostersFit		= RCache.Vertex.GetSize() / (firstV->geom->vb_stride*uiVertexPerImposter);
 
 	for (u32 i=0; i<lstLODs.size(); i++)
 	{
@@ -45,8 +35,10 @@ void R_dsgraph_structure::r_dsgraph_render_lods	(bool _setup_zb, bool _clear)
 		{
 			// sort out redundancy
 			R_dsgraph::_LodItem		&P		= lstLODs[i];
-			if (P.pVisual->shader->E[shid]==cur_S)	cur_count++	;
-			else {
+			if (P.pVisual->shader->E[shid]==cur_S)
+				cur_count++	;
+			else 
+			{
 				lstLODgroups.push_back	(cur_count);
 				cur_S				= P.pVisual->shader->E[shid];
 				cur_count			= 1;

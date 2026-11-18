@@ -6,15 +6,9 @@
 // ZNear - always 0.0f
 // ZFar - always 1.0f
 
-//class ENGINE_API CResourceManager;
-//class ENGINE_API CGammaControl;
-
 #include "pure.h"
-//#include "hw.h"
 #include "../xrcore/ftimer.h"
 #include "stats.h"
-//#include "shader.h"
-//#include "R_Backend.h"
 
 extern ENGINE_API float VIEWPORT_NEAR;
 #define VIEWPORT_NEAR_HUD 0.01f
@@ -214,7 +208,6 @@ public:
 	CSecondVPParams m_SecondViewport;	//--#SM+#-- +SecondVP+
 
     // Dependent classes
-
     CStats* Statistic;
 
     Fmatrix mInvFullTransform;
@@ -226,7 +219,6 @@ public:
 	Fmatrix mainVPFullTrans;
 	Fmatrix mainVPViewSaved;
 	Fmatrix mainVPProjectSaved;
-	//Fmatrix	secVPTransShrinked;
 
     CRenderDevice()
         :
@@ -357,12 +349,7 @@ private:
 
 extern ENGINE_API CRenderDevice Device;
 
-#ifndef _EDITOR
 #define RDEVICE Device
-#else
-#define RDEVICE EDevice
-#endif
-
 
 extern ENGINE_API bool g_bBenchmark;
 

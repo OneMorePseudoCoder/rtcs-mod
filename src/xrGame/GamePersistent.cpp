@@ -29,12 +29,10 @@
 #include "UI/UIGameTutorial.h"
 
 #ifndef MASTER_GOLD
-#	include "custommonster.h"
+#include "custommonster.h"
 #endif // MASTER_GOLD
 
-#ifndef _EDITOR
-#	include "ai_debug.h"
-#endif // _EDITOR
+#include "ai_debug.h"
 
 CGamePersistent::CGamePersistent(void)
 {
@@ -655,8 +653,8 @@ void CGamePersistent::OnEvent(EVENT E, u64 P1, u64 P2)
 		game->restart_simulator	(saved_name);
 		xr_free					(saved_name);
 		return;
-	}else
-	if(E==eDemoStart)
+	}
+	else if(E==eDemoStart)
 	{
 		string256			cmd;
 		LPCSTR				demo	= LPCSTR(P1);
@@ -670,9 +668,7 @@ void CGamePersistent::OnEvent(EVENT E, u64 P1, u64 P2)
 void CGamePersistent::Statistics	(CGameFont* F)
 {
 #ifdef DEBUG
-#	ifndef _EDITOR
-		m_last_stats_frame		= m_frame_counter;
-#	endif
+	m_last_stats_frame		= m_frame_counter;
 #endif
 }
 

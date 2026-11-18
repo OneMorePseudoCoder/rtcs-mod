@@ -4,16 +4,12 @@
 #else
 	#define XRNETSERVER_API __declspec(dllimport)
 
-	#ifndef _EDITOR
-		#pragma comment(lib,	"xrNetServer"	)
-    #endif
+	#pragma comment(lib,	"xrNetServer"	)
 #endif
 
 #include "../xrCore/net_utils.h"
 #include <dplay/dplay8.h>
 #include "net_messages.h"
-
-
 
 #include "net_compressor.h"
 
@@ -27,7 +23,8 @@ XRNETSERVER_API extern int		get_psNET_ServerUpdate();
 
 XRNETSERVER_API extern BOOL		psNET_direct_connect;
 
-enum	{
+enum	
+{
 	NETFLAG_MINIMIZEUPDATES		= (1<<0),
 	NETFLAG_LOG_SV_PACKETS		= (1<<2),
 };

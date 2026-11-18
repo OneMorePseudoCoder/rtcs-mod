@@ -17,9 +17,6 @@
 
 const u32 BIG_FILE_READER_WINDOW_SIZE = 1024*1024;
 
-//typedef void DUMMY_STUFF (const void*,const u32&,void*);
-//XRCORE_API DUMMY_STUFF *g_temporary_stuff = 0;
-
 # pragma warning(push)
 # pragma warning(disable:4995)
 # include <malloc.h>
@@ -27,11 +24,7 @@ const u32 BIG_FILE_READER_WINDOW_SIZE = 1024*1024;
 
 CLocatorAPI* xr_FS = NULL;
 
-#ifdef _EDITOR
-# define FSLTX "fs.ltx"
-#else
-# define FSLTX "fsgame.ltx"
-#endif
+#define FSLTX "fsgame.ltx"
 
 struct _open_file
 {
@@ -1378,12 +1371,9 @@ IWriter* CLocatorAPI::w_open(LPCSTR path, LPCSTR _fname)
 {
     string_path fname;
     xr_strcpy(fname, _fname);
-    xr_strlwr(fname);//,".$");
+    xr_strlwr(fname);
     if (path&&path[0]) update_path(fname, path, fname);
     CFileWriter* W = xr_new<CFileWriter>(fname, false);
-#ifdef _EDITOR
-    if (!W->valid()) xr_delete(W);
-#endif
     return W;
 }
 
@@ -1391,12 +1381,9 @@ IWriter* CLocatorAPI::w_open_ex(LPCSTR path, LPCSTR _fname)
 {
     string_path fname;
     xr_strcpy(fname, _fname);
-    xr_strlwr(fname);//,".$");
+    xr_strlwr(fname);
     if (path&&path[0]) update_path(fname, path, fname);
     CFileWriter* W = xr_new<CFileWriter>(fname, true);
-#ifdef _EDITOR
-    if (!W->valid()) xr_delete(W);
-#endif
     return W;
 }
 

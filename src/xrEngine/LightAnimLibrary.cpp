@@ -299,48 +299,11 @@ CLAItem* ELightAnimLibrary::AppendItem(LPCSTR name, CLAItem* src)
 {
     VERIFY2 (FindItem(name)==0,"Duplicate name found.");
     CLAItem* I = xr_new<CLAItem>();
-    if (src) *I = *src;
-    else I->InitDefault();
+    if (src)
+		*I = *src;
+    else
+		I->InitDefault();
     I->cName = name;
     Items.push_back (I);
     return I;
 }
-
-#ifdef _EDITOR
-void ELightAnimLibrary::RemoveObject(LPCSTR _fname, EItemType type, bool& res)
-{
-    if (TYPE_FOLDER == type)
-    {
-        res = true;
-        return;
-    }
-    else if (TYPE_OBJECT == type)
-    {
-        LAItemIt it = FindItemI(_fname);
-        if (it != Items.end())
-        {
-            xr_delete(*it);
-            Items.erase(it);
-            res = true;
-            return;
-        }
-    }
-    else THROW;
-    res = false;
-}
-//---------------------------------------------------------------------------
-
-void ELightAnimLibrary::RenameObject(LPCSTR nm0, LPCSTR nm1, EItemType type)
-{
-    if (TYPE_FOLDER == type)
-    {
-    }
-    else if (TYPE_OBJECT == type)
-    {
-        CLAItem* I = FindItem(nm0);
-        R_ASSERT(I);
-        I->cName = nm1;
-    }
-}
-//---------------------------------------------------------------------------
-#endif

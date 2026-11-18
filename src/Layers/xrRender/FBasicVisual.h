@@ -40,9 +40,6 @@ private:
 class		ECORE_API			dxRender_Visual : public IRenderVisual
 {
 public:
-#ifdef _EDITOR
-    ogf_desc					desc		;
-#endif
 	shared_str					dbg_name	;
 	virtual shared_str	_BCL	getDebugName() { return dbg_name; }
 public:
@@ -57,10 +54,6 @@ public:
 	virtual void				Copy						(dxRender_Visual* from);
 	virtual void				Spawn						()				{};
 	virtual void				Depart						()				{};
-
-//	virtual	CKinematics*		dcast_PKinematics			()				{ return 0;	}
-//	virtual	CKinematicsAnimated*dcast_PKinematicsAnimated	()				{ return 0;	}
-//	virtual IParticleCustom*	dcast_ParticleCustom		()				{ return 0;	}
 
 	virtual vis_data&	_BCL	getVisData() { return vis;}
 	virtual u32					getType()	 { return Type;}

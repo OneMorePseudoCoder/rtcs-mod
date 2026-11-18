@@ -65,12 +65,7 @@ virtual	void					BuildBoneMatrix				( const CBoneData* bd, CBoneInstance &bi, co
 public:
 
 	virtual void				OnCalculateBones		();
-public: 
-#ifdef _EDITOR
-public:
-#else
 private:
-#endif
 	u32											Update_LastTime;
 
 	CBlendInstance*								blend_instances;
@@ -104,9 +99,9 @@ protected:
 private:
 	void						IBlendSetup				(CBlend& B,u16 part,u8 channel, MotionID motion_ID, BOOL  bMixing, float blendAccrue, float blendFalloff, float Speed, BOOL noloop, PlayCallback Callback, LPVOID CallbackParam);
 	void						IFXBlendSetup			(CBlend &B, MotionID motion_ID, float blendAccrue, float blendFalloff,float Power ,float Speed,u16 bone);
-//.	bool						LoadMotions				(LPCSTR N, IReader *data);
+
 public:
-#if (defined DEBUG || defined _EDITOR)
+#ifdef DEBUG
 	std::pair<LPCSTR,LPCSTR>	LL_MotionDefName_dbg	(MotionID	ID);
 	void						LL_DumpBlends_dbg		( );
 #endif
@@ -116,14 +111,7 @@ public:
 
 	void						SetUpdateTracksCalback		( IUpdateTracksCallback	*callback );
 	IUpdateTracksCallback		*GetUpdateTracksCalback		( ){ return m_update_tracks_callback; }
-//	LPCSTR						LL_MotionDefName_dbg	(LPVOID		ptr);
 
-#ifdef _EDITOR
-    u32							LL_CycleCount	(){u32 cnt=0; for (u32 k=0; k<m_Motions.size(); k++) cnt+=m_Motions[k].motions.cycle()->size(); return cnt;}
-    u32							LL_FXCount		(){u32 cnt=0; for (u32 k=0; k<m_Motions.size(); k++) cnt+=m_Motions[k].motions.fx()->size(); return cnt;}
-	accel_map*					LL_Motions		(u32 slot){return m_Motions[slot].motions.motion_map();}
-	MotionID					ID_Motion		(LPCSTR  N, u16 slot);
-#endif
 	u16							LL_MotionsSlotCount(){return (u16)m_Motions.size();}
 	const shared_motions&		LL_MotionsSlot	(u16 idx){return m_Motions[idx].motions;}
 

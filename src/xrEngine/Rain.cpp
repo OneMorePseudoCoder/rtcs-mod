@@ -5,14 +5,10 @@
 #include "igame_persistent.h"
 #include "environment.h"
 
-#ifdef _EDITOR
-#include "ui_toolscustom.h"
-#else
 #include "render.h"
 #include "igame_level.h"
 #include "../xrcdb/xr_area.h"
 #include "xr_object.h"
-#endif
 
 // Warning: duplicated in dxRainRender
 static const int max_desired_items = 2500;
@@ -72,7 +68,6 @@ void CEffect_Rain::Born(Item& dest, float radius)
     float z = dist*_sin(angle);
     dest.D.random_dir(axis, deg2rad(drop_angle));
     dest.P.set(x + view.x - dest.D.x*source_offset, source_offset + view.y, z + view.z - dest.D.z*source_offset);
-    // dest.P.set (x+view.x,height+view.y,z+view.z);
     dest.fSpeed = ::Random.randF(drop_speed_min, drop_speed_max);
 
     float height = max_distance;
@@ -82,14 +77,12 @@ void CEffect_Rain::Born(Item& dest, float radius)
 BOOL CEffect_Rain::RayPick(const Fvector& s, const Fvector& d, float& range, collide::rq_target tgt)
 {
     BOOL bRes = TRUE;
-#ifdef _EDITOR
-    Tools->RayPick (s,d,range);
-#else
     collide::rq_result RQ;
     CObject* E = g_pGameLevel->CurrentViewEntity();
     bRes = g_pGameLevel->ObjectSpace.RayPick(s, d, range, tgt, RQ, E);
-    if (bRes) range = RQ.range;
-#endif
+    if (bRes)
+		range = RQ.range;
+
     return bRes;
 }
 
@@ -112,18 +105,12 @@ void CEffect_Rain::RenewItem(Item& dest, float height, BOOL bHit)
 
 void CEffect_Rain::OnFrame()
 {
-#ifndef _EDITOR
-    if (!g_pGameLevel) return;
-#endif
-
-#ifdef DEDICATED_SERVER
-    return;
-#endif
+    if (!g_pGameLevel)
+		return;
 
     // Parse states
     float factor = g_pGamePersistent->Environment().CurrentEnv->rain_density;
     static float hemi_factor = 0.f;
-#ifndef _EDITOR
     CObject* E = g_pGameLevel->CurrentViewEntity();
     if (E && E->renderable_ROS())
     {
@@ -138,12 +125,12 @@ void CEffect_Rain::OnFrame()
         clamp(t, 0.001f, 1.0f);
         hemi_factor = hemi_factor*(1.0f - t) + f*t;
     }
-#endif
 
     switch (state)
     {
     case stIdle:
-        if (factor < EPS_L) return;
+        if (factor < EPS_L)
+			return;
         state = stWorking;
         snd_Ambient.play(0, sm_Looped);
         snd_Ambient.set_position(Fvector().set(0, 0, 0));
@@ -168,10 +155,8 @@ void CEffect_Rain::OnFrame()
 
 void CEffect_Rain::Render()
 {
-#ifndef _EDITOR
     if (!g_pGameLevel)
 		return;
-#endif
 
     m_pRender->Render(*this);
 }

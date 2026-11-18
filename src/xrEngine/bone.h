@@ -405,15 +405,12 @@ public:
     IC float _BCL editor_lo_limit(u8 k) const { return IK_data.limits[k].limit.x; }
     IC float _BCL editor_hi_limit(u8 k) const { return IK_data.limits[k].limit.y; }
 
-
-
-
     void SaveData(IWriter& F);
     void LoadData(IReader& F);
     void ResetData();
     void CopyData(CBone* bone);
 
-#if defined _EDITOR || defined _MAYA_EXPORT
+#if defined _MAYA_EXPORT
     void ShapeScale(const Fvector& amount);
     void ShapeRotate(const Fvector& amount);
     void ShapeMove(const Fvector& amount);

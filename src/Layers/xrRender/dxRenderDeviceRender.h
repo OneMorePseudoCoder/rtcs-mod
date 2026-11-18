@@ -2,13 +2,7 @@
 #define dxRenderDeviceRender_included
 #pragma once
 
-#ifndef _EDITOR
-	#define DEV dxRenderDeviceRender::Instance().Resources
-#else
-	#define DEV EDevice.Resources
-#endif
-
-#ifndef _EDITOR
+#define DEV dxRenderDeviceRender::Instance().Resources
 
 #include "..\..\Include\xrRender\RenderDeviceRender.h"
 #include "xr_effgamma.h"
@@ -30,8 +24,6 @@ public:
 	virtual void	setBrightness(float fGamma);
 	virtual void	setContrast(float fGamma);
 	virtual void	updateGamma();
-
-	//void	gammaGenLUT(D3DGAMMARAMP &G) {m_Gamma.GenLUT(G);}
 
 	//	Destroy
 	virtual void	OnDeviceDestroy( BOOL bKeepTextures);
@@ -77,11 +69,7 @@ public:
 	ref_shader			m_SelectionShader;
 
 private:
-
 	CGammaControl		m_Gamma;
 };
-
-#endif //ifndef _EDITOR
-
 
 #endif	//	RenderDeviceRender_included

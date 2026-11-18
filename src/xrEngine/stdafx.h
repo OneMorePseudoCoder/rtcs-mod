@@ -2,10 +2,6 @@
 #define STDAFX_3DA
 #pragma once
 
-#ifdef _EDITOR
-#include "..\editors\ECore\stdafx.h"
-#else
-
 #ifndef NDEBUG
 # ifndef INGAME_EDITOR
 # define INGAME_EDITOR
@@ -25,7 +21,6 @@
 
 #pragma warning(disable:4995)
 #include <d3d9.h>
-//#include <dplay8.h>
 #pragma warning(default:4995)
 
 // you must define ENGINE_BUILD then building the engine itself
@@ -67,7 +62,6 @@ extern ENGINE_API CInifile* pGameIni;
 #else
 #pragma comment(lib, "lua51.lib" )
 #endif
-//#include "lua/library_linkage.h"
 //-AVO
 
 #ifndef DEBUG
@@ -84,5 +78,4 @@ extern ENGINE_API CInifile* pGameIni;
 #define READ_IF_EXISTS(ltx,method,section,name,default_value)\
  (((ltx)->line_exist(section, name)) ? ((ltx)->method(section, name)) : (default_value))
 
-#endif // !M_BORLAND
 #endif // !defined STDAFX_3DA

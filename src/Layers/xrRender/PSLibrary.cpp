@@ -8,11 +8,6 @@
 #include "ParticleEffect.h"
 #include "ParticleGroup.h"
 
-#ifdef _EDITOR
-#	include "ParticleEffectActions.h"
-#include "../ECore/Editor/ui_main.h"
-#endif
-
 #define _game_data_			"$game_data$"
 
 bool ped_sort_pred	(const PS::CPEDef* a, 	const PS::CPEDef* b)	{	return xr_strcmp(a->Name(),b->Name())<0;}
@@ -23,17 +18,9 @@ bool pgd_find_pred	(const PS::CPGDef* a, 	LPCSTR b)				{	return xr_strcmp(a->m_N
 //----------------------------------------------------
 void CPSLibrary::OnCreate()
 {
-#ifdef _EDITOR
-    if(pCreateEAction)
-    {
-        Load2();
-    }else
-#endif
-    {
-    	string_path		fn;
-        FS.update_path	(fn,_game_data_,"particles.xr");
-        Load			(fn);
-    }
+    string_path		fn;
+    FS.update_path	(fn,_game_data_,"particles.xr");
+    Load			(fn);
 }
  
 void CPSLibrary::OnDestroy()
@@ -49,19 +36,16 @@ void CPSLibrary::OnDestroy()
 		xr_delete	(*g_it);
 	m_PGDs.clear	();
 }
-//----------------------------------------------------
+
 PS::PEDIt CPSLibrary::FindPEDIt(LPCSTR Name)
 {
-	if (!Name) return m_PEDs.end();
-#ifdef _EDITOR
-	for (PS::PEDIt it=m_PEDs.begin(); it!=m_PEDs.end(); it++)
-    	if (0==xr_strcmp((*it)->Name(),Name)) return it;
-	return m_PEDs.end();
-#else
+	if (!Name)
+		return m_PEDs.end();
 	PS::PEDIt I = std::lower_bound(m_PEDs.begin(),m_PEDs.end(),Name,ped_find_pred);
-	if (I==m_PEDs.end() || (0!=xr_strcmp((*I)->m_Name,Name)))	return m_PEDs.end();
-	else														return I;
-#endif
+	if (I==m_PEDs.end() || (0!=xr_strcmp((*I)->m_Name,Name)))
+		return m_PEDs.end();
+	else
+		return I;
 }
 
 PS::CPEDef* CPSLibrary::FindPED(LPCSTR Name)
@@ -73,15 +57,11 @@ PS::CPEDef* CPSLibrary::FindPED(LPCSTR Name)
 PS::PGDIt CPSLibrary::FindPGDIt(LPCSTR Name)
 {
 	if (!Name) return m_PGDs.end();
-#ifdef _EDITOR
-	for (PS::PGDIt it=m_PGDs.begin(); it!=m_PGDs.end(); it++)
-    	if (0==xr_strcmp((*it)->m_Name,Name)) return it;
-	return m_PGDs.end();
-#else
 	PS::PGDIt I = std::lower_bound(m_PGDs.begin(),m_PGDs.end(),Name,pgd_find_pred);
-	if (I==m_PGDs.end() || (0!=xr_strcmp((*I)->m_Name,Name)))	return m_PGDs.end();
-	else														return I;
-#endif
+	if (I==m_PGDs.end() || (0!=xr_strcmp((*I)->m_Name,Name)))
+		return m_PGDs.end();
+	else
+		return I;
 }
 
 PS::CPGDef* CPSLibrary::FindPGD(LPCSTR Name)
@@ -129,11 +109,6 @@ bool CPSLibrary::Load2()
 
 	FS.file_list				(files, _path, FS_ListFiles, "*.pe,*.pg");
 
-#ifdef _EDITOR
-	SPBItem* pb = NULL;
-	if(UI->m_bReady)
-    pb 							= UI->ProgressStart(files.size(),"Loading particles...");
-#endif
 	FS_FileSet::iterator it		= files.begin();
 	FS_FileSet::iterator it_e	= files.end();
 
@@ -144,10 +119,6 @@ bool CPSLibrary::Load2()
 	    _splitpath				(f.name.c_str(), 0, p_path, p_name, p_ext );
         FS.update_path			(_path, "$game_particles$",f.name.c_str());
         CInifile				ini (_path,TRUE,TRUE,FALSE);
-
-#ifdef _EDITOR
-        if(pb) pb->Inc					();
-#endif
 
         xr_sprintf				(_path, sizeof(_path),"%s%s",p_path, p_name);
         if(0==stricmp(p_ext,".pe"))
@@ -179,9 +150,6 @@ bool CPSLibrary::Load2()
 	for (PS::PEDIt e_it = m_PEDs.begin(); e_it!=m_PEDs.end(); e_it++)
     	(*e_it)->CreateShader();
 
-#ifdef _EDITOR
-    if(pb) UI->ProgressEnd		(pb);
-#endif
 	Msg				("Loaded particles :%d", files.size());
 	return true;
 }

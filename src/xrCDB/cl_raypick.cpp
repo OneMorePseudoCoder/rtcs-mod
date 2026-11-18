@@ -13,8 +13,8 @@
 #define R_END
 #endif
 
-
-namespace RAPID {
+namespace RAPID 
+{
 	void XRCollide::add_raypick(const raypick_info& rp_inf)
 	{
 		RayContact.push_back(rp_inf);
@@ -30,11 +30,6 @@ namespace RAPID {
 	IC DWORD& IR(float &x) { return (DWORD&)x; }
 	IC BOOL TestAABB(const Fvector& bMax, const Fvector& rP, const Fvector& rD, Fvector& coord)
 	{
-    #ifdef _EDITOR
-    	Fbox		BB;
-        BB.set		(-bMax.x,-bMax.y,-bMax.z,bMax.x,bMax.y,bMax.z);
-        return 		BB.Pick2(rP,rD,coord);
-    #else
 		BOOL		Inside = TRUE;
 		Fvector		MaxT,bMin;
 		MaxT.set	(-1.f,-1.f,-1.f);
@@ -108,13 +103,12 @@ namespace RAPID {
 			return false;
 			#endif
 		}
-	#endif
 	}
 
 	void XRCollide::raypick_fast		(const box *B, const Fvector& rC, const Fvector& rD)
 	{
-		if ((ray_flags&RAY_ONLYFIRST) && (RayContact.size()>1)) return;
-//		if (!B) return;
+		if ((ray_flags&RAY_ONLYFIRST) && (RayContact.size()>1))
+			return;
 
 		// 1. XForm ray from parent to local space
 		Fvector C,D,P;

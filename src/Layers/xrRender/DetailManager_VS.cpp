@@ -3,13 +3,8 @@
 
 #include "detailmanager.h"
 
-#ifdef _EDITOR
-#	include "igame_persistent.h"
-#	include "environment.h"
-#else
-#	include "../../xrEngine/igame_persistent.h"
-#	include "../../xrEngine/environment.h"
-#endif
+#include "../../xrEngine/igame_persistent.h"
+#include "../../xrEngine/environment.h"
 
 #include "../xrRenderDX10/dx10BufferUtils.h"
 
@@ -211,7 +206,6 @@ void CDetailManager::hw_Render()
 	hw_Render_dump			(&*hwc_array,	1, 0, c_hdr );
 
 	// Wave1
-	//wave.set				(1.f/3.f,		1.f/7.f,	1.f/5.f,	RDEVICE.fTimeGlobal*swing_current.speed);
 	wave.set				(1.f/3.f,		1.f/7.f,	1.f/5.f,	m_time_pos);
 	RCache.set_c			(&*hwc_wave,	wave.div(PI_MUL_2));	// wave
 	RCache.set_c			(&*hwc_wind,	dir2);																					// wind-dir
@@ -234,16 +228,11 @@ void	CDetailManager::hw_Render_dump		(ref_constant x_array, u32 var_id, u32 lod_
 	vis_list& list	=	m_visibles	[var_id];
 
 	Fvector					c_sun,c_ambient,c_hemi;
-#ifndef _EDITOR
+
 	CEnvDescriptor&	desc	= *g_pGamePersistent->Environment().CurrentEnv;
 	c_sun.set				(desc.sun_color.x,	desc.sun_color.y,	desc.sun_color.z);	c_sun.mul(.5f);
 	c_ambient.set			(desc.ambient.x,	desc.ambient.y,		desc.ambient.z);
 	c_hemi.set				(desc.hemi_color.x, desc.hemi_color.y,	desc.hemi_color.z);
-#else
-	c_sun.set				(1,1,1);	c_sun.mul(.5f);
-	c_ambient.set			(1,1,1);
-	c_hemi.set				(1,1,1);
-#endif    
 
 	VERIFY(objects.size()<=list.size());
 

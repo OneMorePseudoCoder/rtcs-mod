@@ -4,23 +4,16 @@
 #include "hwcaps.h"
 #include "hw.h"
 
-#ifndef _EDITOR
-	#include <nvapi.h>
-	//#include "ATI/atimgpud.h"
-#endif
+#include <nvapi.h>
 
 namespace
 {
-
-#ifndef _EDITOR
 u32 GetNVGpuNum()
 {
 	NvLogicalGpuHandle  logicalGPUs[NVAPI_MAX_LOGICAL_GPUS];
 	NvU32               logicalGPUCount;
 	NvPhysicalGpuHandle physicalGPUs[NVAPI_MAX_PHYSICAL_GPUS];
 	NvU32               physicalGPUCount;
-
-//	int result = NVAPI_OK;
 
 	int iGpuNum = 0;
 
@@ -39,7 +32,6 @@ u32 GetNVGpuNum()
 	{
 		Msg("* NvAPI_EnumLogicalGPUs failed!");
 		return iGpuNum;
-		// error
 	}
 
 	// enumerate physical gpus
@@ -48,7 +40,6 @@ u32 GetNVGpuNum()
 	{
 		Msg("* NvAPI_EnumPhysicalGPUs failed!");
 		return iGpuNum;
-		// error
 	}
 
 	Msg	("* NVidia MGPU: Logical(%d), Physical(%d)", physicalGPUCount, logicalGPUCount);
@@ -100,12 +91,6 @@ u32 GetGpuNum()
 	
 	return res;
 }
-#else
-u32 GetGpuNum()
-{
-	return 1;
-}
-#endif
 }
 
 #if !defined(USE_DX10) && !defined(USE_DX11)
@@ -162,13 +147,10 @@ void CHWCaps::Update()
 	Msg					("* GPU vertex cache: %s, %d",(1==vc.OptMethod)?"recognized":"unrecognized",u32(geometry.dwVertexCache));
 
 	// *******1********** Compatibility : vertex shader
-	if (0==raster_major)		geometry_major=0;		// Disable VS if no PS
-#ifdef _EDITOR
-	geometry_major		= 0;
-#endif
+	if (0==raster_major)
+		geometry_major=0;		// Disable VS if no PS
 
-	//
-	bTableFog			=	FALSE;	//BOOL	(caps.RasterCaps&D3DPRASTERCAPS_FOGTABLE);
+	bTableFog			=	FALSE;
 
 	// Detect if stencil available
 	bStencil			=	FALSE;

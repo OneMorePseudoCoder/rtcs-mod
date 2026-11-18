@@ -8,7 +8,6 @@
 
 #ifndef XRAY_ALIFE_SPACE
 #define XRAY_ALIFE_SPACE
-//#include "../xrcore/_std_extensions.h"
 
 // ALife objects, events and tasks
 #define ALIFE_VERSION				0x0006
@@ -177,14 +176,14 @@ namespace ALife {
 		return(eHitTypeMax);
 #endif
 	}
-#ifndef	_EDITOR
+
 xr_token							hit_types_token							[ ];
 
 	IC LPCSTR g_cafHitType2String(EHitType tHitType)
 	{
 		return get_token_name(hit_types_token, tHitType);
 	}
-#endif
+
 	using INT_VECTOR = xr_vector<int>;
 	using INT_IT = INT_VECTOR::iterator;
 

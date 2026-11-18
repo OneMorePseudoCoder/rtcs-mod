@@ -10,8 +10,6 @@
 
 #include "dxRenderDeviceRender.h"
 
-
-//
 STextureList::~STextureList				()			{	DEV->_DeleteTextureList	(this);			}
 SMatrixList::~SMatrixList				()			{	DEV->_DeleteMatrixList		(this);			}
 SConstantList::~SConstantList			()			{	DEV->_DeleteConstantList	(this);			}
@@ -19,7 +17,7 @@ SPass::~SPass							()			{	DEV->_DeletePass			(this);			}
 ShaderElement::~ShaderElement			()			{	DEV->_DeleteElement		(this);			}
 SGeometry::~SGeometry					()			{	DEV->DeleteGeom			(this);			}
 Shader::~Shader							()			{	DEV->Delete				(this);			}
-																							 
+
 //////////////////////////////////////////////////////////////////////////					 
 void	resptrcode_shader::create		(LPCSTR s_shader, LPCSTR s_textures, LPCSTR s_constants, LPCSTR s_matrices)
 {
@@ -60,13 +58,9 @@ BOOL SPass::equal(const SPass& other)
 
 	if (T != other.T)					return FALSE;
 	if (C != other.C)					return FALSE;
-#ifdef _EDITOR
-	if (M != other.M)					return FALSE;
-#endif
 	return TRUE;
 }
 
-//
 ShaderElement::ShaderElement()
 {
 	flags.iPriority		= 1;

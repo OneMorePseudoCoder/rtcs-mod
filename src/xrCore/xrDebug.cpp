@@ -1,8 +1,4 @@
 #include "stdafx.h"
-
-
-#ifndef _EDITOR
-
 #include "xrdebug.h"
 #include "resource.h"
 #include "dbghelp.h"
@@ -306,15 +302,11 @@ LONG WINAPI UnhandledFilter	( struct _EXCEPTION_POINTERS *pExceptionInfo )
 //////////////////////////////////////////////////////////////////////
 #ifdef M_BORLAND
 //	typedef void ( _RTLENTRY *___new_handler) ();
-namespace std{
+namespace std
+{
 	extern new_handler _RTLENTRY _EXPFUNC set_new_handler( new_handler new_p );
 };
 
-//    typedef int	(__stdcall * _PNH)( size_t );
-//    _CRTIMP int	__cdecl _set_new_mode( int );
-//    _PNH	__cdecl set_new_handler( _PNH );
-//	typedef void (new * new_handler)();
-//	new_handler set_new_handler(new_handler my_handler);
 	static void __cdecl def_new_handler() 
     {
 		FATAL		("Out of memory.");
@@ -322,7 +314,6 @@ namespace std{
 
     void	xrDebug::_initialize		(const bool &dedicated)
     {
-//        std::set_new_mode 				(1);					// gen exception if can't allocate memory
         std::set_new_handler			(def_new_handler  );	// exception-handler for 'out of memory' condition
         ::SetUnhandledExceptionFilter	( UnhandledFilter );	// exception handler to all "unhandled" exceptions
     }
@@ -340,7 +331,5 @@ namespace std{
 		std::set_unexpected				(_terminate);
         ::SetUnhandledExceptionFilter	( UnhandledFilter );	// exception handler to all "unhandled" exceptions
     }
-
-#endif
 
 #endif

@@ -41,7 +41,8 @@ void	CBlender_Compile::r_Pass		(LPCSTR _vs, LPCSTR _ps, bool bFog, BOOL bZtest, 
 	ctable.merge			(&vs->constants);
 
 	// Last Stage - disable
-	if (0==stricmp(_ps,"null"))	{
+	if (0==stricmp(_ps,"null"))	
+	{
 		RS.SetTSS				(0,D3DTSS_COLOROP,D3DTOP_DISABLE);
 		RS.SetTSS				(0,D3DTSS_ALPHAOP,D3DTOP_DISABLE);
 	}
@@ -146,7 +147,6 @@ u32		CBlender_Compile::r_Sampler		(LPCSTR _name, LPCSTR texture, bool b_ps1x_Pro
 		// Sampler states
 		i_Address				(dwStage,address);
 		i_Filter				(dwStage,fmin,fmip,fmag);
-		//.i_Filter				(dwStage,D3DTEXF_POINT,D3DTEXF_POINT,D3DTEXF_POINT); // show pixels
 		if (dwStage<4)			i_Projective		(dwStage,b_ps1x_ProjectiveDivide);
 	}
 	return	dwStage;
@@ -173,9 +173,6 @@ void	CBlender_Compile::r_End			()
 	dest.state				= DEV->_CreateState		(RS.GetContainer());
 	dest.T					= DEV->_CreateTextureList	(passTextures);
 	dest.C					= 0;
-#ifdef _EDITOR
-	dest.M					= 0;
-#endif
 	SH->passes.push_back(DEV->_CreatePass(dest));
 }
 #endif	//	USE_DX10

@@ -13,9 +13,6 @@
 
 #include "../xrRender/dxRenderDeviceRender.h"
 
-// #include "std_classes.h"
-// #include "xr_avi.h"
-
 void fix_texture_name(LPSTR fn)
 {
 	LPSTR _ext = strext(fn);
@@ -312,12 +309,9 @@ ID3DBaseTexture*	CRender::texture_load(LPCSTR fRName, u32& ret_msize, bool bStag
 	bStaging &= bAllowStaging;
 
 	ID3DBaseTexture*		pTexture2D		= NULL;
-	//IDirect3DCubeTexture9*	pTextureCUBE	= NULL;
 	string_path				fn;
-	//u32						dwWidth,dwHeight;
 	u32						img_size		= 0;
 	int						img_loaded_lod	= 0;
-	//D3DFORMAT				fmt;
 	u32						mip_cnt=u32(-1);
 	// validation
 	R_ASSERT				(fRName);
@@ -325,7 +319,7 @@ ID3DBaseTexture*	CRender::texture_load(LPCSTR fRName, u32& ret_msize, bool bStag
 
 	// make file name
 	string_path				fname;
-	xr_strcpy(fname,fRName); //. andy if (strext(fname)) *strext(fname)=0;
+	xr_strcpy(fname,fRName);
 	fix_texture_name		(fname);
 	IReader* S				= NULL;
 	if (!FS.exist(fn,"$game_textures$",	fname,	".dds")	&& strstr(fname,"_bump"))	goto _BUMP_from_base;
@@ -334,18 +328,9 @@ ID3DBaseTexture*	CRender::texture_load(LPCSTR fRName, u32& ret_msize, bool bStag
 	if (FS.exist(fn,"$game_textures$",	fname,	".dds"))							goto _DDS;
 
 
-#ifdef _EDITOR
-	ELog.Msg(mtError,"Can't find texture '%s'",fname);
-	return 0;
-#else
-
 	Msg("! Can't find texture '%s'",fname);
 	R_ASSERT(FS.exist(fn,"$game_textures$",	"ed\\ed_not_existing_texture",".dds"));
 	goto _DDS;
-
-	//	Debug.fatal(DEBUG_INFO,"Can't find texture '%s'",fname);
-
-#endif
 
 _DDS:
 	{
@@ -357,31 +342,18 @@ _DDS:
 #endif // DEBUG
 		img_size				= S->length	();
 		R_ASSERT				(S);
-		//R_CHK2					(D3DXGetImageInfoFromFileInMemory	(S->pointer(),S->length(),&IMG), fn);
 #ifdef USE_DX11
 		R_CHK2 (D3DX11GetImageInfoFromMemory(S->pointer(),S->length(), 0, &IMG, 0), fn);
 #else
 		R_CHK2 (D3DX10GetImageInfoFromMemory(S->pointer(),S->length(), 0, &IMG, 0), fn);
 #endif
-		//if (IMG.ResourceType	== D3DRTYPE_CUBETEXTURE)			goto _DDS_CUBE;
-		if (IMG.MiscFlags & D3D_RESOURCE_MISC_TEXTURECUBE)			goto _DDS_CUBE;
-		else														goto _DDS_2D;
+		if (IMG.MiscFlags & D3D_RESOURCE_MISC_TEXTURECUBE)
+			goto _DDS_CUBE;
+		else
+			goto _DDS_2D;
 
 _DDS_CUBE:
 		{
-			//R_CHK(D3DXCreateCubeTextureFromFileInMemoryEx(
-			//	HW.pDevice,
-			//	S->pointer(),S->length(),
-			//	D3DX_DEFAULT,
-			//	IMG.MipLevels,0,
-			//	IMG.Format,
-			//	D3DPOOL_MANAGED,
-			//	D3DX_DEFAULT,
-			//	D3DX_DEFAULT,
-			//	0,&IMG,0,
-			//	&pTextureCUBE
-			//	));
-
 			//	Inited to default by provided default constructor
 #ifdef USE_DX11
 			D3DX11_IMAGE_LOAD_INFO LoadInfo;
@@ -435,22 +407,6 @@ _DDS_2D:
 			// Check for LMAP and compress if needed
 			strlwr					(fn);
 
-
-			// Load   SYS-MEM-surface, bound to device restrictions
-			//ID3DTexture2D*		T_sysmem;
-			//R_CHK2(D3DXCreateTextureFromFileInMemoryEx
-			//	(
-			//	HW.pDevice,S->pointer(),S->length(),
-			//	D3DX_DEFAULT,D3DX_DEFAULT,
-			//	IMG.MipLevels,0,
-			//	IMG.Format,
-			//	D3DPOOL_SYSTEMMEM,
-			//	D3DX_DEFAULT,
-			//	D3DX_DEFAULT,
-			//	0,&IMG,0,
-			//	&T_sysmem
-			//	), fn);
-
 			img_loaded_lod			= get_texture_load_lod(fn);
 
 			//	Inited to default by provided default constructor
@@ -459,18 +415,10 @@ _DDS_2D:
 #else
 			D3DX10_IMAGE_LOAD_INFO LoadInfo;
 #endif
-			//LoadInfo.FirstMipLevel = img_loaded_lod;
 			LoadInfo.Width	= IMG.Width;
 			LoadInfo.Height	= IMG.Height;
-
 			LoadInfo.FirstMipLevel = img_loaded_lod;
 
-			/*if (img_loaded_lod) // Mortan: если буду чинить x32 не забыть вернуть
-			{
-				Reduce(LoadInfo.Width, LoadInfo.Height, IMG.MipLevels, img_loaded_lod);
-			}*/
-
-			//LoadInfo.Usage = D3D_USAGE_IMMUTABLE;
 			if (bStaging)
 			{
 				LoadInfo.Usage = D3D_USAGE_STAGING;

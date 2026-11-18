@@ -128,23 +128,27 @@ void CSoundRender_Source::LoadWave	(LPCSTR pName)
 
 void CSoundRender_Source::load(LPCSTR name)
 {
-	string_path			fn,N;
-	xr_strcpy				(N,name);
-	strlwr				(N);
-	if (strext(N))		*strext(N) = 0;
+	string_path fn, N;
+	xr_strcpy(N, name);
+	strlwr(N);
 
-	fname				= N;
+	if (strext(N))
+		*strext(N) = 0;
 
-	strconcat			(sizeof(fn),fn,N,".ogg");
-	if (!FS.exist("$level$",fn))	FS.update_path	(fn,"$game_sounds$",fn);
+	fname = N;
 
-#ifdef _EDITOR
-	if (!FS.exist(fn)){ 
-		FS.update_path	(fn,"$game_sounds$","$no_sound.ogg");
+	strconcat(sizeof(fn), fn, N, ".ogg");
+
+	if (!FS.exist("$level$", fn))
+		FS.update_path(fn, "$game_sounds$", fn);
+
+	if (!FS.exist(fn))
+	{ 
+		FS.update_path(fn,"$game_sounds$", "$no_sound.ogg");
     }
-#endif
-	LoadWave			(fn);
-	SoundRender->cache.cat_create	(CAT, dwBytesTotal);
+
+	LoadWave(fn);
+	SoundRender->cache.cat_create(CAT, dwBytesTotal);
 }
 
 void CSoundRender_Source::unload()

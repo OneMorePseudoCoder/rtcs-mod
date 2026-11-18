@@ -7,11 +7,7 @@
 
 #include "FHierrarhyVisual.h"
 #include "../../xrEngine/Fmesh.h"
-#ifndef _EDITOR
-#include "../../xrEngine/render.h"
-#else
-#include "../../Include/xrAPI/xrAPI.h"
-#endif
+#include "../../xrEngine/Render.h"
 
 //////////////////////////////////////////////////////////////////////
 // Construction/Destruction
@@ -24,7 +20,8 @@ FHierrarhyVisual::FHierrarhyVisual()  : dxRender_Visual()
 
 FHierrarhyVisual::~FHierrarhyVisual()
 {
-	if (!bDontDelete) {
+	if (!bDontDelete) 
+	{
 		for (u32 i=0; i<children.size(); i++)	
 			::Render->model_Delete((IRenderVisual *&)children[i]);
 	}
@@ -33,7 +30,8 @@ FHierrarhyVisual::~FHierrarhyVisual()
 
 void FHierrarhyVisual::Release()
 {
-	if (!bDontDelete) {
+	if (!bDontDelete) 
+	{
 		for (u32 i=0; i<children.size(); i++)
 			children[i]->Release();
 	}
@@ -47,13 +45,10 @@ void FHierrarhyVisual::Load(const char* N, IReader *data, u32 dwFlags)
 		// From Link
 		u32 cnt = data->r_u32		();
 		children.resize				(cnt);
-		for (u32 i=0; i<cnt; i++)	{
-#ifdef _EDITOR
-			THROW;
-#else
+		for (u32 i=0; i<cnt; i++)	
+		{
 			u32 ID	= data->r_u32();
 			children[i]	= (dxRender_Visual*)::Render->getVisual(ID);
-#endif
 		}
 		bDontDelete = TRUE;
 	}

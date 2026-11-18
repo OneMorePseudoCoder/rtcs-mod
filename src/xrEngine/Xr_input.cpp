@@ -4,10 +4,8 @@
 #include "xr_input.h"
 #include "IInputReceiver.h"
 #include "../include/editor/ide.hpp"
-
-#ifndef _EDITOR
 # include "xr_input_xinput.h"
-#endif
+
 CInput* pInput = NULL;
 IInputReceiver dummyController;
 
@@ -216,7 +214,6 @@ void CInput::KeyUpdate()
         KBState[od[idx].dwOfs] = od[idx].dwData & 0x80;
     }
 
-#ifndef _EDITOR
     bool b_alt_tab = false;
 
     if (!b_altF4 && KBState[DIK_F4] && (KBState[DIK_RMENU] || KBState[DIK_LMENU]))
@@ -226,13 +223,10 @@ void CInput::KeyUpdate()
         Engine.Event.Defer("KERNEL:quit");
     }
 
+    if (b_altF4)
+		return;
 
-#endif
-    if (b_altF4) return;
-
-#ifndef _EDITOR
     if (Device.dwPrecacheFrame == 0)
-#endif
     {
 
         for (u32 i = 0; i < dwElements; i++)
@@ -246,10 +240,8 @@ void CInput::KeyUpdate()
             else
             {
                 cbStack.back()->IR_OnKeyboardRelease(key);
-#ifndef _EDITOR
                 if (key == DIK_TAB && (iGetAsyncKeyState(DIK_RMENU) || iGetAsyncKeyState(DIK_LMENU)))
                     b_alt_tab = true;
-#endif
             }
         }
 
@@ -258,47 +250,10 @@ void CInput::KeyUpdate()
                 cbStack.back()->IR_OnKeyboardHold(i);
     }
 
-#ifndef _EDITOR
     if (b_alt_tab)
         SendMessage(Device.m_hWnd, WM_SYSCOMMAND, SC_MINIMIZE, 0);
-#endif
-    /*
-    #ifndef _EDITOR
-    //update xinput if exist
-    for( DWORD iUserIndex=0; iUserIndex<DXUT_MAX_CONTROLLERS; iUserIndex++ )
-    {
-    DXUTGetGamepadState( iUserIndex, &g_GamePads[iUserIndex], true, false );
-
-    if( !g_GamePads[iUserIndex].bConnected )
-    continue; // unplugged?
-
-    bool new_b, old_b;
-    new_b = !!(g_GamePads[iUserIndex].wPressedButtons & XINPUT_GAMEPAD_A);
-    old_b = !!(g_GamePads[iUserIndex].wLastButtons & XINPUT_GAMEPAD_A);
-
-    if(new_b != old_b)
-    {
-    if(old_b)
-    cbStack.back()->IR_OnMousePress(0);
-    else
-    cbStack.back()->IR_OnMouseRelease(0);
-    }
-    int dx,dy;
-    dx = iFloor(g_GamePads[iUserIndex].fThumbRX*6);
-    dy = iFloor(g_GamePads[iUserIndex].fThumbRY*6);
-    if(dx || dy)
-    cbStack.back()->IR_OnMouseMove ( dx, dy );
-    }
-
-    if(Device.fTimeGlobal > stop_vibration_time)
-    {
-    stop_vibration_time = flt_max;
-    set_vibration (0, 0);
-    }
-    //xinput
-    #endif
-    */
 }
+
 bool CInput::get_dik_name(int dik, LPSTR dest_str, int dest_sz)
 {
     DIPROPSTRING keyname;
@@ -361,10 +316,9 @@ void CInput::MouseUpdate()
         if (hr != S_OK) return;
     };
 
-#ifndef _EDITOR
     if (Device.dwPrecacheFrame)
         return;
-#endif
+
     BOOL mouse_prev[COUNT_MOUSE_BUTTONS];
 
     mouse_prev[0] = mouseState[0];
@@ -645,7 +599,4 @@ bool CInput::get_exclusive_mode()
 void CInput::feedback(u16 s1, u16 s2, float time)
 {
     stop_vibration_time = RDEVICE.fTimeGlobal + time;
-#ifndef _EDITOR
-    //. set_vibration (s1, s2);
-#endif
 }

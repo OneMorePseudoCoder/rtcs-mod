@@ -88,40 +88,27 @@ void	CBlender_Compile::_cpp_Compile	(ShaderElement* _SH)
 	bDetail_Diffuse	= FALSE;
 	bDetail_Bump	= FALSE;
 
-#ifndef _EDITOR
 #if RENDER==R_R1
 	if (RImplementation.o.no_detail_textures)
 		bDetail = FALSE;
-#endif
 #endif
 
 	if(bDetail)
 	{
 		DEV->m_textures_description.GetTextureUsage(base, bDetail_Diffuse, bDetail_Bump);
 
-#ifndef _EDITOR
 #if RENDER!=R_R1
 		//	Detect the alowance of detail bump usage here.
-		if (  !(RImplementation.o.advancedpp && ps_r2_ls_flags.test(R2FLAG_DETAIL_BUMP) ) )
+		if (!(RImplementation.o.advancedpp && ps_r2_ls_flags.test(R2FLAG_DETAIL_BUMP)))
 		{
 			bDetail_Diffuse |= bDetail_Bump;
 			bDetail_Bump = false;
 		}
 #endif
-#endif
-
 	}
 
-	bUseSteepParallax = DEV->m_textures_description.UseSteepParallax(base) 
-		&& BT->canUseSteepParallax();
-/*
-	if (DEV->m_textures_description.UseSteepParallax(base))
-	{
-		bool bSteep = BT->canUseSteepParallax();
-		DEV->m_textures_description.UseSteepParallax(base);
-		bUseSteepParallax = true;
-	}
-*/	
+	bUseSteepParallax = DEV->m_textures_description.UseSteepParallax(base) && BT->canUseSteepParallax();
+
 #ifdef USE_DX11
 	TessMethod = 0;
 #endif
@@ -134,20 +121,12 @@ void	CBlender_Compile::SetParams		(int iPriority, bool bStrictB2F)
 {
 	SH->flags.iPriority		= iPriority;
 	SH->flags.bStrictB2F	= bStrictB2F;
-	if (bStrictB2F){			
-#ifdef _EDITOR    
-		if (1!=(SH->flags.iPriority/2)){
-        	Log("!If StrictB2F true then Priority must div 2.");
-            SH->flags.bStrictB2F	= FALSE;
-        }
-#else
+	if (bStrictB2F)
+	{			
     	VERIFY(1==(SH->flags.iPriority/2));
-#endif
     }
-	//SH->Flags.bLighting		= FALSE;
 }
 
-//
 void	CBlender_Compile::PassBegin		()
 {
 	RS.Invalidate			();
@@ -187,9 +166,6 @@ void	CBlender_Compile::PassEnd			()
 	SetMapping				();
 	proto.constants	= DEV->_CreateConstantTable(ctable);
 	proto.T 		= DEV->_CreateTextureList	(passTextures);
-#ifdef _EDITOR
-	proto.M			= DEV->_CreateMatrixList	(passMatrices);
-#endif
 	proto.C			= DEV->_CreateConstantList	(passConstants);
 
 	ref_pass	_pass_		= DEV->_CreatePass			(proto);
@@ -213,10 +189,6 @@ void	CBlender_Compile::PassSET_ZB		(BOOL bZTest, BOOL bZWrite, BOOL bInvertZTest
 	if (Pass())	bZWrite = FALSE;
 	RS.SetRS	(D3DRS_ZFUNC,			bZTest?(bInvertZTest?D3DCMP_GREATER:D3DCMP_LESSEQUAL):D3DCMP_ALWAYS);
 	RS.SetRS	(D3DRS_ZWRITEENABLE,	BC(bZWrite));
-	/*
-	if (bZWrite || bZTest)				RS.SetRS	(D3DRS_ZENABLE,	D3DZB_TRUE);
-	else								RS.SetRS	(D3DRS_ZENABLE,	D3DZB_FALSE);
-	*/
 }
 
 void	CBlender_Compile::PassSET_ablend_mode	(BOOL bABlend,	u32 abSRC, u32 abDST)
@@ -255,10 +227,8 @@ void	CBlender_Compile::PassSET_LightFog	(BOOL bLight, BOOL bFog)
 {
 	RS.SetRS(D3DRS_LIGHTING,			BC(bLight));
 	RS.SetRS(D3DRS_FOGENABLE,			BC(bFog));
-	//SH->Flags.bLighting				|= !!bLight;
 }
 
-//
 void	CBlender_Compile::StageBegin	()
 {
 	StageSET_Address	(D3DTADDRESS_WRAP);	// Wrapping enabled by default
@@ -274,10 +244,6 @@ void	CBlender_Compile::StageSET_Address	(u32 adr)
 }
 void	CBlender_Compile::StageSET_XForm	(u32 tf, u32 tc)
 {
-#ifdef _EDITOR
-	RS.SetTSS	(Stage(),D3DTSS_TEXTURETRANSFORMFLAGS,	tf);
-	RS.SetTSS	(Stage(),D3DTSS_TEXCOORDINDEX,			tc);
-#endif
 }
 void	CBlender_Compile::StageSET_Color	(u32 a1, u32 op, u32 a2)
 {

@@ -3,10 +3,9 @@
 
 #pragma warning(disable:4995)
 #include <d3dx9.h>
-#ifndef _EDITOR
-	#pragma comment(lib, "d3dx9.lib")
+#pragma comment(lib, "d3dx9.lib")
 #include "../../xrEngine/render.h"
-#endif
+
 #pragma warning(default:4995)
 
 #include "ResourceManager.h"
@@ -81,9 +80,6 @@ SPass*		CResourceManager::_CreatePass			(const SPass& proto)
 	P->vs						=	proto.vs;
 	P->constants				=	proto.constants;
 	P->T						=	proto.T;
-#ifdef _EDITOR
-	P->M						=	proto.M;
-#endif
 	P->C						=	proto.C;
 
 	v_passes.push_back			(P);
@@ -133,8 +129,6 @@ void		CResourceManager::_DeleteDecl		(const SDeclaration* dcl)
 	Msg	("! ERROR: Failed to find compiled vertex-declarator");
 }
 
-//--------------------------------------------------------------------------------------------------------------
-#ifndef _EDITOR
 SVS*	CResourceManager::_CreateVS		(LPCSTR _name)
 {
 	string_path			name;
@@ -198,7 +192,6 @@ SVS*	CResourceManager::_CreateVS		(LPCSTR _name)
 		return					_vs;
 	}
 }
-#endif
 
 void	CResourceManager::_DeleteVS			(const SVS* vs)
 {
@@ -212,8 +205,6 @@ void	CResourceManager::_DeleteVS			(const SVS* vs)
 	Msg	("! ERROR: Failed to find compiled vertex-shader '%s'",*vs->cName);
 }
 
-#ifndef _EDITOR
-//--------------------------------------------------------------------------------------------------------------
 SPS*	CResourceManager::_CreatePS			(LPCSTR name)
 {
 	LPSTR N				= LPSTR(name);
@@ -268,7 +259,6 @@ SPS*	CResourceManager::_CreatePS			(LPCSTR name)
 		return					_ps;
 	}
 }
-#endif
 
 void	CResourceManager::_DeletePS			(const SPS* ps)
 {

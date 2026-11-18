@@ -1,11 +1,5 @@
-//---------------------------------------------------------------------------
-
 #ifndef LightAnimLibraryH
 #define LightAnimLibraryH
-//---------------------------------------------------------------------------
-#ifdef _EDITOR
-#include "../xrEProps/FolderLib.h"
-#endif
 
 class ENGINE_API CLAItem
 {
@@ -48,13 +42,10 @@ public:
     LAItemVec Items;
     LAItemIt FindItemI(LPCSTR name);
     CLAItem* FindItem(LPCSTR name);
+
 public:
     ELightAnimLibrary ();
     ~ELightAnimLibrary ();
-#ifdef _EDITOR
-    void RemoveObject(LPCSTR fname, EItemType type, bool& res);
-    void RenameObject(LPCSTR fn0, LPCSTR fn1, EItemType type);
-#endif
 
     void OnCreate();
     void OnDestroy();
