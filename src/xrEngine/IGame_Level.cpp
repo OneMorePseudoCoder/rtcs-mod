@@ -27,13 +27,11 @@ IGame_Level::IGame_Level()
     Device.DumpResourcesMemoryUsage();
 }
 
-//#include "resourcemanager.h"
-
 IGame_Level::~IGame_Level()
 {
     if (strstr(Core.Params, "-nes_texture_storing"))
-        //Device.Resources->StoreNecessaryTextures();
         Device.m_pRender->ResourcesStoreNecessaryTextures();
+
     xr_delete(pLevel);
 
     // Render-level unload
@@ -53,7 +51,6 @@ IGame_Level::~IGame_Level()
         Device.m_pRender->ResourcesGetMemoryUsage(m_base, c_base, m_lmaps, c_lmaps);
 
     Msg("* [ D3D ]: textures[%d K]", (m_base + m_lmaps) / 1024);
-
 }
 
 void IGame_Level::net_Stop()
@@ -316,8 +313,7 @@ void IGame_Level::SoundEvent_OnDestDestroy(Feel::Sound* obj)
         Feel::Sound* m_obj;
     };
 
-    snd_Events.erase(std::remove_if(snd_Events.begin(), snd_Events.end(), rem_pred(obj)),
-        snd_Events.end());
+    snd_Events.erase(std::remove_if(snd_Events.begin(), snd_Events.end(), rem_pred(obj)), snd_Events.end());
 }
 
 void IGame_Level::ApplyCamera()
@@ -325,3 +321,27 @@ void IGame_Level::ApplyCamera()
 
 }
 
+void IGame_Level::LL_CheckTextures()
+{
+    u32 m_base, c_base, m_lmaps, c_lmaps;
+
+    Device.m_pRender->ResourcesGetMemoryUsage(m_base, c_base, m_lmaps, c_lmaps);
+
+    Msg("* t-report - base: %d, %d K", c_base, m_base / 1024);
+    Msg("* t-report - lmap: %d, %d K", c_lmaps, m_lmaps / 1024);
+    BOOL bError = FALSE;
+    if (m_base > 64 * 1024 * 1024 || c_base > 400)
+    {
+        LPCSTR msg = "Too many base-textures (limit: 400 textures or 64M).\n        Reduce number of textures (better) or their resolution (worse).";
+        Msg ("***FATAL***: %s", msg);
+        bError = TRUE;
+    }
+    if (m_lmaps > 32 * 1024 * 1024 || c_lmaps > 8)
+    {
+#ifdef DEBUG
+        LPCSTR msg = "Too many lmap-textures (limit: 8 textures or 32M).\n        Reduce pixel density (worse) or use more vertex lighting (better).";
+        Msg("***FATAL***: %s", msg);
+#endif // #ifdef DEBUG
+        bError = TRUE;
+    }
+}

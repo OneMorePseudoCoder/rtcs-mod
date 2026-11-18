@@ -1,6 +1,5 @@
 #include "pch_script.h"
 #include "GameObject.h"
-//#include "../Include/xrRender/RenderVisual.h"
 #include "../Include/xrRender/RenderVisual.h"
 #include "../xrphysics/PhysicsShell.h"
 #include "ai_space.h"
@@ -172,12 +171,8 @@ void CGameObject::OnEvent		(NET_Packet& P, u16 type)
 				// !!! ___ it is necessary to be check!
 				break;
 			}
-#ifdef MP_LOGGING
-			Msg("--- Object: GE_DESTROY of [%d][%s]", ID(), cNameSect().c_str());
-#endif // MP_LOGGING
 
 			setDestroy		(TRUE);
-//			MakeMeCrow		();
 		}
 		break;
 	}

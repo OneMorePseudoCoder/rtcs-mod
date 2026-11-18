@@ -2032,9 +2032,6 @@
     <Filter Include="Core\Common\debug">
       <UniqueIdentifier>{6f0684eb-522c-4fdd-903d-6954b0c0f4d4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Core\Common\debug\make_final">
-      <UniqueIdentifier>{f3e4fd87-5386-4350-8c0f-fe6f9a823515}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Core\Common\debug\static_cast_checked">
       <UniqueIdentifier>{7cc45c9b-456f-485f-9228-1538d319dd8c}</UniqueIdentifier>
     </Filter>
@@ -6198,9 +6195,6 @@
     <ClInclude Include="ui\UIOptionsManagerScript.h">
       <Filter>UI\Common\OptionsItem</Filter>
     </ClInclude>
-    <ClInclude Include="ui\UIOptConCom.h">
-      <Filter>UI\Common\OptionsConsoleCommands</Filter>
-    </ClInclude>
     <ClInclude Include="MainMenu.h">
       <Filter>UI\Common\MainMenu</Filter>
     </ClInclude>
@@ -9226,9 +9220,6 @@
     </ClCompile>
     <ClCompile Include="ui\UIOptionsManagerScript.cpp">
       <Filter>UI\Common\OptionsItem</Filter>
-    </ClCompile>
-    <ClCompile Include="ui\UIOptConCom.cpp">
-      <Filter>UI\Common\OptionsConsoleCommands</Filter>
     </ClCompile>
     <ClCompile Include="MainMenu.cpp">
       <Filter>UI\Common\MainMenu</Filter>

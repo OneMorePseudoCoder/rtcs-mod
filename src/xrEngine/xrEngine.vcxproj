@@ -309,7 +309,6 @@ copy /Y "$(xrSdkDir)binaries\x64\BugTrap-x64.dll" "$(OutputPath)BugTrap-x64.dll"
     <ClInclude Include="MbHelpers.h" />
     <ClInclude Include="md5.h" />
     <ClInclude Include="motion.h" />
-    <ClInclude Include="mp_logging.h" />
     <ClInclude Include="no_single.h" />
     <ClInclude Include="ObjectAnimator.h" />
     <ClInclude Include="ObjectDump.h" />
@@ -329,7 +328,6 @@ copy /Y "$(xrSdkDir)binaries\x64\BugTrap-x64.dll" "$(OutputPath)BugTrap-x64.dll"
     <ClInclude Include="Stats.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="std_classes.h" />
-    <ClInclude Include="Text_Console.h" />
     <ClInclude Include="thunderbolt.h" />
     <ClInclude Include="tntQAVI.h" />
     <ClInclude Include="trivial_encryptor.h" />
@@ -338,7 +336,6 @@ copy /Y "$(xrSdkDir)binaries\x64\BugTrap-x64.dll" "$(OutputPath)BugTrap-x64.dll"
     <ClInclude Include="xrHemisphere.h" />
     <ClInclude Include="xrImage_Resampler.h" />
     <ClInclude Include="xrLevel.h" />
-    <ClInclude Include="xrSASH.h" />
     <ClInclude Include="xrSheduler.h" />
     <ClInclude Include="xrTheora_Stream.h" />
     <ClInclude Include="xrTheora_Surface.h" />
@@ -346,7 +343,6 @@ copy /Y "$(xrSdkDir)binaries\x64\BugTrap-x64.dll" "$(OutputPath)BugTrap-x64.dll"
     <ClInclude Include="xr_collide_form.h" />
     <ClInclude Include="xr_efflensflare.h" />
     <ClInclude Include="xr_input.h" />
-    <ClInclude Include="xr_input_xinput.h" />
     <ClInclude Include="XR_IOConsole.h" />
     <ClInclude Include="xr_ioc_cmd.h" />
     <ClInclude Include="xr_object.h" />
@@ -406,7 +402,6 @@ copy /Y "$(xrSdkDir)binaries\x64\BugTrap-x64.dll" "$(OutputPath)BugTrap-x64.dll"
     <ClCompile Include="GameMtlLib_Engine.cpp" />
     <ClCompile Include="ICollidable.cpp" />
     <ClCompile Include="IGame_Level.cpp" />
-    <ClCompile Include="IGame_Level_check_textures.cpp" />
     <ClCompile Include="IGame_ObjectPool.cpp" />
     <ClCompile Include="IGame_Persistent.cpp" />
     <ClCompile Include="IInputReceiver.cpp" />
@@ -437,13 +432,10 @@ copy /Y "$(xrSdkDir)binaries\x64\BugTrap-x64.dll" "$(OutputPath)BugTrap-x64.dll"
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Mixed|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Text_Console.cpp" />
-    <ClCompile Include="Text_Console_WndProc.cpp" />
     <ClCompile Include="thunderbolt.cpp" />
     <ClCompile Include="tntQAVI.cpp" />
     <ClCompile Include="xrHemisphere.cpp" />
     <ClCompile Include="xrImage_Resampler.cpp" />
-    <ClCompile Include="xrSASH.cpp" />
     <ClCompile Include="xrSheduler.cpp" />
     <ClCompile Include="xrTheora_Stream.cpp" />
     <ClCompile Include="xrTheora_Surface.cpp" />
@@ -451,7 +443,6 @@ copy /Y "$(xrSdkDir)binaries\x64\BugTrap-x64.dll" "$(OutputPath)BugTrap-x64.dll"
     <ClCompile Include="xr_collide_form.cpp" />
     <ClCompile Include="xr_efflensflare.cpp" />
     <ClCompile Include="Xr_input.cpp" />
-    <ClCompile Include="xr_input_xinput.cpp" />
     <ClCompile Include="XR_IOConsole.cpp" />
     <ClCompile Include="XR_IOConsole_callback.cpp" />
     <ClCompile Include="XR_IOConsole_control.cpp" />
@@ -460,7 +451,6 @@ copy /Y "$(xrSdkDir)binaries\x64\BugTrap-x64.dll" "$(OutputPath)BugTrap-x64.dll"
     <ClCompile Include="xr_object.cpp" />
     <ClCompile Include="xr_object_list.cpp" />
     <ClCompile Include="x_ray.cpp" />
-    <ClCompile Include="_scripting.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />

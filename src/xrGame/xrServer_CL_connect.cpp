@@ -115,9 +115,6 @@ void	xrServer::SendConnectResult(IClient* CL, u8 res, u8 res1, char* ResultStr)
 
 	if (!res)			//need disconnect 
 	{
-#ifdef MP_LOGGING
-		Msg("* Server disconnecting client, resaon: %s", ResultStr);
-#endif
 		Flush_Clients_Buffers	();
 		DisconnectClient		(CL, ResultStr);
 	}	
@@ -155,11 +152,6 @@ void xrServer::Check_GameSpy_CDKey_Success			(IClient* CL)
 
 bool xrServer::NeedToCheckClient_BuildVersion		(IClient* CL)	
 {
-/*#ifdef DEBUG
-
-	return false; 
-
-#endif*/
 	xrClientData* tmp_client	= smart_cast<xrClientData*>(CL);
 	VERIFY						(tmp_client);
 	PerformSecretKeysSync		(tmp_client);
@@ -177,12 +169,6 @@ void xrServer::OnBuildVersionRespond				( IClient* CL, NET_Packet& P )
 	P.r_begin( Type );
 	u64 _our		=	FS.auth_get();
 	u64 _him		=	P.r_u64();
-
-#ifdef USE_DEBUG_AUTH
-	Msg("_our = %d", _our);
-	Msg("_him = %d", _him);
-	_our = MP_DEBUG_AUTH;
-#endif // USE_DEBUG_AUTH
 
 	if ( _our != _him )
 	{

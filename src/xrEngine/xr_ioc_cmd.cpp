@@ -23,7 +23,6 @@ xr_token vid_bpp_token[] =
     {"32", 32},
     {0, 0}
 };
-//-----------------------------------------------------------------------
 
 void IConsole_Command::add_to_LRU(shared_str const& arg)
 {
@@ -52,8 +51,6 @@ void IConsole_Command::add_LRU_to_tips(vecTips& tips)
         tips.push_back((*it_rb));
     }
 }
-
-// =======================================================
 
 class CCC_Quit : public IConsole_Command
 {
@@ -843,17 +840,10 @@ void CCC_Register()
     CMD4(CCC_Float, "hud_adjust_delta_pos", &hud_adj_delta_pos, -10.f, 10.f);
     CMD4(CCC_Float, "hud_adjust_delta_rot", &hud_adj_delta_rot, -10.f, 10.f);
 
-
     CMD4(CCC_Float, "adjust_delta_pos", &adj_delta_pos, -10.f, 10.f);
     CMD4(CCC_Float, "adjust_delta_rot", &adj_delta_rot, -10.f, 10.f);
 
     CMD1(CCC_ExclusiveMode, "input_exclusive_mode");
-
-    extern int g_svTextConsoleUpdateRate;
-    CMD4(CCC_Integer, "sv_console_update_rate", &g_svTextConsoleUpdateRate, 1, 100);
-
-    extern int g_svDedicateServerUpdateReate;
-    CMD4(CCC_Integer, "sv_dedicated_server_update_rate", &g_svDedicateServerUpdateReate, 1, 1000);
 
     CMD1(CCC_HideConsole, "hide");
 

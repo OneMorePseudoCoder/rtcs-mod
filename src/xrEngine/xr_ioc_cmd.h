@@ -6,8 +6,6 @@
 #define CMD3(cls,p1,p2,p3) { static cls x##cls(p1,p2,p3); Console->AddCommand(&x##cls);}
 #define CMD4(cls,p1,p2,p3,p4) { static cls x##cls(p1,p2,p3,p4); Console->AddCommand(&x##cls);}
 
-#include "xrSASH.h"
-
 class ENGINE_API IConsole_Command
 {
 public:
@@ -53,9 +51,6 @@ public:
         Info(I);
         Msg("~ Invalid syntax in call to '%s'", cName);
         Msg("~ Valid arguments: %s", I);
-
-        g_SASH.OnConsoleInvalidSyntax(false, "~ Invalid syntax in call to '%s'", cName);
-        g_SASH.OnConsoleInvalidSyntax(true, "~ Valid arguments: %s", I);
     }
     virtual void Execute(LPCSTR args) = 0;
     virtual void Status(TStatus& S) { S[0] = 0; }
@@ -73,7 +68,7 @@ public:
     {
         add_LRU_to_tips(tips);
     }
-    // vecLRU& LRU () { return m_LRU; }
+
     virtual void add_to_LRU(shared_str const& arg);
     void add_LRU_to_tips(vecTips& tips);
 

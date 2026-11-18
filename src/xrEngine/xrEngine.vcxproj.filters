@@ -97,9 +97,6 @@
     <Filter Include="Render\Execution &amp; 3D\Shaders\Textures">
       <UniqueIdentifier>{be153bad-fd3d-49b2-9f7a-f93bc731673e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Render\Execution &amp; 3D\TextConsole">
-      <UniqueIdentifier>{05c345f6-67bb-479a-8226-b50fddbf5bf6}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Engine">
       <UniqueIdentifier>{cd9ac8cb-af4e-4084-968c-98b28d708e33}</UniqueIdentifier>
     </Filter>
@@ -151,9 +148,6 @@
     <Filter Include="RenderRef\doug_lea_memory_allocator">
       <UniqueIdentifier>{6c14caad-1705-4fbf-87b0-9ad1d734d338}</UniqueIdentifier>
     </Filter>
-    <Filter Include="OpenAutomate">
-      <UniqueIdentifier>{fe56b488-34f8-4632-9f5e-7805f761b338}</UniqueIdentifier>
-    </Filter>
     <Filter Include="CPU">
       <UniqueIdentifier>{d5c34dea-5824-4ae9-b3e4-0779ba0fc541}</UniqueIdentifier>
     </Filter>
@@ -163,9 +157,6 @@
       <Filter>General</Filter>
     </ClInclude>
     <ClInclude Include="defines.h">
-      <Filter>General</Filter>
-    </ClInclude>
-    <ClInclude Include="mp_logging.h">
       <Filter>General</Filter>
     </ClInclude>
     <ClInclude Include="no_single.h">
@@ -190,9 +181,6 @@
       <Filter>Interfaces\Input</Filter>
     </ClInclude>
     <ClInclude Include="xr_input.h">
-      <Filter>Interfaces\Input</Filter>
-    </ClInclude>
-    <ClInclude Include="xr_input_xinput.h">
       <Filter>Interfaces\Input</Filter>
     </ClInclude>
     <ClInclude Include="ISheduled.h">
@@ -354,9 +342,6 @@
     <ClInclude Include="xrTheora_Surface_mmx.h">
       <Filter>Render\Execution &amp; 3D\Shaders\Textures</Filter>
     </ClInclude>
-    <ClInclude Include="Text_Console.h">
-      <Filter>Render\Execution &amp; 3D\TextConsole</Filter>
-    </ClInclude>
     <ClInclude Include="Properties.h">
       <Filter>Engine</Filter>
     </ClInclude>
@@ -426,9 +411,6 @@
     <ClInclude Include="doug_lea_memory_allocator.h">
       <Filter>RenderRef\doug_lea_memory_allocator</Filter>
     </ClInclude>
-    <ClInclude Include="xrSASH.h">
-      <Filter>OpenAutomate</Filter>
-    </ClInclude>
     <ClInclude Include="CPU\PLC.h">
       <Filter>CPU</Filter>
     </ClInclude>
@@ -450,9 +432,6 @@
     <ClCompile Include="Xr_input.cpp">
       <Filter>Interfaces\Input</Filter>
     </ClCompile>
-    <ClCompile Include="xr_input_xinput.cpp">
-      <Filter>Interfaces\Input</Filter>
-    </ClCompile>
     <ClCompile Include="ISheduled.cpp">
       <Filter>Interfaces\Sheduler</Filter>
     </ClCompile>
@@ -472,9 +451,6 @@
       <Filter>Interfaces\Physics</Filter>
     </ClCompile>
     <ClCompile Include="IGame_Level.cpp">
-      <Filter>Game API</Filter>
-    </ClCompile>
-    <ClCompile Include="IGame_Level_check_textures.cpp">
       <Filter>Game API</Filter>
     </ClCompile>
     <ClCompile Include="IGame_Persistent.cpp">
@@ -597,12 +573,6 @@
     <ClCompile Include="xrTheora_Surface_mmx.cpp">
       <Filter>Render\Execution &amp; 3D\Shaders\Textures</Filter>
     </ClCompile>
-    <ClCompile Include="Text_Console.cpp">
-      <Filter>Render\Execution &amp; 3D\TextConsole</Filter>
-    </ClCompile>
-    <ClCompile Include="Text_Console_WndProc.cpp">
-      <Filter>Render\Execution &amp; 3D\TextConsole</Filter>
-    </ClCompile>
     <ClCompile Include="pure.cpp">
       <Filter>Engine</Filter>
     </ClCompile>
@@ -632,9 +602,6 @@
     </ClCompile>
     <ClCompile Include="mailSlot.cpp">
       <Filter>Engine\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="_scripting.cpp">
-      <Filter>Engine\Core\Scripting</Filter>
     </ClCompile>
     <ClCompile Include="ai_script_lua_debug.cpp">
       <Filter>Engine\Core\Scripting</Filter>
@@ -689,9 +656,6 @@
     </ClCompile>
     <ClCompile Include="doug_lea_memory_allocator.c">
       <Filter>RenderRef\doug_lea_memory_allocator</Filter>
-    </ClCompile>
-    <ClCompile Include="xrSASH.cpp">
-      <Filter>OpenAutomate</Filter>
     </ClCompile>
     <ClCompile Include="..\..\sdk\include\OpenAutomate\src\OpenAutomate.c" />
     <ClCompile Include="md5c.c" />

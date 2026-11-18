@@ -21,12 +21,6 @@
 #define INCLUDE_FROM_ENGINE
 #include "../xrCore/FS_impl.h"
 
-#ifdef INGAME_EDITOR
-# include "../include/editor/ide.hpp"
-# include "engine_impl.hpp"
-#endif // #ifdef INGAME_EDITOR
-
-#include "xrSash.h"
 #include "igame_persistent.h"
 
 ENGINE_API CRenderDevice Device;
@@ -79,21 +73,12 @@ extern void CheckPrivilegySlowdown();
 
 void CRenderDevice::End(void)
 {
-#ifdef INGAME_EDITOR
-    bool load_finished = false;
-#endif // #ifdef INGAME_EDITOR
     if (dwPrecacheFrame)
     {
         ::Sound->set_master_volume(0.f);
         dwPrecacheFrame--;
-        //. pApp->load_draw_internal ();
         if (0 == dwPrecacheFrame)
         {
-
-#ifdef INGAME_EDITOR
-            load_finished = true;
-#endif // #ifdef INGAME_EDITOR
-            //Gamma.Update ();
             m_pRender->updateGamma();
 
             if (precache_light) precache_light->set_active(false);
@@ -124,17 +109,8 @@ void CRenderDevice::End(void)
     g_bRendering = FALSE;
     // end scene
 
-    // Present goes here, so call OA Frame end.
-    if (g_SASH.IsBenchmarkRunning())
-        g_SASH.DisplayFrame(Device.fTimeGlobal);
     m_pRender->End();
-
-# ifdef INGAME_EDITOR
-    if (load_finished && m_editor)
-        m_editor->on_load_finished();
-# endif // #ifdef INGAME_EDITOR
 }
-
 
 void CRenderDevice::SecondaryThreadProc(void* context)
 {
@@ -179,8 +155,6 @@ void CRenderDevice::PreCache(u32 amount, bool b_draw_loadscreen, bool b_wait_use
     }
 }
 
-int g_svDedicateServerUpdateReate = 100;
-
 ENGINE_API xr_list<LOADING_EVENT> g_loading_events;
 
 #include "render.h"
@@ -205,8 +179,11 @@ void CRenderDevice::on_idle()
 
     const u64 frameStartTime = TimerGlobal.GetElapsed_ms();
 
-    if (psDeviceFlags.test(rsStatistic)) g_bEnableStatGather = TRUE;
-    else g_bEnableStatGather = FALSE;
+    if (psDeviceFlags.test(rsStatistic))
+		g_bEnableStatGather = TRUE;
+    else
+		g_bEnableStatGather = FALSE;
+
     if (g_loading_events.size())
     {
         if (g_loading_events.front()())
@@ -216,10 +193,6 @@ void CRenderDevice::on_idle()
     }
     else
     {
-        if ((!Device.dwPrecacheFrame) && (!g_SASH.IsBenchmarkRunning())
-            && g_bLoaded)
-            g_SASH.StartBenchmark();
-
         FrameMove();
     }
 
@@ -236,27 +209,6 @@ void CRenderDevice::on_idle()
         mView.build_camera_dir(vCameraPosition, vCameraDirection, vCameraTop);
     }
 
-	//if (m_bMakeLevelMap)
-	//{
-	//	// build camera matrix
-	//	Msg("DDDDFF");
-	//	Fbox bb = curr_lm_fbox;
-	//	bb.getcenter(vCameraPosition);
-
-	//	vCameraDirection.set(0.f, -1.f, EPS_S);
-	//	vCameraTop.set(0.f, 0.f, 1.f);
-	//	vCameraRight.set(1.f, 0.f, 0.f);
-	//	mView.build_camera_dir(vCameraPosition, vCameraDirection, vCameraTop);
-
-	//	bb.xform(mView);
-	//	// build project matrix
-	//	mProject.build_projection_ortho(bb.max.x - bb.min.x, bb.max.y - bb.min.y, bb.min.z, bb.max.z);
-
-	//	//Device.mFullTransform.mul(Device.mProject, Device.mView);
-	//	//D3DXMatrixInverse((D3DXMATRIX*)&Device.mInvFullTransform, 0, (D3DXMATRIX*)&Device.mFullTransform);
-	//	//m_bMakeLevelMap = false;
-	//}
-
 	// Render Viewports
 	if (Device.m_SecondViewport.IsSVPActive() && Device.m_SecondViewport.IsSVPFrame())
 	{
@@ -264,7 +216,6 @@ void CRenderDevice::on_idle()
         Render->lastViewPort = SECONDARY_WEAPON_SCOPE;
         Render->viewPortsThisFrame.push_back(MAIN_VIEWPORT);
         Render->viewPortsThisFrame.push_back(SECONDARY_WEAPON_SCOPE);
-
 	}
 	else
 	{
@@ -581,11 +532,7 @@ void CRenderDevice::OnWM_Activate(WPARAM wParam, LPARAM lParam)
         {
             Device.seqAppActivate.Process(rp_AppActivate);
             app_inactive_time += TimerMM.GetElapsed_ms() - app_inactive_time_start;
-
-# ifdef INGAME_EDITOR
-            if (!editor())
-# endif // #ifdef INGAME_EDITOR
-                ShowCursor(FALSE);
+            ShowCursor(FALSE);
         }
         else
         {

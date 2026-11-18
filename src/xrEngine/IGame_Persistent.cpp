@@ -11,10 +11,6 @@
 #include "ps_instance.h"
 #include "CustomHUD.h"
 
-#ifdef INGAME_EDITOR
-# include "editor_environment_manager.hpp"
-#endif // INGAME_EDITOR
-
 ENGINE_API IGame_Persistent* g_pGamePersistent = NULL;
 
 IGame_Persistent::IGame_Persistent()
@@ -29,14 +25,7 @@ IGame_Persistent::IGame_Persistent()
 
 	m_pGShaderConstants = new ShadersExternalData(); //--#SM+#--
 
-#ifndef INGAME_EDITOR
     pEnvironment = xr_new<CEnvironment>();
-#else // #ifdef INGAME_EDITOR
-    if (RDEVICE.editor())
-        pEnvironment = xr_new<editor::environment::manager>();
-    else
-        pEnvironment = xr_new<CEnvironment>();
-#endif // #ifdef INGAME_EDITOR
 }
 
 IGame_Persistent::~IGame_Persistent()

@@ -350,13 +350,13 @@ bool			CLevel::Connect2Server				(const char* options)
 		return FALSE		;
 	};
 
-	
 	if(psNET_direct_connect)
 		net_Syncronised = TRUE;
 	else
 		net_Syncronize	();
 
-	while (!net_IsSyncronised()) {
+	while (!net_IsSyncronised()) 
+	{
 		Sleep(1);
 		if (net_Disconnected)
 		{
@@ -366,10 +366,6 @@ bool			CLevel::Connect2Server				(const char* options)
 		}
 	};
 
-	//---------------------------------------------------------------------------
-	//P.w_begin	(M_CLIENT_REQUEST_CONNECTION_DATA);
-	//Send		(P, net_flags(TRUE, TRUE, TRUE, TRUE));
-	//---------------------------------------------------------------------------
 	return TRUE;
 };
 
@@ -377,12 +373,9 @@ void			CLevel::OnBuildVersionChallenge		()
 {
 	NET_Packet P;
 	P.w_begin				(M_CL_AUTH);
-#ifdef USE_DEBUG_AUTH
-	u64 auth = MP_DEBUG_AUTH;
-	Msg("* Sending auth value ...");
-#else
+
 	u64 auth = FS.auth_get();
-#endif //#ifdef DEBUG
+
 	P.w_u64					(auth);
 	SecureSend				(P, net_flags(TRUE, TRUE, TRUE, TRUE));
 };

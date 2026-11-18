@@ -1,37 +1,7 @@
 #include "stdafx.h"
 #include "resource.h"
 
-#ifdef INGAME_EDITOR
-# include "../include/editor/ide.hpp"
-# include "engine_impl.hpp"
-#endif // #ifdef INGAME_EDITOR
-
 extern LRESULT CALLBACK WndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
-
-#ifdef INGAME_EDITOR
-void CRenderDevice::initialize_editor()
-{
-    m_editor_module = LoadLibrary("editor.dll");
-    if (!m_editor_module)
-    {
-        Msg("! cannot load library \"editor.dll\"");
-        return;
-    }
-
-    m_editor_initialize = (initialize_function_ptr)GetProcAddress(m_editor_module, "initialize");
-    VERIFY(m_editor_initialize);
-
-    m_editor_finalize = (finalize_function_ptr)GetProcAddress(m_editor_module, "finalize");
-    VERIFY(m_editor_finalize);
-
-    m_engine = xr_new<engine_impl>();
-    m_editor_initialize(m_editor, m_engine);
-    VERIFY(m_editor);
-
-    m_hWnd = m_editor->view_handle();
-    VERIFY(m_hWnd != INVALID_HANDLE_VALUE);
-}
-#endif // #ifdef INGAME_EDITOR
 
 void CRenderDevice::Initialize()
 {
@@ -73,24 +43,12 @@ void CRenderDevice::Initialize()
         ChangeDisplaySettings(&screen_settings, CDS_FULLSCREEN);
 
         // Create the render window
-        m_hWnd = CreateWindow(wndclass, "S.T.A.L.K.E.R.: Call of Pripyat", m_dwWindowStyle,
-            /*rc.left, rc.top, */0, 0,
-            screen_width, screen_height, 0L,
-            0, hInstance, 0L);
+        m_hWnd = CreateWindow(wndclass, "S.T.A.L.K.E.R.: Call of Pripyat", m_dwWindowStyle, 0, 0, screen_width, screen_height, 0L, 0, hInstance, 0L);
     }
 
     // Save window properties
     m_dwWindowStyle = GetWindowLongPtr(m_hWnd, GWL_STYLE);
     GetWindowRect(m_hWnd, &m_rcWindowBounds);
     GetClientRect(m_hWnd, &m_rcWindowClient);
-
-    /*
-    if (strstr(lpCmdLine,"-gpu_sw")!=NULL) HW.Caps.bForceGPU_SW = TRUE;
-    else HW.Caps.bForceGPU_SW = FALSE;
-    if (strstr(lpCmdLine,"-gpu_nopure")!=NULL) HW.Caps.bForceGPU_NonPure = TRUE;
-    else HW.Caps.bForceGPU_NonPure = FALSE;
-    if (strstr(lpCmdLine,"-gpu_ref")!=NULL) HW.Caps.bForceGPU_REF = TRUE;
-    else HW.Caps.bForceGPU_REF = FALSE;
-    */
 }
 
