@@ -128,7 +128,6 @@ bool IGame_Level::Load(u32 dwNum)
     return true;
 }
 
-int psNET_DedicatedSleep = 5;
 void IGame_Level::OnRender()
 {
 #ifdef _GPA_ENABLED
@@ -332,8 +331,10 @@ void IGame_Level::LL_CheckTextures()
     BOOL bError = FALSE;
     if (m_base > 64 * 1024 * 1024 || c_base > 400)
     {
+#ifdef DEBUG
         LPCSTR msg = "Too many base-textures (limit: 400 textures or 64M).\n        Reduce number of textures (better) or their resolution (worse).";
         Msg ("***FATAL***: %s", msg);
+#endif // #ifdef DEBUG
         bError = TRUE;
     }
     if (m_lmaps > 32 * 1024 * 1024 || c_lmaps > 8)

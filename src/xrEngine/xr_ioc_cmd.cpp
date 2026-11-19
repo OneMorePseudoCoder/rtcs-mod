@@ -684,10 +684,8 @@ ENGINE_API float fps_limit = 60.0f;
 extern int rsDVB_Size;
 extern int rsDIB_Size;
 extern int psNET_ServerUpdate;
-extern int psNET_DedicatedSleep;
 extern char psNET_Name[32];
 extern Flags32 psEnvFlags;
-//extern float r__dtex_range;
 
 extern int g_ErrorLineCount;
 
@@ -769,7 +767,6 @@ void CCC_Register()
 
     // Texture manager
     CMD4(CCC_Integer, "texture_lod", &psTextureLOD, 0, 4);
-    CMD4(CCC_Integer, "net_dedicated_sleep", &psNET_DedicatedSleep, 0, 64);
 
     // General video control
     CMD1(CCC_VidMode, "vid_mode");

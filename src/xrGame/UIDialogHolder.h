@@ -1,5 +1,4 @@
 #pragma once
-#include "../xrEngine/no_single.h"
 
 class CUIDialogWnd;
 class CUIWindow;
@@ -13,10 +12,14 @@ public:
 	bool operator < (const dlgItem& itm) const;
 };
 
-class recvItem{
+class recvItem
+{
 public:
-	enum{	eCrosshair		= (1<<0),
-			eIndicators		= (1<<1)};
+	enum
+	{	
+		eCrosshair		= (1<<0),
+		eIndicators		= (1<<1)
+	};
 	recvItem		(CUIDialogWnd*);
 	CUIDialogWnd*	m_item;
 	Flags8			m_flags;
@@ -57,5 +60,4 @@ public:
 	virtual bool 			IR_UIOnMouseMove				(int dx, int dy);
 	virtual bool 			IR_UIOnMouseWheel				(int direction);
 	virtual bool 			IR_UIOnKeyboardHold				(int dik);
-
 };

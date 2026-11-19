@@ -1,7 +1,6 @@
 #ifndef XRENGINE_ISPATIAL_H_INCLUDED
 #define XRENGINE_ISPATIAL_H_INCLUDED
 
-//#pragma once
 #include "../xrCore/xrPool.h"
 
 #include "xr_collide_defs.h"
@@ -92,7 +91,6 @@ public:
 public:
 	virtual		void			spatial_register	()	;
 	virtual		void			spatial_unregister	()	;
-	BENCH_SEC_SCRAMBLEVTBL2
 	virtual		void			spatial_move		()	;
 	virtual		Fvector			spatial_sector_point()	{ return spatial.sphere.P; }
 	ICF			void			spatial_updatesector()	{
@@ -136,11 +134,6 @@ public:
 	}
 };
 ////////////
-
-
-
-
-
 
 //template <class T, int granularity>
 //class	poolSS;

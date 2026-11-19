@@ -16,14 +16,8 @@ void CRenderDevice::Initialize()
 
         // Register the windows class
         HINSTANCE hInstance = (HINSTANCE)GetModuleHandle(0);
-        WNDCLASS wndClass = { 0, WndProc, 0, 0, hInstance,
-                             LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1)),
-                             LoadCursor(NULL, IDC_ARROW),
-                             (HBRUSH)GetStockObject(BLACK_BRUSH),
-                             NULL, wndclass
-        };
+        WNDCLASS wndClass = { 0, WndProc, 0, 0, hInstance, LoadIcon(hInstance, MAKEINTRESOURCE(IDI_ICON1)), LoadCursor(NULL, IDC_ARROW), (HBRUSH)GetStockObject(BLACK_BRUSH), NULL, wndclass };
         RegisterClass(&wndClass);
-
 
         // Set the window's initial style
         m_dwWindowStyle = WS_BORDER | WS_DLGFRAME;

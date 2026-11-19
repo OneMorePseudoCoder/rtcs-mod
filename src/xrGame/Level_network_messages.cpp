@@ -297,18 +297,12 @@ void CLevel::ClientReceive()
 			}break;
 		case M_CHAT_MESSAGE:
 			{
-				/*if (!game_configured)
-				{
-					Msg("! WARNING: ignoring game event [%d] - game not configured...", m_type);
-					break;
-				}*/
 				if (!game) break;
 			}break;
 		case M_CLIENT_WARN:
 			{
 				if (!game) break;
 			}break;
-		case M_REMOTE_CONTROL_AUTH:
 		case M_REMOTE_CONTROL_CMD:
 			{
 			}break;
@@ -330,7 +324,6 @@ void CLevel::ClientReceive()
 				else
 				{
 					const char* m_SO = m_caServerOptions.c_str();
-//					const char* m_CO = m_caClientOptions.c_str();
 
 					m_SO = strchr(m_SO, '/'); if (m_SO) m_SO++;
 					m_SO = strchr(m_SO, '/'); 
@@ -369,16 +362,6 @@ void CLevel::ClientReceive()
 		case M_BULLET_CHECK_RESPOND:
 			{
 				if (!game) break;
-			}break;
-		case M_STATISTIC_UPDATE:
-			{
-				Msg("--- CL: On Update Request");
-					if (!game) break;
-				game_events->insert		(*P);
-				if (g_bDebugEvents)		ProcessGameEvents();
-			}break;
-		case M_STATISTIC_UPDATE_RESPOND: //deprecated, see  xrServer::OnMessage
-			{
 			}break;
 		case M_SECURE_KEY_SYNC:
 			{

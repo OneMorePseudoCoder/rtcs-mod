@@ -443,22 +443,15 @@ void CHW::OnAppDeactivate()
 	}
 }
 
-
 BOOL CHW::support( D3DFORMAT fmt, DWORD type, DWORD usage)
 {
 	//	TODO: DX10: implement stub for this code.
 	VERIFY(!"Implement CHW::support");
-	/*
-	HRESULT hr		= pD3D->CheckDeviceFormat(DevAdapter,DevT,Caps.fTarget,usage,(D3DRESOURCETYPE)type,fmt);
-	if (FAILED(hr))	return FALSE;
-	else			return TRUE;
-	*/
 	return TRUE;
 }
 
 void CHW::updateWindowProps(HWND m_hWnd)
 {
-	//	BOOL	bWindowed				= strstr(Core.Params,"-dedicated") ? TRUE : !psDeviceFlags.is	(rsFullscreen);
 	BOOL	bWindowed				= !psDeviceFlags.is	(rsFullscreen);
 
 	u32		dwWindowStyle			= 0;

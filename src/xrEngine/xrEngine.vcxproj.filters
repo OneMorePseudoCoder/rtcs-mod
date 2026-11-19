@@ -159,9 +159,6 @@
     <ClInclude Include="defines.h">
       <Filter>General</Filter>
     </ClInclude>
-    <ClInclude Include="no_single.h">
-      <Filter>General</Filter>
-    </ClInclude>
     <ClInclude Include="stdafx.h">
       <Filter>General</Filter>
     </ClInclude>

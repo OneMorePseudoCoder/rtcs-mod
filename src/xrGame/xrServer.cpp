@@ -542,61 +542,9 @@ u32 xrServer::OnMessage	(NET_Packet& P, ClientID sender)			// Non-Zero means bro
 		{
 			game->AddDelayedEvent		(P,GAME_EVENT_CREATE_PLAYER_STATE, 0, sender);
 		}break;
-	case M_STATISTIC_UPDATE:
-		{
-			SendBroadcast			(BroadcastCID,P,net_flags(TRUE,TRUE));
-		}break;
-	case M_STATISTIC_UPDATE_RESPOND:
-		{
-		}break;
-	case M_PLAYER_FIRE:
-		{
-			if (game)
-				game->OnPlayerFire(sender, P);
-		}break;
-	case M_REMOTE_CONTROL_AUTH:
-		{
-			string512				reason;
-			shared_str				user;
-			shared_str				pass;
-			P.r_stringZ				(user);
-			if(0==stricmp(user.c_str(),"logoff"))
-			{
-				CL->m_admin_rights.m_has_admin_rights	= FALSE;
-				if (CL->ps)
-				{
-					CL->ps->resetFlag(GAME_PLAYER_HAS_ADMIN_RIGHTS);
-				}
-				xr_strcpy				(reason,"logged off");
-				Msg("# Remote administrator logged off.");
-			}else
-			{
-				P.r_stringZ				(pass);
-				bool res = CheckAdminRights(user, pass, reason);
-				if(res){
-					CL->m_admin_rights.m_has_admin_rights	= TRUE;
-					CL->m_admin_rights.m_dwLoginTime		= Device.dwTimeGlobal;
-					if (CL->ps)
-					{
-						CL->ps->setFlag(GAME_PLAYER_HAS_ADMIN_RIGHTS);
-					}
-					Msg("# User [%s] logged as remote administrator.", user.c_str());
-				}else
-					Msg("# User [%s] tried to login as remote administrator. Access denied.", user.c_str());
-
-			}
-			NET_Packet			P_answ;			
-			P_answ.w_begin		(M_REMOTE_CONTROL_AUTH);
-			P_answ.w_stringZ	(reason);
-			SendTo				(CL->ID,P_answ,net_flags(TRUE,TRUE));
-		}break;
-
 	case M_REMOTE_CONTROL_CMD:
 		{
 			AddDelayedPacket(P, sender);
-		}break;
-	case M_BATTLEYE:
-		{
 		}break;
 	case M_SECURE_KEY_SYNC:
 		{
@@ -611,32 +559,6 @@ u32 xrServer::OnMessage	(NET_Packet& P, ClientID sender)			// Non-Zero means bro
 	VERIFY							(verify_entities());
 
 	return							IPureServer::OnMessage(P, sender);
-}
-
-bool xrServer::CheckAdminRights(const shared_str& user, const shared_str& pass, string512& reason)
-{
-	bool res			= false;
-	string_path			fn;
-	FS.update_path		(fn,"$app_data_root$","radmins.ltx");
-	if(FS.exist(fn))
-	{
-		CInifile			ini(fn);
-		if(ini.line_exist("radmins",user.c_str()))
-		{
-			if (ini.r_string ("radmins",user.c_str()) == pass)
-			{
-				xr_strcpy			(reason, sizeof(reason),"Access permitted.");
-				res				= true;
-			}else
-			{
-				xr_strcpy			(reason, sizeof(reason),"Access denied. Wrong password.");
-			}
-		}else
-			xr_strcpy			(reason, sizeof(reason),"Access denied. No such user.");
-	}else
-		xr_strcpy				(reason, sizeof(reason),"Access denied.");
-
-	return				res;
 }
 
 void xrServer::SendTo_LL			(ClientID ID, void* data, u32 size, u32 dwFlags, u32 dwTimeout)
@@ -656,6 +578,7 @@ void xrServer::SendTo_LL			(ClientID ID, void* data, u32 size, u32 dwFlags, u32 
 		IPureServer::SendTo_Buf(ID,data,size,dwFlags,dwTimeout);
 	}
 }
+
 void xrServer::SendBroadcast(ClientID exclude, NET_Packet& P, u32 dwFlags)
 {
 	struct ClientExcluderPredicate

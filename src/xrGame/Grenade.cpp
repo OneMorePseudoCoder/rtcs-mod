@@ -1,7 +1,6 @@
 #include "stdafx.h"
 #include "grenade.h"
 #include "../xrphysics/PhysicsShell.h"
-//.#include "WeaponHUD.h"
 #include "entity.h"
 #include "ParticlesObject.h"
 #include "actor.h"
@@ -12,11 +11,11 @@
 #include "game_cl_base.h"
 #include "xrserver_objects_alife.h"
 
-#define GRENADE_REMOVE_TIME		30000
-const float default_grenade_detonation_threshold_hit=100;
+#define GRENADE_REMOVE_TIME 30000
+const float default_grenade_detonation_threshold_hit = 100;
+
 CGrenade::CGrenade(void) 
 {
-
 	m_destroy_callback.clear();
 	m_eSoundCheckout = ESoundTypes(SOUND_TYPE_WEAPON_RECHARGING);
 }
@@ -32,18 +31,17 @@ void CGrenade::Load(LPCSTR section)
 
 	m_sounds.LoadSound(section,"snd_checkout", "sndCheckout", false, m_eSoundCheckout);
 
-	//////////////////////////////////////
-	//время убирания оружия с уровня
 	if(pSettings->line_exist(section,"grenade_remove_time"))
 		m_dwGrenadeRemoveTime = pSettings->r_u32(section,"grenade_remove_time");
 	else
 		m_dwGrenadeRemoveTime = GRENADE_REMOVE_TIME;
+
 	m_grenade_detonation_threshold_hit=READ_IF_EXISTS(pSettings,r_float,section,"detonation_threshold_hit",default_grenade_detonation_threshold_hit);
 }
 
-void CGrenade::Hit					(SHit* pHDS)
+void CGrenade::Hit(SHit* pHDS)
 {
-	if( ALife::eHitTypeExplosion==pHDS->hit_type && m_grenade_detonation_threshold_hit<pHDS->damage()&&CExplosive::Initiator()==u16(-1)) 
+	if (ALife::eHitTypeExplosion == pHDS->hit_type && m_grenade_detonation_threshold_hit < pHDS->damage() && CExplosive::Initiator() == u16(-1)) 
 	{
 		CExplosive::SetCurrentParentID(pHDS->who->ID());
 		Destroy();
@@ -185,8 +183,6 @@ void CGrenade::Throw()
 	m_thrown = true;
 }
 
-
-
 void CGrenade::Destroy() 
 {
 	//Generate Expode event
@@ -202,14 +198,9 @@ void CGrenade::Destroy()
 	CExplosive::GenExplodeEvent	(Position(), normal);
 }
 
-
-
 bool CGrenade::Useful() const
 {
-
-	bool res = (/* !m_throw && */ m_dwDestroyTime == 0xffffffff && CExplosive::Useful() && TestServerFlag(CSE_ALifeObject::flCanSave));
-
-	return res;
+	return m_dwDestroyTime == 0xffffffff && CExplosive::Useful() && TestServerFlag(CSE_ALifeObject::flCanSave);
 }
 
 void CGrenade::OnEvent(NET_Packet& P, u16 type) 
@@ -250,7 +241,8 @@ void CGrenade::PutNextToSlot()
 			P.w_u16							(pNext->BaseSlot());
 			pNext->u_EventSend				(P);
 			m_pInventory->SetActiveSlot		(pNext->BaseSlot());
-		}else
+		}
+		else
 		{
 			CActor* pActor = smart_cast<CActor*>( m_pInventory->GetOwner());
 			
@@ -329,7 +321,7 @@ ALife::_TIME_ID	 CGrenade::TimePassedAfterIndependant()	const
 BOOL CGrenade::UsedAI_Locations		()
 {
 #pragma todo("Dima to Yura : It crashes, because on net_Spawn object doesn't use AI locations, but on net_Destroy it does use them")
-	return inherited::UsedAI_Locations( );//m_dwDestroyTime == 0xffffffff;
+	return inherited::UsedAI_Locations( );
 }
 
 void CGrenade::net_Relcase(CObject* O )

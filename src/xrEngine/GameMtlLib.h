@@ -23,10 +23,8 @@
 #define GAMEMTL_CHUNK_FACTORS_MP 0x1008
 //----------------------------------------------------
 #define GAMEMTLPAIR_CHUNK_PAIR 0x1000
-//#define GAMEMTLPAIR_CHUNK_FLOTATION 0x1001 - obsolete
 #define GAMEMTLPAIR_CHUNK_BREAKING 0x1002
 #define GAMEMTLPAIR_CHUNK_STEP 0x1003
-//#define GAMEMTLPAIR_CHUNK_COLLIDE 0x1004 - obsolete / rename HIT
 #define GAMEMTLPAIR_CHUNK_COLLIDE 0x1005
 //----------------------------------------------------
 
@@ -209,9 +207,8 @@ class MTL_EXPORT_API CGameMtlLibrary
 {
     int material_index;
     int material_pair_index;
-    BENCH_SEC_SCRAMBLEMEMBER1
 
-        GameMtlVec materials;
+	GameMtlVec materials;
     GameMtlPairVec material_pairs;
 
     // game part

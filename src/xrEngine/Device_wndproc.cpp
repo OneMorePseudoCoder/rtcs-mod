@@ -41,6 +41,7 @@ bool CRenderDevice::on_message(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 
     return (false);
 }
+
 //-----------------------------------------------------------------------------
 // Name: WndProc()
 // Desc: Static msg handler which passes messages to the application class.

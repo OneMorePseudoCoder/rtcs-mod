@@ -3,13 +3,12 @@
 
 #include "../xrcdb/ispatial.h"
 #include "isheduled.h"
-//#include "iinputreceiver.h"
 #include "irenderable.h"
 #include "icollidable.h"
 #include "engineapi.h"
 #include "device.h"
+
 // refs
-//class ENGINE_API IRender_Visual;
 class ENGINE_API IRender_Sector;
 class ENGINE_API IRender_ObjectSpecific;
 class ENGINE_API CCustomHUD;
@@ -56,8 +55,6 @@ public:
         u32 storage;
     };
 private:
-    BENCH_SEC_SCRAMBLEMEMBER1
-    BENCH_SEC_SCRAMBLEVTBL2
     // Some property variables
     ObjectProperties Props;
     shared_str NameObject;
@@ -76,10 +73,6 @@ public:
     u32 dwFrame_UpdateCL;
     u32 dwFrame_AsCrow;
 
-    // Crow-MODE
-    // if (object_is_visible)
-    // if (object_is_near)
-    // if (object_is_crow_always)
 #ifdef DEBUG
     void DBGGetProps(ObjectProperties& p) const { p = Props; }
 #endif

@@ -317,10 +317,6 @@ void CLevel::ProcessGameEvents()
                 Send(PRespond, net_flags(TRUE, TRUE));
                 break;
             }
-            case M_STATISTIC_UPDATE:
-            {
-                break;
-            }
             case M_GAMEMESSAGE:
             {
                 Game().OnGameMessage(P);

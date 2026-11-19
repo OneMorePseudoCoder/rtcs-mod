@@ -53,20 +53,12 @@ enum {
 	M_AUTH_CHALLENGE,
 	M_CL_AUTH,
 	M_BULLET_CHECK_RESPOND,
-	//-----------------------------------------------------
-	M_STATISTIC_UPDATE,
-	M_STATISTIC_UPDATE_RESPOND,
-	//-----------------------------------------------------
-	M_PLAYER_FIRE,
-	//-----------------------------------------------------
 	M_MOVE_PLAYERS,
 	M_MOVE_ARTEFACTS,
 	M_MOVE_PLAYERS_RESPOND,
 	//-----------------------------------------------------
 	M_CHANGE_SELF_NAME,
-	M_REMOTE_CONTROL_AUTH,
 	M_REMOTE_CONTROL_CMD,
-	M_BATTLEYE,
 
 	M_SV_MAP_NAME,				//request and responce
 	M_SV_DIGEST,				//request and responce

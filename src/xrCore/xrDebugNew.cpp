@@ -871,10 +871,6 @@ LONG WINAPI UnhandledFilter(_EXCEPTION_POINTERS* pExceptionInfo)
 //		std::set_new_handler(&std_out_of_memory_handler);
 
 		_set_purecall_handler(&pure_call_handler);
-
-#if 0// should be if we use exceptions
-		std::set_unexpected				(_terminate);
-#endif
 	}
 
     void xrDebug::_initialize(const bool &dedicated)
@@ -888,18 +884,5 @@ LONG WINAPI UnhandledFilter(_EXCEPTION_POINTERS* pExceptionInfo)
 		SetupExceptionHandler			(dedicated);
 #endif // USE_BUG_TRAP
 		previous_filter					= ::SetUnhandledExceptionFilter(UnhandledFilter);	// exception handler to all "unhandled" exceptions
-
-#if 0
-		struct foo {static void	recurs	(const u32 &count)
-		{
-			if (!count)
-				return;
-
-			_alloca			(4096);
-			recurs			(count - 1);
-		}};
-		foo::recurs			(u32(-1));
-		std::terminate		();
-#endif // 0
 	}
 #endif

@@ -171,24 +171,18 @@ void CObjectFactory::register_classes	()
 	add<CHUDManager>											(CLSID_HUDMANAGER				,"hud_manager");
 
 	//Server Game type
-#ifndef NO_SINGLE
 	add<game_sv_Single>											(CLSID_SV_GAME_SINGLE			,"game_sv_single");
 	add<game_cl_Single>											(CLSID_CL_GAME_SINGLE			,"game_cl_single");
-#endif // #ifndef NO_SINGLE
 
 	add<CUIGameSP>												(CLSID_GAME_UI_SINGLE			,"game_ui_single");
 
 	ADD(CActor					,CSE_ALifeCreatureActor			,CLSID_OBJECT_ACTOR				,"actor");
 
 	// server entities
-#ifndef NO_SINGLE
 	add<CSE_ALifeGroupTemplate<CSE_ALifeMonsterBase> >			(CLSID_AI_FLESH_GROUP			,"flesh_group");
-//	add<CSE_SpawnGroup>											(CLSID_AI_SPAWN_GROUP			,"spawn_group");
 	add<CSE_ALifeGraphPoint>									(CLSID_AI_GRAPH					,"graph_point");
 	add<CSE_ALifeOnlineOfflineGroup>							(CLSID_ONLINE_OFFLINE_GROUP		,"online_offline_group");
-#endif // #ifndef NO_SINGLE
-	
-#ifndef NO_SINGLE
+
 	ADD(CAI_Flesh				,CSE_ALifeMonsterBase			,CLSID_AI_FLESH					,"flesh");
 	ADD(CChimera				,CSE_ALifeMonsterBase			,CLSID_AI_CHIMERA				,"chimera");
 	ADD(CAI_Dog					,CSE_ALifeMonsterBase			,CLSID_AI_DOG_RED				,"dog_red");
@@ -218,7 +212,6 @@ void CObjectFactory::register_classes	()
 	ADD(CCar					,CSE_ALifeCar					,CLSID_CAR						,"car");
 
 	ADD(CHelicopter				,CSE_ALifeHelicopter			,CLSID_VEHICLE_HELICOPTER		,"helicopter");
-#endif // #ifndef NO_SINGLE
 
 	// Artefacts
 	ADD(CMercuryBall			,CSE_ALifeItemArtefact			,CLSID_AF_MERCURY_BALL			,"art_mercury_ball");
@@ -274,9 +267,7 @@ void CObjectFactory::register_classes	()
 	ADD(CGrenadeLauncher		,CSE_ALifeItem					,CLSID_OBJECT_W_GLAUNCHER		,"wpn_grenade_launcher");
 
 	// Inventory
-#ifndef NO_SINGLE
 	ADD(CBolt					,CSE_ALifeItemBolt				,CLSID_IITEM_BOLT				,"obj_bolt");
-#endif // #ifndef NO_SINGLE
 	ADD(CMedkit					,CSE_ALifeItem					,CLSID_IITEM_MEDKIT				,"obj_medkit");
 	ADD(CMedkit					,CSE_ALifeItem					,CLSID_IITEM_BANDAGE			,"obj_bandage");
 	ADD(CAntirad				,CSE_ALifeItem					,CLSID_IITEM_ANTIRAD			,"obj_antirad");
@@ -313,9 +304,7 @@ void CObjectFactory::register_classes	()
 	ADD(CHairsZone				,CSE_ALifeZoneVisual			,CLSID_Z_BFUZZ					,"zone_bfuzz");
 	ADD(CHairsZone				,CSE_ALifeZoneVisual			,CLSID_Z_RUSTYH					,"zone_rusty_hair");
 	ADD(CMosquitoBald			,CSE_ALifeAnomalousZone			,CLSID_Z_DEAD					,"zone_dead");
-#ifndef	BENCHMARK_BUILD
 	ADD(CLevelChanger			,CSE_ALifeLevelChanger			,CLSID_LEVEL_CHANGER			,"level_changer");
-#endif	//	BENCHMARK_BUILD
 	ADD(CScriptZone				,CSE_ALifeSpaceRestrictor		,CLSID_SCRIPT_ZONE				,"script_zone");
 	ADD(CSmartZone				,CSE_ALifeSmartZone				,CLSID_SMART_ZONE				,"smart_zone");
 	ADD(CTorridZone				,CSE_ALifeTorridZone			,CLSID_Z_TORRID					,"torrid_zone");
@@ -323,6 +312,7 @@ void CObjectFactory::register_classes	()
 	ADD(CAmebaZone				,CSE_ALifeZoneVisual			,CLSID_Z_AMEBA					,"ameba_zone");
 	ADD(CNoGravityZone			,CSE_ALifeAnomalousZone			,CLSID_Z_NOGRAVITY				,"nogravity_zone");
 	ADD(CZoneCampfire			,CSE_ALifeAnomalousZone			,CLSID_Z_CAMPFIRE				,"zone_campfire");
+
 	// Detectors
 	ADD(CSimpleDetector			,CSE_ALifeItemDetector			,CLSID_DETECTOR_SIMPLE			,"device_detector_simple");
 	ADD(CAdvancedDetector		,CSE_ALifeItemDetector			,CLSID_DETECTOR_ADVANCED		,"device_detector_advanced");
@@ -349,7 +339,5 @@ void CObjectFactory::register_classes	()
 	ADD(CDestroyablePhysicsObject,CSE_ALifeObjectPhysic			,CLSID_PHYSICS_DESTROYABLE		,"obj_phys_destroyable");
 
 	ADD(CInventoryBox			,CSE_ALifeInventoryBox			,CLSID_INVENTORY_BOX			,"inventory_box");
-#ifndef NO_SINGLE
 	ADD(smart_cover::object		,CSE_SmartCover					,TEXT2CLSID("SMRTCOVR")			,"smart_cover");
-#endif // #ifndef NO_SINGLE
 }

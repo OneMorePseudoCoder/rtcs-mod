@@ -161,6 +161,7 @@ public:
         SMarker& pMarker = m_Markers[ID];
         pMarker.m_fPos = NewPos;
     };
+
     IC void ClearMarkers()
     {
         m_Markers.clear();

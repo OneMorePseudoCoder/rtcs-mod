@@ -951,17 +951,6 @@ public:
 
 };
 
-
-
-/*class CCC_DebugFonts : public IConsole_Command {
-public:
-	CCC_DebugFonts (LPCSTR N) : IConsole_Command(N) {bEmptyArgsHandled = true; }
-	virtual void Execute				(LPCSTR args) 
-	{
-		xr_new<CUIDebugFonts>()->ShowDialog(true);		
-	}
-};*/
-
 class CCC_DebugNode : public IConsole_Command {
 public:
 	CCC_DebugNode(LPCSTR N) : IConsole_Command(N)  { };
@@ -992,7 +981,7 @@ public:
 
 class CCC_ShowMonsterInfo : public IConsole_Command {
 public:
-				CCC_ShowMonsterInfo(LPCSTR N) : IConsole_Command(N)  { };
+	CCC_ShowMonsterInfo(LPCSTR N) : IConsole_Command(N)  { };
 
 	virtual void Execute(LPCSTR args) {
 

@@ -164,7 +164,6 @@ void	CBackend::set_ClipPlanes	(u32 _enable, Fplane*	_planes /*=NULL */, u32 coun
 #endif	//	USE_DX10
 }
 
-#ifndef DEDICATED_SREVER
 void	CBackend::set_ClipPlanes	(u32 _enable, Fmatrix*	_xform  /*=NULL */, u32 fmask/* =0xff */)
 {
 	if (0==HW.Caps.geometry.dwClipPlanes)	return;
@@ -433,9 +432,3 @@ void CBackend::set_Textures			(STextureList* _T)
 #endif
 #endif	//	USE_DX10
 }
-#else
-
-void	CBackend::set_ClipPlanes	(u32 _enable, Fmatrix*	_xform  /*=NULL */, u32 fmask/* =0xff */) {}
-void CBackend::set_Textures			(STextureList* _T) {}
-
-#endif

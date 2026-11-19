@@ -61,10 +61,6 @@ void CRenderDevice::Reset(bool precache)
 
     ShowCursor(TRUE);
     u32 tm_start = TimerAsync();
-    if (g_pGamePersistent)
-    {
-        //. g_pGamePersistent->Environment().OnDeviceDestroy();
-    }
 
     m_pRender->Reset(m_hWnd, dwWidth, dwHeight, fWidth_2, fHeight_2);
 
@@ -83,9 +79,12 @@ void CRenderDevice::Reset(bool precache)
     {
         g_pGamePersistent->Environment().bNeed_re_create_env = TRUE;
     }
+
     _SetupStates();
+    
     if (precache)
         PreCache(20, true, false);
+    
     u32 tm_end = TimerAsync();
     Msg("*** RESET [%d ms]", tm_end - tm_start);
 

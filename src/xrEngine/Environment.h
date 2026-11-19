@@ -119,8 +119,6 @@ public:
     shared_str sky_texture_env_name;
     shared_str clouds_texture_name;
 
-    BENCH_SEC_SCRAMBLEMEMBER1
-
     FactoryPtr<IEnvDescriptorRender> m_pDescriptor;
 
     Fvector4 clouds_color;
@@ -254,7 +252,6 @@ public:
     Fquaternion wind_blast_current;
 
     // Environments
-    BENCH_SEC_SCRAMBLEMEMBER2
     CEnvDescriptorMixer* CurrentEnv;
     CEnvDescriptor* Current[2];
 

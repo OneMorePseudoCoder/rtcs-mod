@@ -92,7 +92,6 @@ void CRenderDevice::Create()
     string_path fname;
     FS.update_path(fname, "$game_data$", "shaders.xr");
 
-    //////////////////////////////////////////////////////////////////////////
     _Create(fname);
 
     PreCache(0, false, false);

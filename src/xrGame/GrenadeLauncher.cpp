@@ -6,7 +6,6 @@
 #include "stdafx.h"
 
 #include "grenadelauncher.h"
-//#include "PhysicsShell.h"
 
 CGrenadeLauncher::CGrenadeLauncher()
 {
@@ -37,7 +36,6 @@ void CGrenadeLauncher::UpdateCL()
 {
 	inherited::UpdateCL();
 }
-
 
 void CGrenadeLauncher::OnH_A_Chield() 
 {

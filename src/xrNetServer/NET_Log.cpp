@@ -49,12 +49,7 @@ string64 PacketName[] = {
 	"M_AUTH_CHALLENGE",
 	"M_CL_AUTH",
 	"M_BULLET_CHECK_RESPOND",
-	//-----------------------------------------------------
-	"M_STATISTIC_UPDATE",
-	"M_STATISTIC_UPDATE_RESPOND",
-	//-----------------------------------------------------
-	"M_PLAYER_FIRE",
-	//-----------------------------------------------------
+
 	"M_MOVE_PLAYERS",
 	"M_MOVE_PLAYERS_RESPOND",
 

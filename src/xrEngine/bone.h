@@ -382,10 +382,10 @@ public:
     IC Fmatrix& _LRTransform() { return local_rest_transform; }
     IC Fmatrix& _MTransform() { return mot_transform; }
 
-    IC Fmatrix& _LTransform() { return mTransform; } //{return last_transform;}
+    IC Fmatrix& _LTransform() { return mTransform; }
     IC const Fmatrix& _LTransform() const { return mTransform; }
 
-    IC Fmatrix& _RenderTransform() { return mRenderTransform; } //{return render_transform;}
+    IC Fmatrix& _RenderTransform() { return mRenderTransform; }
     IC Fvector& _RestOffset() { return rest_offset; }
     IC Fvector& _RestRotate() { return rest_rotate; }
 
@@ -399,11 +399,6 @@ public:
 #ifdef _LW_EXPORT
     void ParseBone(LWItemID bone);
 #endif
-    IC float _BCL engine_lo_limit(u8 k) const { return -IK_data.limits[k].limit.y; }
-    IC float _BCL engine_hi_limit(u8 k) const { return -IK_data.limits[k].limit.x; }
-
-    IC float _BCL editor_lo_limit(u8 k) const { return IK_data.limits[k].limit.x; }
-    IC float _BCL editor_hi_limit(u8 k) const { return IK_data.limits[k].limit.y; }
 
     void SaveData(IWriter& F);
     void LoadData(IReader& F);
@@ -447,8 +442,8 @@ private:
     float _BCL get_mass() const { return mass; }
     u16 _BCL get_game_mtl_idx() const;
     u16 _BCL GetParentID() const { if (parent) return u16(parent->SelfID); else return u16(-1); };
-    float _BCL lo_limit(u8 k) const { return engine_lo_limit(k); }
-    float _BCL hi_limit(u8 k) const { return engine_hi_limit(k); }
+    float _BCL lo_limit(u8 k) const { return -IK_data.limits[k].limit.y; }
+    float _BCL hi_limit(u8 k) const { return -IK_data.limits[k].limit.x; }
 };
 
 //*** Shared Bone Data ****************************************************************************

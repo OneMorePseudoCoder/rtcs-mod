@@ -27,7 +27,7 @@ protected:
 
     IC bool EQ(LPCSTR S1, LPCSTR S2) { return xr_strcmp(S1, S2) == 0; }
 public:
-    IConsole_Command(LPCSTR N BENCH_SEC_SIGN) :
+    IConsole_Command(LPCSTR N) :
         cName(N),
         bEnabled(TRUE),
         bLowerCaseArgs(TRUE),
@@ -41,8 +41,6 @@ public:
         if (Console)
             Console->RemoveCommand(this);
     };
-
-    BENCH_SEC_SCRAMBLEVTBL3
 
     LPCSTR Name() { return cName; }
     void InvalidSyntax()
@@ -61,8 +59,6 @@ public:
         Status(S);
         if (S[0]) F->w_printf("%s %s\r\n", cName, S);
     }
-
-    BENCH_SEC_SCRAMBLEVTBL2
 
     virtual void fill_tips(vecTips& tips, u32 mode)
     {
@@ -109,7 +105,6 @@ public:
         xr_sprintf(str, sizeof(str), "%s (current) [on/off]", value->test(mask) ? "on" : "off");
         tips.push_back(str);
     }
-
 };
 
 class ENGINE_API CCC_ToggleMask : public IConsole_Command
@@ -148,7 +143,6 @@ public:
         xr_sprintf(str, sizeof(str), "%s (current) [on/off]", value->test(mask) ? "on" : "off");
         tips.push_back(str);
     }
-
 };
 
 class ENGINE_API CCC_Token : public IConsole_Command
@@ -231,7 +225,6 @@ public:
             tok++;
         }
     }
-
 };
 
 class ENGINE_API CCC_Float : public IConsole_Command
@@ -271,7 +264,6 @@ public:
         tips.push_back(str);
         IConsole_Command::fill_tips(tips, mode);
     }
-
 };
 
 class ENGINE_API CCC_Vector3 : public IConsole_Command
@@ -314,7 +306,6 @@ protected:
         tips.push_back(str);
         IConsole_Command::fill_tips(tips, mode);
     }
-
 };
 
 class ENGINE_API CCC_Integer : public IConsole_Command
@@ -389,7 +380,6 @@ public:
         tips.push_back((LPCSTR)value);
         IConsole_Command::fill_tips(tips, mode);
     }
-
 };
 
 class ENGINE_API CCC_LoadCFG : public IConsole_Command

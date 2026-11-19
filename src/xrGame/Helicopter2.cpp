@@ -1,11 +1,8 @@
 #include "pch_script.h"
 #include "helicopter.h"
-//#include "level.h"
 #include "script_game_object.h"
-//#include "game_object_space.h"
 #include "../Include/xrRender/Kinematics.h"
 #include "../xrEngine/LightAnimLibrary.h"
-//#include "../xrphysics/PhysicsShell.h"
 #include "script_callback_ex.h"
 #include "ai/stalker/ai_stalker.h"
 #include "CustomZone.h"
@@ -24,7 +21,7 @@ bool CHelicopter::isObjectVisible			(CObject* O)
 	float ray_length		= from_point.distance_to(to_point);
 
 	BOOL res = Level().ObjectSpace.RayTest(from_point, dir_to_object, ray_length, collide::rqtStatic, NULL, NULL);
-		
+
 	return !res;
 }
 
@@ -37,15 +34,14 @@ void CHelicopter::TurnLighting(bool bOn)
 {
 	m_light_render->set_active						(bOn);
 	m_light_started = bOn;
-
 }
+
 void  CHelicopter::TurnEngineSound(bool bOn)
 {
 	if(bOn)
 		m_engineSound.set_volume(1.0f);
 	else
 		m_engineSound.set_volume(0.0f);
-
 }
 
 void CHelicopter::StartFlame ()
@@ -203,7 +199,6 @@ float CHelicopter::GetRealAltitude()
 
 	down_dir.set(0.0f, -1.0f, 0.0f);
 
-
 	Level().ObjectSpace.RayPick(XFORM().c, down_dir, 1000.0f, collide::rqtStatic, cR, NULL);
 	
 	return cR.range;
@@ -211,9 +206,6 @@ float CHelicopter::GetRealAltitude()
 
 void	CHelicopter::Hit							(SHit* pHDS)
 {
-//	inherited::Hit(pHDS);
-
-
 	if(GetfHealth()<0.005f)
 		return;
 
@@ -272,7 +264,6 @@ void CollisionCallbackDead(bool& do_colide,bool bo1,dContact& c,SGameMtl* materi
 
 	if(l_this&& !l_this->m_exploded)
 		l_this->m_ready_explode=true;
-
 }
 
 void CHelicopter::DieHelicopter()

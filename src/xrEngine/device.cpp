@@ -15,17 +15,17 @@
 #pragma warning(default:4995)
 
 #include "x_ray.h"
-#include "render.h"
+#include "Render.h"
+#include "IGame_Level.h"
 
 // must be defined before include of FS_impl.h
 #define INCLUDE_FROM_ENGINE
 #include "../xrCore/FS_impl.h"
 
-#include "igame_persistent.h"
+#include "IGame_Persistent.h"
 
 ENGINE_API CRenderDevice Device;
 ENGINE_API CLoadScreenRenderer load_screen_renderer;
-
 
 ENGINE_API BOOL g_bRendering = FALSE;
 
@@ -132,7 +132,6 @@ void CRenderDevice::SecondaryThreadProc(void* context)
     }
 }
 
-#include "igame_level.h"
 void CRenderDevice::PreCache(u32 amount, bool b_draw_loadscreen, bool b_wait_user_input)
 {
     if (m_pRender->GetForceGPU_REF())
@@ -157,17 +156,12 @@ void CRenderDevice::PreCache(u32 amount, bool b_draw_loadscreen, bool b_wait_use
 
 ENGINE_API xr_list<LOADING_EVENT> g_loading_events;
 
-#include "render.h"
-#include "IGame_Level.h"
-
 //#define MOVE_CURRENT_FRAME_COUNTR // This is to determine, if the second vp bugs are happening because there were no frame step
 
 bool CRenderDevice::bMainMenuActive()
 {
     return  g_pGamePersistent && g_pGamePersistent->m_pMainMenu && g_pGamePersistent->m_pMainMenu->IsActive();
 }
-
-#define OPT_Z
 
 void CRenderDevice::on_idle()
 {
@@ -229,7 +223,6 @@ void CRenderDevice::on_idle()
 
     u32 t_width = Device.dwWidth, t_height = Device.dwHeight;
 
-#ifdef OPT_Z
 	for (size_t i = 0; i < Render->viewPortsThisFrame.size(); i++)
 	{
 		Render->currentViewPort = Render->viewPortsThisFrame[i];
@@ -286,8 +279,6 @@ void CRenderDevice::on_idle()
 			Device.dwHeight = t_height;
 		}
 	}
-#endif // 0
-
 	
 	// Restore main vp saved stuff for the needs of new frame
     if (Device.m_SecondViewport.IsSVPActive())
@@ -421,8 +412,7 @@ void CRenderDevice::FrameMove()
         // Timer
         float fPreviousFrameTime = Timer.GetElapsed_sec();
         Timer.Start(); // previous frame
-        fTimeDelta = 0.1f * fTimeDelta + 0.9f*fPreviousFrameTime; // smooth random system activity - worst case ~7% error
-        //fTimeDelta = 0.7f * fTimeDelta + 0.3f*fPreviousFrameTime; // smooth random system activity
+        fTimeDelta = 0.1f * fTimeDelta + 0.9f * fPreviousFrameTime; // smooth random system activity - worst case ~7% error
         if (fTimeDelta > .1f)
             fTimeDelta = .1f; // limit to 15fps minimum
 
@@ -432,8 +422,7 @@ void CRenderDevice::FrameMove()
         if (Paused())
             fTimeDelta = 0.0f;
 
-        // u64 qTime = TimerGlobal.GetElapsed_clk();
-        fTimeGlobal = TimerGlobal.GetElapsed_sec(); //float(qTime)*CPU::cycles2seconds;
+        fTimeGlobal = TimerGlobal.GetElapsed_sec();
         u32 _old_global = dwTimeGlobal;
         dwTimeGlobal = TimerGlobal.GetElapsed_ms();
         dwTimeDelta = dwTimeGlobal - _old_global;
@@ -442,11 +431,8 @@ void CRenderDevice::FrameMove()
     // Frame move
     Statistic->EngineTOTAL.Begin();
 
-    // TODO: HACK to test loading screen.
-    //if(!g_bLoaded)
     ProcessLoading(rp_Frame);
-    //else
-    // seqFrame.Process (rp_Frame);
+
     Statistic->EngineTOTAL.End();
 }
 
@@ -457,7 +443,6 @@ void ProcessLoading(RP_FUNC* f)
 }
 
 ENGINE_API BOOL bShowPauseString = TRUE;
-#include "IGame_Persistent.h"
 
 void CRenderDevice::Pause(BOOL bOn, BOOL bTimer, BOOL bSound, LPCSTR reason)
 {
@@ -557,8 +542,7 @@ void CRenderDevice::RemoveSeqFrame(pureFrame* f)
     seqFrame.Remove(f);
 }
 
-CLoadScreenRenderer::CLoadScreenRenderer()
-    :b_registered(false)
+CLoadScreenRenderer::CLoadScreenRenderer() : b_registered(false), b_need_user_input(false)
 {}
 
 void CLoadScreenRenderer::start(bool b_user_input)
@@ -570,7 +554,8 @@ void CLoadScreenRenderer::start(bool b_user_input)
 
 void CLoadScreenRenderer::stop()
 {
-    if (!b_registered) return;
+    if (!b_registered)
+        return;
     Device.seqRender.Remove(this);
     pApp->destroy_loading_shaders();
     b_registered = false;

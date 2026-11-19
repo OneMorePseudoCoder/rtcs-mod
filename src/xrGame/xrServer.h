@@ -180,7 +180,6 @@ public:
 	virtual void			OnBuildVersionRespond				(IClient* CL, NET_Packet& P);
 protected:
 	xrClientsPool			m_disconnected_clients;
-	bool					CheckAdminRights		(const shared_str& user, const shared_str& pass, string512& reason);
 	virtual IClient*		new_client				( SClientConnectData* cl_data );
 	
 	virtual bool			Check_ServerAccess( IClient* CL, string512& reason )	{ return true; }
