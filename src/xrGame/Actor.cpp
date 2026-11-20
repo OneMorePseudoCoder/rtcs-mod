@@ -608,41 +608,38 @@ void CActor::Die	(CObject* who)
 #endif // #ifdef DEBUG
 	inherited::Die		(who);
 
-	if (OnServer())
-	{	
-		u16 I = inventory().FirstSlot();
-		u16 E = inventory().LastSlot();
+	u16 I = inventory().FirstSlot();
+	u16 E = inventory().LastSlot();
 
-		for (; I <= E; ++I)
+	for (; I <= E; ++I)
+	{
+		PIItem item_in_slot = inventory().ItemFromSlot(I);
+		if (I == inventory().GetActiveSlot()) 
 		{
-			PIItem item_in_slot = inventory().ItemFromSlot(I);
-			if (I == inventory().GetActiveSlot()) 
+			if (item_in_slot)
 			{
-				if (item_in_slot)
-				{
-					CGrenade* grenade = smart_cast<CGrenade*>(item_in_slot);
-					if (grenade)
-						grenade->DropGrenade();
-					else
-						item_in_slot->SetDropManual(TRUE);						
-				};
-			continue;
-			}
-			else
-			{
-				CCustomOutfit* pOutfit = smart_cast<CCustomOutfit*>(item_in_slot);
-				if (pOutfit)
-					continue;
+				CGrenade* grenade = smart_cast<CGrenade*>(item_in_slot);
+				if (grenade)
+					grenade->DropGrenade();
+				else
+					item_in_slot->SetDropManual(TRUE);						
 			};
-			if (item_in_slot) 
-				inventory().Ruck(item_in_slot);
+		continue;
+		}
+		else
+		{
+			CCustomOutfit* pOutfit = smart_cast<CCustomOutfit*>(item_in_slot);
+			if (pOutfit)
+				continue;
 		};
-
-		///!!! чистка пояса
-		TIItemContainer &l_blist = inventory().m_belt;
-		while (!l_blist.empty())	
-			inventory().Ruck(l_blist.front());
+		if (item_in_slot) 
+			inventory().Ruck(item_in_slot);
 	};
+
+	///!!! чистка пояса
+	TIItemContainer &l_blist = inventory().m_belt;
+	while (!l_blist.empty())	
+		inventory().Ruck(l_blist.front());
 
 	::Sound->play_at_pos	(sndDie[Random.randI(SND_DIE_COUNT)],this,Position());
 
@@ -967,10 +964,10 @@ void CActor::set_state_box(u32	mstate)
 	else 
 		character_physics_support()->movement()->ActivateBox(0, true);
 }
+
 void CActor::shedule_Update	(u32 DT)
 {
-	setSVU							(OnServer());
-//.	UpdateInventoryOwner			(DT);
+	setSVU							(true);
 
 	if(IsFocused())
 	{
@@ -992,18 +989,16 @@ void CActor::shedule_Update	(u32 DT)
 						g_player_hud->attach_item	(pHudItem);
 					}
 				}
-			}else
+			}
+			else
 			{
 					g_player_hud->detach_item_idx	( 0 );
-					//Msg("---No active item in inventory(), item 0 detached.");
 			}
 		}
 		else
 		{
 			g_player_hud->detach_all_items();
-			//Msg("---No hud view found, all items detached.");
 		}
-			
 	}
 
 	if(m_holder || !getEnabled() || !Ready())
@@ -1017,23 +1012,10 @@ void CActor::shedule_Update	(u32 DT)
 	float	dt	 			=  float(DT)/1000.f;
 
 	// Check controls, create accel, prelimitary setup "mstate_real"
-	
 	if (Level().CurrentControlEntity() == this)
-	//------------------------------------------------
 	{
 		g_cl_CheckControls		(mstate_wishful,NET_SavedAccel,NET_Jump,dt);
-		{
-			/*
-			if (mstate_real & mcJump)
-			{
-				NET_Packet	P;
-				u_EventGen(P, GE_ACTOR_JUMPING, ID());
-				P.w_sdir(NET_SavedAccel);
-				P.w_float(NET_Jump);
-				u_EventSend(P);
-			}
-			*/
-		}
+
 		g_cl_Orientate			(mstate_real,dt);
 		g_Orientate				(mstate_real,dt);
 
@@ -1043,9 +1025,8 @@ void CActor::shedule_Update	(u32 DT)
 		g_SetAnimation			(mstate_real);
 		
 		// Check for game-contacts
-		Fvector C; float R;		
-		//m_PhysicMovementControl->GetBoundingSphere	(C,R);
-		
+		Fvector C;
+		float R;
 		Center( C );
 		R = Radius();
 		feel_touch_update( C, R );
@@ -1436,38 +1417,34 @@ ALife::_TIME_ID	 CActor::TimePassedAfterDeath()	const
 void CActor::OnItemTake(CInventoryItem *inventory_item)
 {
 	CInventoryOwner::OnItemTake(inventory_item);
-	if (OnClient()) return;
 }
 
 void CActor::OnItemDrop(CInventoryItem *inventory_item, bool just_before_destroy)
 {
 	CInventoryOwner::OnItemDrop(inventory_item, just_before_destroy);
 
-	CCustomOutfit* outfit		= smart_cast<CCustomOutfit*>(inventory_item);
-	if(outfit && inventory_item->m_ItemCurrPlace.type==eItemPlaceSlot)
+	CCustomOutfit* outfit = smart_cast<CCustomOutfit*>(inventory_item);
+	if (outfit && inventory_item->m_ItemCurrPlace.type == eItemPlaceSlot)
 	{
-		outfit->ApplySkinModel	(this, false, false);
+		outfit->ApplySkinModel(this, false, false);
 	}
 
 	CWeapon* weapon	= smart_cast<CWeapon*>(inventory_item);
-	if(weapon && inventory_item->m_ItemCurrPlace.type==eItemPlaceSlot)
+	if (weapon && inventory_item->m_ItemCurrPlace.type == eItemPlaceSlot)
 	{
 		weapon->OnZoomOut();
-		if(weapon->GetRememberActorNVisnStatus())
+		if (weapon->GetRememberActorNVisnStatus())
 			weapon->EnableActorNVisnAfterZoom();
 	}
 
-	if(		!just_before_destroy && 
-			inventory_item->BaseSlot()==GRENADE_SLOT && 
-			NULL==inventory().ItemFromSlot(GRENADE_SLOT) )
+	if (!just_before_destroy && inventory_item->BaseSlot() == GRENADE_SLOT && NULL == inventory().ItemFromSlot(GRENADE_SLOT))
 	{
-		PIItem grenade =  inventory().SameSlot(GRENADE_SLOT, inventory_item, true);
+		PIItem grenade = inventory().SameSlot(GRENADE_SLOT, inventory_item, true);
 		
-		if(grenade)
+		if (grenade)
 			inventory().Slot(GRENADE_SLOT, grenade, true, true);
 	}
 }
-
 
 void CActor::OnItemDropUpdate ()
 {
@@ -1480,7 +1457,6 @@ void CActor::OnItemDropUpdate ()
 		if( !(*I)->IsInvalid() && !attached(*I))
 			attach(*I);
 }
-
 
 void CActor::OnItemRuck		(CInventoryItem *inventory_item, const SInvItemPlace& previous_place)
 {
@@ -1673,18 +1649,18 @@ bool CActor::use_center_to_aim			() const
 	return							(!!(mstate_real&mcCrouch));
 }
 
-bool CActor::can_attach			(const CInventoryItem *inventory_item) const
+bool CActor::can_attach(const CInventoryItem* inventory_item) const
 {
-	const CAttachableItem	*item = smart_cast<const CAttachableItem*>(inventory_item);
-	if (!item || /*!item->enabled() ||*/ !item->can_be_attached())
-		return			(false);
+	const CAttachableItem* item = smart_cast<const CAttachableItem*>(inventory_item);
+	if (!item || !item->can_be_attached())
+		return false;
 
 	//можно ли присоединять объекты такого типа
-	if( m_attach_item_sections.end() == std::find(m_attach_item_sections.begin(),m_attach_item_sections.end(),inventory_item->object().cNameSect()) )
+	if (m_attach_item_sections.end() == std::find(m_attach_item_sections.begin(), m_attach_item_sections.end(), inventory_item->object().cNameSect()))
 		return false;
 
 	//если уже есть присоединненый объет такого типа 
-	if(attached(inventory_item->object().cNameSect()))
+	if (attached(inventory_item->object().cNameSect()))
 		return false;
 
 	return true;

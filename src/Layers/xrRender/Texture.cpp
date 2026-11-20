@@ -363,10 +363,11 @@ _DDS_2D:
 			strlwr					(fn);
 			// Load   SYS-MEM-surface, bound to device restrictions
 			ID3DTexture2D*		T_sysmem;
+			UINT dim = HW.Caps.raster.bNonPow2 ? D3DX_DEFAULT_NONPOW2 : D3DX_DEFAULT;
 			HRESULT const result	=
 				D3DXCreateTextureFromFileInMemoryEx(
 					HW.pDevice,S->pointer(),S->length(),
-					D3DX_DEFAULT,D3DX_DEFAULT,
+					dim,dim,
 					IMG.MipLevels,0,
 					IMG.Format,
 					D3DPOOL_SYSTEMMEM,

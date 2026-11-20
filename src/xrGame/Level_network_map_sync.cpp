@@ -36,7 +36,7 @@ bool CLevel::IsChecksumsEqual(u32 check_sum) const
 
 bool CLevel::synchronize_map_data()
 {
-	if (!OnClient() && !IsDemoSave())
+	if (!IsDemoSave())
 	{
 		deny_m_spawn		= FALSE;
 		map_data.m_map_sync_received	= true;
@@ -84,9 +84,8 @@ bool CLevel::synchronize_map_data()
 	return synchronize_client();
 }
 
-bool	CLevel::synchronize_client()
+bool CLevel::synchronize_client()
 {
-//---------------------------------------------------------------------------
 	if (!sended_request_connection_data)
 	{
 		NET_Packet	P;
@@ -95,24 +94,25 @@ bool	CLevel::synchronize_client()
 		Send		(P, net_flags(TRUE, TRUE, TRUE, TRUE));
 		sended_request_connection_data = TRUE;
 	}
-//---------------------------------------------------------------------------
+
 	if (game_configured)
 	{
 		deny_m_spawn = FALSE;
 		return true;
 	}
+
 #ifdef DEBUG
 	Msg("--- Waiting for server configuration...");
 #endif // #ifdef DEBUG
-	if(Server)
+
+	if (Server)
 	{
 		ClientReceive();
 		Server->Update();
-	}	// if OnClient ClientReceive method called in upper invokation
-	//Sleep(5); 
+	}
+
 	return !!game_configured;
 }
-
 
 void LevelMapSyncData::CheckToSendMapSync()
 {

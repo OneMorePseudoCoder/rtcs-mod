@@ -427,69 +427,36 @@ void CLevel::OnFrame()
         CGameFont* F = UI().Font().pFontDI;
         if (!psNET_direct_connect)
         {
-            if (IsServer())
+            const IServerStatistic* S = Server->GetStatistic();
+            F->SetHeightI(0.015f);
+            F->OutSetI(0.0f, 0.5f);
+            F->SetColor(D3DCOLOR_XRGB(0, 255, 0));
+            F->OutNext("IN:  %4d/%4d (%2.1f%%)", S->bytes_in_real, S->bytes_in, 100.f*float(S->bytes_in_real) / float(S->bytes_in));
+            F->OutNext("OUT: %4d/%4d (%2.1f%%)", S->bytes_out_real, S->bytes_out, 100.f*float(S->bytes_out_real) / float(S->bytes_out));
+            F->OutNext("client_2_sever ping: %d", net_Statistic.getPing());
+            F->OutNext("SPS/Sended : %4d/%4d", S->dwBytesPerSec, S->dwBytesSended);
+            F->SetColor(D3DCOLOR_XRGB(255, 255, 255));
+            struct net_stats_functor
             {
-                const IServerStatistic* S = Server->GetStatistic();
-                F->SetHeightI(0.015f);
-                F->OutSetI(0.0f, 0.5f);
-                F->SetColor(D3DCOLOR_XRGB(0, 255, 0));
-                F->OutNext("IN:  %4d/%4d (%2.1f%%)", S->bytes_in_real, S->bytes_in,
-                    100.f*float(S->bytes_in_real) / float(S->bytes_in));
-                F->OutNext("OUT: %4d/%4d (%2.1f%%)", S->bytes_out_real, S->bytes_out,
-                    100.f*float(S->bytes_out_real) / float(S->bytes_out));
-                F->OutNext("client_2_sever ping: %d", net_Statistic.getPing());
-                F->OutNext("SPS/Sended : %4d/%4d", S->dwBytesPerSec, S->dwBytesSended);
-                F->SetColor(D3DCOLOR_XRGB(255, 255, 255));
-                struct net_stats_functor
+                xrServer* m_server;
+                CGameFont* F;
+                void operator()(IClient* C)
                 {
-                    xrServer* m_server;
-                    CGameFont* F;
-                    void operator()(IClient* C)
-                    {
-                        m_server->UpdateClientStatistic(C);
-                        F->OutNext("0x%08x: P(%d), BPS(%2.1fK), MRR(%2d), MSR(%2d), Retried(%2d), Blocked(%2d)",
-                            //Server->game->get_option_s(*C->Name,"name",*C->Name),
-                            C->ID.value(),
-                            C->stats.getPing(),
-                            float(C->stats.getBPS()),// /1024,
-                            C->stats.getMPS_Receive(),
-                            C->stats.getMPS_Send(),
-                            C->stats.getRetriedCount(),
-                            C->stats.dwTimesBlocked);
-                    }
-                };
-                net_stats_functor tmp_functor;
-                tmp_functor.m_server = Server;
-                tmp_functor.F = F;
-                Server->ForEachClientDo(tmp_functor);
-            }
-            if (IsClient())
-            {
-                IPureClient::UpdateStatistic();
-                F->SetHeightI(0.015f);
-                F->OutSetI(0.0f, 0.5f);
-                F->SetColor(D3DCOLOR_XRGB(0, 255, 0));
-                F->OutNext("client_2_sever ping: %d", net_Statistic.getPing());
-                F->SetColor(D3DCOLOR_XRGB(255, 255, 255));
-                F->OutNext("BReceivedPs(%2d), BSendedPs(%2d), Retried(%2d), Blocked(%2d)",
-                    net_Statistic.getReceivedPerSec(),
-                    net_Statistic.getSendedPerSec(),
-                    net_Statistic.getRetriedCount(),
-                    net_Statistic.dwTimesBlocked);
-#ifdef DEBUG
-                if (!pStatGraphR)
-                {
-                    pStatGraphR = xr_new<CStatGraph>();
-                    pStatGraphR->SetRect(50, 700, 300, 68, 0xff000000, 0xff000000);
-                    pStatGraphR->SetMinMax(0.0f, 65536.0f, 1000);
-                    pStatGraphR->SetStyle(CStatGraph::stBarLine);
-                    pStatGraphR->AppendSubGraph(CStatGraph::stBarLine);
+                    m_server->UpdateClientStatistic(C);
+                    F->OutNext("0x%08x: P(%d), BPS(%2.1fK), MRR(%2d), MSR(%2d), Retried(%2d), Blocked(%2d)",
+                        C->ID.value(),
+                        C->stats.getPing(),
+                        float(C->stats.getBPS()),// /1024,
+                        C->stats.getMPS_Receive(),
+                        C->stats.getMPS_Send(),
+                        C->stats.getRetriedCount(),
+                        C->stats.dwTimesBlocked);
                 }
-                pStatGraphR->AppendItem(float(net_Statistic.getBPS()), 0xff00ff00, 0);
-                F->OutSet(20.f, 700.f);
-                F->OutNext("64 KBS");
-#endif
-            }
+            };
+            net_stats_functor tmp_functor;
+            tmp_functor.m_server = Server;
+            tmp_functor.F = F;
+            Server->ForEachClientDo(tmp_functor);
         }
     }
     else
@@ -893,20 +860,6 @@ void CLevel::SetEnvironmentGameTimeFactor(u64 const& GameTime, float const& fTim
     game->SetEnvironmentGameTimeFactor(GameTime, fTimeFactor);
 }
 
-bool CLevel::IsServer()
-{
-    if (!Server)
-        return false;
-    return true;
-}
-
-bool CLevel::IsClient()
-{
-    if (Server)
-        return false;
-    return true;
-}
-
 void CLevel::OnAlifeSimulatorUnLoaded()
 {
     MapManager().ResetStorage();
@@ -933,7 +886,6 @@ void CLevel::ApplyCamera()
 
 	if (lastApplyCameraVPNear > -1.f)
 		lastApplyCamera(lastApplyCameraVPNear);
-
 }
 
 u32	GameID()

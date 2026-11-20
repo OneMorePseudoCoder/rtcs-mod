@@ -88,7 +88,6 @@ void CTorch::Load(LPCSTR section)
 
 void CTorch::SwitchNightVision()
 {
-	if (OnClient()) return;
 	SwitchNightVision(!m_bNightVisionOn);	
 }
 
@@ -138,7 +137,6 @@ void CTorch::SwitchNightVision(bool vision_on, bool use_sounds)
 
 	if(m_bNightVisionOn)
 	{
-
 		if(!bIsActiveNow)
 		{
 			if(pHelmet && pHelmet->m_NightVisionSect.size())
@@ -153,7 +151,8 @@ void CTorch::SwitchNightVision(bool vision_on, bool use_sounds)
 			}
 			m_bNightVisionOn = false; // in case if there is no nightvision in helmet and outfit
 		}
-	}else
+	}
+	else
 	{
 		if(bIsActiveNow)
 		{
@@ -164,7 +163,6 @@ void CTorch::SwitchNightVision(bool vision_on, bool use_sounds)
 
 void CTorch::Switch()
 {
-	if (OnClient())			return;
 	bool bActive			= !m_switched_on;
 	Switch					(bActive);
 }
@@ -175,10 +173,7 @@ void CTorch::Switch(bool light_on)
 	if (can_use_dynamic_lights())
 	{
 		light_render->set_active(light_on);
-		
-		// CActor *pA = smart_cast<CActor *>(H_Parent());
-		//if(!pA)
-			light_omni->set_active(light_on);
+		light_omni->set_active(light_on);
 	}
 	glow_render->set_active					(light_on);
 

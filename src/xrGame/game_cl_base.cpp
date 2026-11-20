@@ -11,9 +11,6 @@
 #include "UI/UIDialogWnd.h"
 #include "string_table.h"
 
-EGameIDs ParseStringToGameType	(LPCSTR str);
-LPCSTR GameTypeToString			(EGameIDs gt, bool bShort);
-
 game_cl_GameState::game_cl_GameState()
 {
 	local_player				= createPlayerState(NULL);	//initializing account info
@@ -26,7 +23,6 @@ game_cl_GameState::game_cl_GameState()
 	shedule_register			();
 
 	m_u16VotingEnabled			= 0;
-	m_bServerControlHits		= true;
 }
 
 game_cl_GameState::~game_cl_GameState()
@@ -85,9 +81,6 @@ struct not_exsiting_clients_deleter
 
 		if ( *local_player == value.second )
 			return false;
-// 			*local_player	=	NULL;
-// 			*client_id		=	0;
-// 		}
 
 		xr_delete(value.second);
 		return true;
@@ -109,7 +102,7 @@ void	game_cl_GameState::net_import_state	(NET_Packet& P)
 	P.r_s32			(m_round);
 	P.r_u32			(m_start_time);
 	m_u16VotingEnabled = u16(P.r_u8());
-	m_bServerControlHits = !!P.r_u8();	
+	P.r_u8();	
 	P.r_u8();
 
 	// Players
@@ -362,13 +355,6 @@ void game_cl_GameState::SendPickUpEvent(u16 ID_who, u16 ID_what)
 
 void game_cl_GameState::set_type_name(LPCSTR s)	
 { 
-	EGameIDs gid =			ParseStringToGameType	(s);
-	m_game_type_name		= GameTypeToString		(gid, false); 
-	if(OnClient())
-	{
-		xr_strcpy					(g_pGamePersistent->m_game_params.m_game_type, m_game_type_name.c_str());
-		g_pGamePersistent->OnGameStart();
-	}
 };
 
 void game_cl_GameState::OnConnected()

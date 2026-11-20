@@ -139,9 +139,6 @@ void stop_weather_fx()
 
 void set_time_factor(float time_factor)
 {
-	if (!OnServer())
-		return;
-
 	Level().Server->game->SetGameTimeFactor(time_factor);
 }
 

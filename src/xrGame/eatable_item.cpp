@@ -59,8 +59,10 @@ bool CEatableItem::Useful() const
 void CEatableItem::OnH_A_Independent() 
 {
 	inherited::OnH_A_Independent();
-	if(!Useful()) {
-		if (object().Local() && OnServer())	object().DestroyObject	();
+	if (!Useful()) 
+	{
+		if (object().Local())
+			object().DestroyObject();
 	}	
 }
 

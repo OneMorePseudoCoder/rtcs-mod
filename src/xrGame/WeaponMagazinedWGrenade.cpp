@@ -353,7 +353,7 @@ void CWeaponMagazinedWGrenade::LaunchGrenade()
 		VERIFY(pGrenade);
 		pGrenade->SetInitiator(H_Parent()->ID());
 
-		if (Local() && OnServer())
+		if (Local())
 		{
 			VERIFY(m_magazine.size());
 			m_magazine.pop_back();
@@ -477,8 +477,7 @@ bool CWeaponMagazinedWGrenade::Attach(PIItem pIItem, bool b_send_event)
 		//уничтожить подствольник из инвентаря
 		if (b_send_event)
 		{
-			if (OnServer())
-				pIItem->object().DestroyObject();
+			pIItem->object().DestroyObject();
 		}
 
 		InitAddons();

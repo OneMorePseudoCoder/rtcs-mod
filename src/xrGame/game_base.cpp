@@ -9,8 +9,6 @@ u64		g_qwStartGameTime		= 12*60*60*1000;
 float	g_fTimeFactor			= pSettings->r_float("alife","time_factor");
 u64		g_qwEStartGameTime		= 12*60*60*1000;
 
-EGameIDs ParseStringToGameType(LPCSTR str);
-
 game_PlayerState::game_PlayerState(NET_Packet* account_info)
 {
 	skin				= 0;
@@ -195,17 +193,7 @@ game_GameState::game_GameState()
 
 CLASS_ID game_GameState::getCLASS_ID(LPCSTR game_type_name, bool isServer)
 {
-	EGameIDs gameID = ParseStringToGameType(game_type_name);
-	switch(gameID)
-	{
-	case eGameIDSingle:
-		return			(isServer)?TEXT2CLSID("SV_SINGL"):TEXT2CLSID("CL_SINGL");
-		break;
-
-	default:
-		return			(TEXT2CLSID(""));
-		break;
-	}
+	return isServer ? TEXT2CLSID("SV_SINGL") : TEXT2CLSID("CL_SINGL");
 }
 
 void game_GameState::switch_Phase		(u32 new_phase)

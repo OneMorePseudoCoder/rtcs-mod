@@ -31,10 +31,7 @@ void CLevel::cl_Process_Spawn(NET_Packet& P)
 	}
 
 	//force object to be local for server client
-	if (OnServer())		
-	{
-		E->s_flags.set(M_SPAWN_OBJECT_LOCAL, TRUE);
-	};
+	E->s_flags.set(M_SPAWN_OBJECT_LOCAL, TRUE);
 
 	g_sv_Spawn					(E);
 

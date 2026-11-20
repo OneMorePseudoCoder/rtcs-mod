@@ -33,14 +33,8 @@ void CLevel::remove_objects	()
 	int loop = 5;
 	while(loop)
 	{
-		if (OnServer()) 
-		{
-			R_ASSERT				(Server);
-			Server->SLS_Clear		();
-		}
-
-		if (OnClient())
-			ClearAllObjects			();
+		R_ASSERT				(Server);
+		Server->SLS_Clear		();
 
 		for (int i=0; i<20; ++i) 
 		{
@@ -59,14 +53,13 @@ void CLevel::remove_objects	()
 			Objects.dump_all_objects();
 		}
 
-		if(Objects.o_count()==0)
+		if (Objects.o_count()==0)
 			break;
 		else
 		{
 			--loop;
-			Msg						("Objects removal next loop. Active objects count=%d", Objects.o_count());
+			Msg("Objects removal next loop. Active objects count=%d", Objects.o_count());
 		}
-
 	}
 
 	BulletManager().Clear		();
@@ -148,11 +141,6 @@ void CLevel::net_Stop		()
 
 void CLevel::ClientSend()
 {
-	if (OnClient())
-	{
-		if ( !net_HasBandwidth() ) return;
-	};
-
 	NET_Packet				P;
 	u32						start	= 0;
 
@@ -163,25 +151,12 @@ void CLevel::ClientSend()
 		{				
 			P.w_begin		(M_CL_UPDATE);
 			
-
 			P.w_u16			(u16(pObj->ID()));
 			P.w_u32			(0);	//reserved place for client's ping
 
-			pObj->net_Export			(P);
-
-			if (P.B.count>9)				
-			{
-				if (!OnServer())
-					Send	(P, net_flags(FALSE));
-			}				
+			pObj->net_Export			(P);				
 		}			
 	}		
-
-	if (OnClient()) 
-	{
-		Flush_Send_Buffer();
-		return;
-	}
 
 	while (1)
 	{
@@ -202,26 +177,24 @@ u32	CLevel::Objects_net_Save	(NET_Packet* _Packet, u32 start, u32 max_object_siz
 {
 	NET_Packet& Packet	= *_Packet;
 	u32			position;
-	for (; start<Objects.o_count(); start++)	{
+	for (; start<Objects.o_count(); start++)	
+	{
 		CObject		*_P = Objects.o_get_by_iterator(start);
 		CGameObject *P = smart_cast<CGameObject*>(_P);
-//		Msg			("save:iterating:%d:%s, size[%d]",P->ID(),*P->cName(), Packet.w_tell() );
-		if (P && !P->getDestroy() && P->net_SaveRelevant())	{
+		if (P && !P->getDestroy() && P->net_SaveRelevant())	
+		{
 			Packet.w_u16			(u16(P->ID())	);
 			Packet.w_chunk_open16	(position);
-//			Msg						("save:saving:%d:%s",P->ID(),*P->cName());
 			P->net_Save				(Packet);
 #ifdef DEBUG
 			u32 size				= u32		(Packet.w_tell()-position)-sizeof(u16);
-//			Msg						("save:saved:%d bytes:%d:%s",size,P->ID(),*P->cName());
-			if				(size>=65536)			{
+			if				(size>=65536)			
+			{
 				Debug.fatal	(DEBUG_INFO,"Object [%s][%d] exceed network-data limit\n size=%d, Pend=%d, Pstart=%d",
 					*P->cName(), P->ID(), size, Packet.w_tell(), position);
 			}
 #endif
 			Packet.w_chunk_close16	(position);
-//			if (0==(--count))		
-//				break;
 			if (max_object_size >= (NET_PacketSizeLimit - Packet.w_tell()))
 				break;
 		}
@@ -234,7 +207,8 @@ void CLevel::ClientSave	()
 	NET_Packet		P;
 	u32				start	= 0;
 
-	for (;;) {
+	for (;;) 
+	{
 		P.w_begin	(M_SAVE_PACKET);
 		
 		start		= Objects_net_Save(&P, start, max_objects_size_in_save);
@@ -246,15 +220,16 @@ void CLevel::ClientSave	()
 	}
 }
 
-void CLevel::Send		(NET_Packet& P, u32 dwFlags, u32 dwTimeout)
+void CLevel::Send(NET_Packet& P, u32 dwFlags, u32 dwTimeout)
 {
 	// optimize the case when server located in our memory
-	if(psNET_direct_connect){
+	if (psNET_direct_connect)
+	{
 		ClientID	_clid;
 		_clid.set	(1);
 		Server->OnMessage		(P,	_clid );
-	}else
-	if (Server && game_configured && OnServer() )
+	}
+	else if (Server && game_configured)
 	{
 #ifdef DEBUG
 		VERIFY2(Server->IsPlayersMonitorLockedByMe() == false, "potential deadlock detected");
@@ -266,14 +241,16 @@ void CLevel::Send		(NET_Packet& P, u32 dwFlags, u32 dwTimeout)
 
 void CLevel::net_Update	()
 {
-	if(game_configured){
+	if (game_configured)
+	{
 		// If we have enought bandwidth - replicate client data on to server
 		Device.Statistic->netClient2.Begin	();
 		ClientSend					();
 		Device.Statistic->netClient2.End		();
 	}
 	// If server - perform server-update
-	if (Server && OnServer())	{
+	if (Server)	
+	{
 		Device.Statistic->netServer.Begin();
 		Server->Update					();
 		Device.Statistic->netServer.End	();

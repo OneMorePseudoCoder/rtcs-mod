@@ -23,7 +23,6 @@ class	game_cl_GameState	: public game_GameState, public ISheduled
 protected:
 	CUIGameCustom*						m_game_ui_custom;
 	u16									m_u16VotingEnabled;	
-	bool								m_bServerControlHits;	
 
 public:
 	typedef associative_vector<ClientID,game_PlayerState*>	PLAYERS_MAP;
@@ -84,7 +83,6 @@ public:
 	void							u_EventSend				(NET_Packet& P);
 
 	virtual		void				OnRender				()	{};
-	virtual		bool				IsServerControlHits		()	{return m_bServerControlHits;};
 	virtual		bool				IsEnemy					(game_PlayerState* ps)	{return false;};
 	virtual		bool				IsEnemy					(CEntityAlive* ea1, CEntityAlive* ea2)	{return false;};
 	virtual		bool				PlayerCanSprint			(CActor* pActor) {return true;};

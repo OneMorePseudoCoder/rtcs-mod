@@ -117,13 +117,11 @@ void CWeaponRG6::FireStart ()
 		VERIFY(pGrenade);
 		pGrenade->SetInitiator(H_Parent()->ID());
 
-		if (OnServer())
-		{
-			NET_Packet P;
-			u_EventGen(P,GE_LAUNCH_ROCKET,ID());
-			P.w_u16(u16(getCurrentRocket()->ID()));
-			u_EventSend(P);
-		}
+		NET_Packet P;
+		u_EventGen(P,GE_LAUNCH_ROCKET,ID());
+		P.w_u16(u16(getCurrentRocket()->ID()));
+		u_EventSend(P);
+
 		dropCurrentRocket();
 	}
 }
@@ -133,7 +131,8 @@ u8 CWeaponRG6::AddCartridge		(u8 cnt)
 	u8 t = inheritedSG::AddCartridge(cnt);
 	u8 k = cnt-t;
 	shared_str fake_grenade_name = pSettings->r_string(m_ammoTypes[m_ammoType].c_str(), "fake_grenade_name");
-	while(k){
+	while(k)
+	{
 		--k;
 		inheritedRL::SpawnRocket(*fake_grenade_name, this);
 	}
@@ -145,17 +144,20 @@ void CWeaponRG6::OnEvent(NET_Packet& P, u16 type)
 	inheritedSG::OnEvent(P,type);
 
 	u16 id;
-	switch (type) {
-		case GE_OWNERSHIP_TAKE : {
+	switch (type) 
+	{
+		case GE_OWNERSHIP_TAKE: 
+		{
 			P.r_u16(id);
 			inheritedRL::AttachRocket(id, this);
 		} break;
-		case GE_OWNERSHIP_REJECT : 
-		case GE_LAUNCH_ROCKET : 
-			{
+		case GE_OWNERSHIP_REJECT: 
+		case GE_LAUNCH_ROCKET: 
+		{
 			bool bLaunch = (type==GE_LAUNCH_ROCKET);
 			P.r_u16						(id);
 			inheritedRL::DetachRocket	(id, bLaunch);
-		} break;
+		} 
+		break;
 	}
 }

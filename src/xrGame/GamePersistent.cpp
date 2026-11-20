@@ -26,6 +26,7 @@
 #include "xrserver_objects_alife_monsters.h"
 #include "../xrServerEntities/xrServer_Object_Base.h"
 #include "UI/UIGameTutorial.h"
+#include "HUDManager.h"
 
 #ifndef MASTER_GOLD
 #include "custommonster.h"
@@ -177,19 +178,11 @@ LPCSTR GameTypeToString(EGameIDs gt, bool bShort)
 	}
 }
 
-EGameIDs ParseStringToGameType(LPCSTR str)
+void CGamePersistent::UpdateGameType()
 {
-	if (!xr_strcmp(str, "single")) 
-		return eGameIDSingle;
-	else
-		return eGameIDNoGame;
-}
+	__super::UpdateGameType();
 
-void CGamePersistent::UpdateGameType			()
-{
-	__super::UpdateGameType		();
-
-	m_game_params.m_e_game_type = ParseStringToGameType(m_game_params.m_game_type);
+	m_game_params.m_e_game_type = eGameIDNoGame;
 
 	g_current_keygroup = _sp;
 }
@@ -717,25 +710,14 @@ void CGamePersistent::LoadTitle(bool change_tip, shared_str map_name)
 		string512				buff;
 		u8						tip_num;
 		luabind::functor<u8>	m_functor;
-		bool is_single = !xr_strcmp(m_game_params.m_game_type,"single");
-		if(is_single)
-		{
-			R_ASSERT( ai().script_engine().functor( "loadscreen.get_tip_number", m_functor ) );
-			tip_num				= m_functor(map_name.c_str());
-		}
-		else
-		{
-			R_ASSERT( ai().script_engine().functor( "loadscreen.get_mp_tip_number", m_functor ) );
-			tip_num				= m_functor(map_name.c_str());
-		}
-//		tip_num = 83;
+
+		R_ASSERT( ai().script_engine().functor( "loadscreen.get_tip_number", m_functor ) );
+		tip_num				= m_functor(map_name.c_str());
+
 		xr_sprintf				(buff, "%s%d:", CStringTable().translate("ls_tip_number").c_str(), tip_num);
 		shared_str				tmp = buff;
 		
-		if(is_single)
-			xr_sprintf			(buff, "ls_tip_%d", tip_num);
-		else
-			xr_sprintf			(buff, "ls_mp_tip_%d", tip_num);
+		xr_sprintf			(buff, "ls_tip_%d", tip_num);
 
 		pApp->LoadTitleInt		(CStringTable().translate("ls_header").c_str(), tmp.c_str(), CStringTable().translate(buff).c_str());
 	}
@@ -774,13 +756,12 @@ void CGamePersistent::RestoreEffectorDOF()
 {
 	SetEffectorDOF			(m_dof[3]);
 }
-#include "hudmanager.h"
 
 //	m_dof		[4];	// 0-dest 1-current 2-from 3-original
 void CGamePersistent::UpdateDof()
 {
-	static float diff_far	= pSettings->r_float("zone_pick_dof","far");//70.0f;
-	static float diff_near	= pSettings->r_float("zone_pick_dof","near");//-70.0f;
+	static float diff_far	= pSettings->r_float("zone_pick_dof","far");
+	static float diff_near	= pSettings->r_float("zone_pick_dof","near");
 
 	if(m_bPickableDOF)
 	{
@@ -791,8 +772,9 @@ void CGamePersistent::UpdateDof()
 		m_dof[0]	= pick_dof;
 		m_dof[2]	= m_dof[1]; //current
 	}
-	if(m_dof[1].similar(m_dof[0]))
-						return;
+
+	if (m_dof[1].similar(m_dof[0]))
+		return;
 
 	float td			= Device.fTimeDelta;
 	Fvector				diff;
@@ -804,7 +786,6 @@ void CGamePersistent::UpdateDof()
 	(m_dof[0].z<m_dof[2].z)?clamp(m_dof[1].z,m_dof[0].z,m_dof[2].z):clamp(m_dof[1].z,m_dof[2].z,m_dof[0].z);
 }
 
-#include "ui\uimainingamewnd.h"
 void CGamePersistent::OnSectorChanged(int sector)
 {
 	if(CurrentGameUI())

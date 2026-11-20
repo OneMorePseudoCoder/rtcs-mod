@@ -211,8 +211,6 @@ void CGrenade::OnEvent(NET_Packet& P, u16 type)
 
 void CGrenade::PutNextToSlot()
 {
-	if (OnClient()) return;
-
 	VERIFY									(!getDestroy());
 	//выкинуть гранату из инвентаря
 	NET_Packet						P;

@@ -359,8 +359,6 @@
     <ClInclude Include="..\xrServerEntities\character_info.h" />
     <ClInclude Include="..\xrServerEntities\character_info_defs.h" />
     <ClInclude Include="..\xrServerEntities\clsid_game.h" />
-    <ClInclude Include="..\xrServerEntities\DrawUtils.h" />
-    <ClInclude Include="..\xrServerEntities\FastDelegate.h" />
     <ClInclude Include="..\xrServerEntities\gametype_chooser.h" />
     <ClInclude Include="..\xrServerEntities\game_base_space.h" />
     <ClInclude Include="..\xrServerEntities\game_graph_space.h" />
@@ -438,7 +436,6 @@
     <ClInclude Include="..\xrServerEntities\specific_character.h" />
     <ClInclude Include="..\xrServerEntities\WaveForm.h" />
     <ClInclude Include="..\xrServerEntities\xml_str_id_loader.h" />
-    <ClInclude Include="..\xrServerEntities\xrEProps.h" />
     <ClInclude Include="..\xrServerEntities\xrMessages.h" />
     <ClInclude Include="..\xrServerEntities\xrServer_Objects.h" />
     <ClInclude Include="..\xrServerEntities\xrServer_Objects_Abstract.h" />
@@ -1341,7 +1338,6 @@
     <ClInclude Include="problem_solver_inline.h" />
     <ClInclude Include="profiler.h" />
     <ClInclude Include="profiler_inline.h" />
-    <ClInclude Include="PropertiesListHelper.h" />
     <ClInclude Include="property_evaluator.h" />
     <ClInclude Include="property_evaluator_const.h" />
     <ClInclude Include="property_evaluator_const_inline.h" />

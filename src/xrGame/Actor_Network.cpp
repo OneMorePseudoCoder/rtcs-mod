@@ -288,9 +288,6 @@ void		CActor::net_Import_Base				( NET_Packet& P)
 	//CSE_ALifeCreatureAbstract
 	float health;
 	P.r_float			(health);
-	//----------- for E3 -----------------------------
-	if (OnClient())SetfHealth(health);
-	//------------------------------------------------
 	P.r_u32				(N.dwTimeStamp	);
 	//---------------------------------------------
 	
@@ -315,33 +312,12 @@ void		CActor::net_Import_Base				( NET_Packet& P)
 	P.r_sdir			(N.p_velocity	);
 	float				fRRadiation;
 	P.r_float			(fRRadiation);
-	//----------- for E3 -----------------------------
-	if (OnClient())		
-	{
-//		fArmor = fRArmor;
-		SetfRadiation(fRRadiation);
-	};
-	//------------------------------------------------
 
 	u8					ActiveSlot;
 	P.r_u8				(ActiveSlot);
 	
-	//----------- for E3 -----------------------------
-	if (OnClient())
-	//------------------------------------------------
-	{
-		if (ActiveSlot == NO_ACTIVE_SLOT) inventory().SetActiveSlot(NO_ACTIVE_SLOT);
-		else 
-		{
-			if (inventory().GetActiveSlot() != u16(ActiveSlot))
-				inventory().Activate(ActiveSlot);
-		};
-	}
-
-	//----------- for E3 -----------------------------
-	if (Local() && OnClient()) return;
-	//-------------------------------------------------
-	if (!NET.empty() && N.dwTimeStamp < NET.back().dwTimeStamp) return;
+	if (!NET.empty() && N.dwTimeStamp < NET.back().dwTimeStamp)
+		return;
 
 	if (!NET.empty() && N.dwTimeStamp == NET.back().dwTimeStamp)
 	{
@@ -429,29 +405,28 @@ void		CActor::net_Import_Physic			( NET_Packet& P)
 
 		N_A.State.previous_position	= N_A.State.position;
 		N_A.State.previous_quaternion = N_A.State.quaternion;
-		//----------- for E3 -----------------------------
-		if (Local() && OnClient() || !g_Alive()) return;
-//		if (g_Alive() && (Remote() || OnServer()))
-		{
-			//-----------------------------------------------
-			if (!NET_A.empty() && N_A.dwTimeStamp < NET_A.back().dwTimeStamp) return;
-			if (!NET_A.empty() && N_A.dwTimeStamp == NET_A.back().dwTimeStamp)
-			{
-				NET_A.back() = N_A;
-			}
-			else
-			{
-				VERIFY(valid_pos(N_A.State.position,ph_boundaries()));
-				NET_A.push_back			(N_A);
-				if (NET_A.size()>5) NET_A.pop_front();
-			};
 
-			if (!NET_A.empty()) m_bInterpolate = true;
+		if (!g_Alive())
+			return;
+
+		if (!NET_A.empty() && N_A.dwTimeStamp < NET_A.back().dwTimeStamp)
+			return;
+		if (!NET_A.empty() && N_A.dwTimeStamp == NET_A.back().dwTimeStamp)
+		{
+			NET_A.back() = N_A;
+		}
+		else
+		{
+			VERIFY(valid_pos(N_A.State.position,ph_boundaries()));
+			NET_A.push_back			(N_A);
+			if (NET_A.size()>5) NET_A.pop_front();
 		};
+
+		if (!NET_A.empty())
+			m_bInterpolate = true;
 	}
-	//-----------------------------------------------
+
 	net_Import_Physic_proceed();
-	//-----------------------------------------------
 };
 
 void	CActor::net_Import_Physic_proceed	( )
@@ -476,10 +451,8 @@ BOOL CActor::net_Spawn		(CSE_Abstract* DC)
 	//force actor to be local on server client
 	CSE_Abstract			*e	= (CSE_Abstract*)(DC);
 	CSE_ALifeCreatureActor	*E	= smart_cast<CSE_ALifeCreatureActor*>(e);	
-	if (OnServer())
-	{
-		E->s_flags.set(M_SPAWN_OBJECT_LOCAL, TRUE);
-	}
+
+	E->s_flags.set(M_SPAWN_OBJECT_LOCAL, TRUE);
 	
 	if(	TRUE == E->s_flags.test(M_SPAWN_OBJECT_LOCAL) && TRUE == E->s_flags.is(M_SPAWN_OBJECT_ASPLAYER))
 		g_actor = this;
@@ -495,10 +468,8 @@ BOOL CActor::net_Spawn		(CSE_Abstract* DC)
 	m_current_legs.invalidate	();
 	m_current_torso.invalidate	();
 	m_current_head.invalidate	();
-	//-------------------------------------
-	//  ,  
-	game_news_registry->registry().init(ID());
 
+	game_news_registry->registry().init(ID());
 
 	if (!CInventoryOwner::net_Spawn(DC)) return FALSE;
 	if (!inherited::net_Spawn(DC))	return FALSE;
@@ -506,13 +477,8 @@ BOOL CActor::net_Spawn		(CSE_Abstract* DC)
 	CSE_ALifeTraderAbstract	 *pTA	= smart_cast<CSE_ALifeTraderAbstract*>(e);
 	set_money				(pTA->m_dwMoney, false);
 
-//.	if(	TRUE == E->s_flags.test(M_SPAWN_OBJECT_LOCAL) && TRUE == E->s_flags.is(M_SPAWN_OBJECT_ASPLAYER))
-//.		CurrentGameUI()->UIMainIngameWnd->m_artefactPanel->InitIcons(m_ArtefactsOnBelt);
-		
-
 	ROS()->force_mode	(IRender_ObjectSpecific::TRACE_ALL);
 
-	//mstate_wishful = E->mstate;
 	mstate_wishful=0;
 	mstate_wishful = E->mstate&(mcCrouch|mcAccel);
 	mstate_old=mstate_real = mstate_wishful;	 
@@ -668,7 +634,6 @@ void CActor::net_Destroy	()
 
 void CActor::net_Relcase	(CObject* O)
 {
-	
  	VERIFY(O);
 	CGameObject* GO = smart_cast<CGameObject*>(O);
 	if(GO&&m_pObjectWeLookingAt==GO){
@@ -694,14 +659,7 @@ void CActor::net_Relcase	(CObject* O)
 
 BOOL	CActor::net_Relevant		()				// relevant for export to server
 { 
-	if (OnServer())
-	{
-		return getSVU() | getLocal(); 
-	}
-	else
-	{
-		return Local() & g_Alive();
-	};
+	return getSVU() | getLocal(); 
 };
 
 void	CActor::SetCallbacks()
@@ -717,6 +675,7 @@ void	CActor::SetCallbacks()
 	V->LL_GetBoneInstance(u16(shoulder_bone)).set_callback	(bctCustom,ShoulderCallback,this);
 	V->LL_GetBoneInstance(u16(head_bone)).set_callback		(bctCustom,HeadCallback,this);
 }
+
 void	CActor::ResetCallbacks()
 {
 	IKinematics* V		= smart_cast<IKinematics*>(Visual());
@@ -844,35 +803,24 @@ void CActor::PH_B_CrPr		()	// actions & operations before physic correction-pred
 		pSyncObj->get_State(LastState);
 		///////////////////////////////////////////////
 
-		//----------- for E3 -----------------------------
-		if (Local() && OnClient())
-			//------------------------------------------------
-		{
-			PHUnFreeze();
+		net_update_A N_A = NET_A.back();
+		net_update N = NET.back();
 
-			pSyncObj->set_State(NET_A.back().State);			
+		NET_Last = N;
+		///////////////////////////////////////////////
+		cam_Active()->Set		(-unaffected_r_torso.yaw,unaffected_r_torso.pitch, 0);
+		if (!N_A.State.enabled) 
+		{
+			pSyncObj->set_State(N_A.State);
 		}
 		else
 		{
-			net_update_A N_A = NET_A.back();
-			net_update N = NET.back();
-
-			NET_Last = N;
-			///////////////////////////////////////////////
-			cam_Active()->Set		(-unaffected_r_torso.yaw,unaffected_r_torso.pitch, 0);//, unaffected_r_torso.roll);		// set's camera orientation
-			if (!N_A.State.enabled) 
-			{
-				pSyncObj->set_State(N_A.State);
-			}
-			else
-			{
-				PHUnFreeze();
-				
-				pSyncObj->set_State(N_A.State);
-				
-				g_Physics(N.p_accel, 0.0f, 0.0f);				
-				Position().set(IStart.Pos);
-			};
+			PHUnFreeze();
+			
+			pSyncObj->set_State(N_A.State);
+			
+			g_Physics(N.p_accel, 0.0f, 0.0f);				
+			Position().set(IStart.Pos);
 		};
 	}
 	else

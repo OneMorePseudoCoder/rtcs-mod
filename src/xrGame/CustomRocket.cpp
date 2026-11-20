@@ -29,6 +29,7 @@
 	else\
 	if(y>z){inst_y;}\
 		else{inst_z;}
+
 CCustomRocket::CCustomRocket() 
 {
 	m_eState					= eInactive;
@@ -51,7 +52,6 @@ CCustomRocket::~CCustomRocket	()
 	m_pTrailLight.destroy		();
 }
 
-
 void CCustomRocket::reinit		()
 {
 	inherited::reinit			();
@@ -68,7 +68,6 @@ void CCustomRocket::reinit		()
 	m_vPrevVel.set(0,0,0);
 }
 
-
 BOOL CCustomRocket::net_Spawn(CSE_Abstract* DC) 
 {
 	m_eState = eInactive;
@@ -79,7 +78,6 @@ BOOL CCustomRocket::net_Spawn(CSE_Abstract* DC)
 
 void CCustomRocket::net_Destroy() 
 {
-//	Msg("---------net_Destroy [%d] frame[%d]",ID(), Device.dwFrame);
 	CPHUpdateObject::Deactivate();
 	inherited::net_Destroy();
 	
@@ -88,18 +86,11 @@ void CCustomRocket::net_Destroy()
 	StopFlying();
 } 
 
-
-void CCustomRocket::SetLaunchParams (const Fmatrix& xform, 
-									 const Fvector& vel,
-									 const Fvector& angular_vel)
+void CCustomRocket::SetLaunchParams (const Fmatrix& xform, const Fvector& vel, const Fvector& angular_vel)
 {
 	VERIFY2						(_valid(xform),"SetLaunchParams. Invalid xform argument!");
 	m_LaunchXForm				= xform;
 	m_vLaunchVelocity			= vel;
-//	if(m_pOwner->ID()==Actor()->ID())
-//	{
-//		Msg("set p start v:	%f,%f,%f	\n",m_vLaunchVelocity.x,m_vLaunchVelocity.y,m_vLaunchVelocity.z);
-//	}
 	m_vLaunchAngularVelocity	= angular_vel;
 	m_time_to_explode			= Device.fTimeGlobal + pSettings->r_float(cNameSect(), "force_explode_time")/1000.0f;
 #ifdef	DEBUG
@@ -107,7 +98,6 @@ void CCustomRocket::SetLaunchParams (const Fmatrix& xform,
 	gbg_rocket_speed2=0;
 #endif	
 }
-
 
 void CCustomRocket::activate_physic_shell	()
 {
@@ -120,10 +110,6 @@ void CCustomRocket::activate_physic_shell	()
 		return;
 	VERIFY2(_valid(m_LaunchXForm),"CCustomRocket::activate_physic_shell. Invalid m_LaunchXForm!");
 
-//	if(m_pOwner->ID()==Actor()->ID())
-//	{
-//		Msg("start v:	%f,%f,%f	\n",m_vLaunchVelocity.x,m_vLaunchVelocity.y,m_vLaunchVelocity.z);
-//	}
 	m_pPhysicsShell->Activate(m_LaunchXForm, m_vLaunchVelocity, m_vLaunchAngularVelocity);
 	m_pPhysicsShell->Update	();
 
@@ -155,8 +141,8 @@ void CCustomRocket::create_physic_shell	()
 		obb.m_halfsize.y,ax.set(obb.m_rotate.j) ; ax.mul(obb.m_halfsize.y); radius=_min(obb.m_halfsize.x,obb.m_halfsize.z) ;obb.m_halfsize.x/=2.f;obb.m_halfsize.z/=2.f,
 		obb.m_halfsize.z,ax.set(obb.m_rotate.k) ; ax.mul(obb.m_halfsize.z); radius=_min(obb.m_halfsize.y,obb.m_halfsize.x) ;obb.m_halfsize.y/=2.f;obb.m_halfsize.x/=2.f
 		)
-		//radius*=1.4142f;
-		Fsphere								sphere1,sphere2;
+
+	Fsphere								sphere1,sphere2;
 	sphere1.P.add						(obb.m_translate,ax);
 	sphere1.R							=radius*1.4142f;
 
@@ -184,7 +170,6 @@ void CCustomRocket::ObjectContactCallback(bool& do_colide,bool bo1,dContact& c ,
 {
 	do_colide = false;
 	
-
 	dxGeomUserData *l_pUD1 = NULL;
 	dxGeomUserData *l_pUD2 = NULL;
 	l_pUD1 = PHRetrieveGeomUserData(c.geom.g1);
@@ -193,30 +178,24 @@ void CCustomRocket::ObjectContactCallback(bool& do_colide,bool bo1,dContact& c ,
 	SGameMtl* material=0;
 	CCustomRocket *l_this = l_pUD1 ? smart_cast<CCustomRocket*>(l_pUD1->ph_ref_object) : NULL;
 	Fvector vUp;
-	if(!l_this){
+	if(!l_this)
+	{
 		l_this = l_pUD2 ? smart_cast<CCustomRocket*>(l_pUD2->ph_ref_object) : NULL;
 		vUp.invert(*(Fvector*)&c.geom.normal);
-
-		//if(dGeomGetClass(c.geom.g1)==dTriListClass)
-		//	material=GMLib.GetMaterialByIdx((u16)c.surface.mode);
-		//else
-		//	material=GMLib.GetMaterialByIdx(l_pUD2->material);
 		material=material_1;
-
-	}else{
-		vUp.set(*(Fvector*)&c.geom.normal);	
-
-		//if(dGeomGetClass(c.geom.g2)==dTriListClass)
-		//	material=GMLib.GetMaterialByIdx((u16)c.surface.mode);
-		//else
-		//	material=GMLib.GetMaterialByIdx(l_pUD1->material);
-		material=material_2;
-
 	}
-	VERIFY(material);
-	if(material->Flags.is(SGameMtl::flPassable)) return;
+	else
+	{
+		vUp.set(*(Fvector*)&c.geom.normal);	
+		material=material_2;
+	}
 
-	if(!l_this||l_this->m_contact.contact) return;
+	VERIFY(material);
+	if(material->Flags.is(SGameMtl::flPassable))
+		return;
+
+	if(!l_this||l_this->m_contact.contact)
+		return;
 
 	CGameObject *l_pOwner = l_pUD1 ? smart_cast<CGameObject*>(l_pUD1->ph_ref_object) : NULL;
 	if(!l_pOwner || l_pOwner == (CGameObject*)l_this) l_pOwner = l_pUD2 ? smart_cast<CGameObject*>(l_pUD2->ph_ref_object) : NULL;
@@ -254,10 +233,6 @@ void CCustomRocket::ObjectContactCallback(bool& do_colide,bool bo1,dContact& c ,
 						l_pos.sub(velocity);
 #ifdef DEBUG
 						corrected_pos=true;
-//.	DBG_OpenCashedDraw();
-//.	const Fvector*	 V_array	= Level().ObjectSpace.GetStaticVerts();
-//.	DBG_DrawTri(neg_tri.T, V_array, D3DCOLOR_XRGB(255,255,0));
-//.	DBG_ClosedCashedDraw(50000);
 #endif
 					}
 				}
@@ -349,26 +324,22 @@ void CCustomRocket::PlayContact()
 		m_pPhysicsShell->set_ObjectContactCallback(NULL);
 		m_pPhysicsShell->Disable();
 	}
-//	if (OnClient()) return;
 
 	Position().set(m_contact.pos);
 	m_contact.contact=false;
 }
 
-
 void CCustomRocket::OnH_B_Chield		()
 {
 	VERIFY(m_eState == eInactive);
 	inherited::OnH_B_Chield		();
-//	Msg("! CCustomRocket::OnH_B_Chield called, id[%d] frame[%d]",ID(),Device.dwFrame);
 }
+
 void CCustomRocket::OnH_A_Chield		()
 {
 	VERIFY(m_eState == eInactive);
 	inherited::OnH_A_Chield		();
-//	Msg("! CCustomRocket::OnH_A_Chield called, id[%d] frame[%d]",ID(),Device.dwFrame);
 }
-
 
 void CCustomRocket::OnH_B_Independent(bool just_before_destroy) 
 {
@@ -378,7 +349,6 @@ void CCustomRocket::OnH_B_Independent(bool just_before_destroy)
 	//-------------------------------------------
 }
 
-
 void CCustomRocket::OnH_A_Independent() 
 {
 	inherited::OnH_A_Independent();
@@ -387,10 +357,7 @@ void CCustomRocket::OnH_A_Independent()
 	setVisible					(true);
 	StartFlying					();
 	StartEngine					();
-//	Msg("! CCustomRocket::OnH_A_Independent called, id[%d] frame[%d]",ID(),Device.dwFrame);
-
 }
-
 
 void CCustomRocket::UpdateCL()
 {
@@ -416,7 +383,6 @@ void CCustomRocket::UpdateCL()
 		if(m_time_to_explode<Device.fTimeGlobal)
 		{
 			Contact(Position(), Direction());
-//			Msg("--contact");
 		}
 	}
 }
@@ -453,11 +419,10 @@ void CCustomRocket::StopEngine				()
 	CPHUpdateObject::Deactivate();
 }
 
-
 void CCustomRocket::UpdateEnginePh			()
 {
 	if (Level().In_NetCorrectionPrediction()) return;
-	float force = m_fEngineImpulse*fixed_step;// * Device.fTimeDelta;
+	float force = m_fEngineImpulse*fixed_step;
 	float k_back=1.f;
 	Fvector l_pos, l_dir; 
 	l_pos.set(0, 0,-2.f);
@@ -472,18 +437,12 @@ void CCustomRocket::UpdateEnginePh			()
 	l_dir.invert();
 	m_pPhysicsShell->applyImpulseTrace(l_pos, l_dir, force);
 	l_dir.set(0, 1.f, 0);
-	force = m_fEngineImpulseUp*fixed_step;// * Device.fTimeDelta;
+	force = m_fEngineImpulseUp*fixed_step;
 	m_pPhysicsShell->applyImpulse(l_dir, force);
-
-
-	//m_pPhysicsShell->set_AngularVel()
 }
 
-
-void CCustomRocket::UpdateEngine				()
+void CCustomRocket::UpdateEngine()
 {
-	//	VERIFY( getVisible() );
-	//	VERIFY( m_pPhysicsShell);
 	if( !m_pPhysicsShell )
 		Msg("! CCustomRocket::UpdateEngine called, but m_pPhysicsShell is NULL");
 
@@ -501,8 +460,6 @@ void CCustomRocket::UpdateEngine				()
 	m_dwEngineTime -= Device.dwTimeDelta;
 }
 
-
-
 //////////////////////////////////////////////////////////////////////////
 //	Lights
 //////////////////////////////////////////////////////////////////////////
@@ -511,9 +468,7 @@ void CCustomRocket::StartLights()
 	if(!m_bLightsEnabled) return;
 
 	//включить световую подсветку от двигателя
-	m_pTrailLight->set_color(m_TrailLightColor.r, 
-							 m_TrailLightColor.g, 
-							 m_TrailLightColor.b);
+	m_pTrailLight->set_color(m_TrailLightColor.r, m_TrailLightColor.g, m_TrailLightColor.b);
 
 	m_pTrailLight->set_range(m_fTrailLightRange);
 	m_pTrailLight->set_position(Position()); 
@@ -522,28 +477,25 @@ void CCustomRocket::StartLights()
 
 void CCustomRocket::StopLights()
 {
-	if(!m_bLightsEnabled) return;
+	if(!m_bLightsEnabled)
+		return;
 	m_pTrailLight->set_active(false);
 }
 
 void CCustomRocket::UpdateLights()
 {
-	if(!m_bLightsEnabled || !m_pTrailLight->get_active()) return;
+	if(!m_bLightsEnabled || !m_pTrailLight->get_active())
+		return;
 	m_pTrailLight->set_position(Position());
 }
 
+void CCustomRocket::PhDataUpdate(float step)
+{}
 
-void CCustomRocket::PhDataUpdate			(float step)
+void CCustomRocket::PhTune(float step)
 {
-
+	UpdateEnginePh();
 }
-void CCustomRocket::PhTune					(float step)
-{
-	UpdateEnginePh							();
-
-}
-
-
 
 //////////////////////////////////////////////////////////////////////////
 //	Particles
@@ -554,7 +506,8 @@ void CCustomRocket::UpdateParticles()
 	if(m_flyingSound._handle() && m_flyingSound._feedback())
 		m_flyingSound.set_position( XFORM().c );
 
-	if(!m_pEngineParticles && !m_pFlyParticles) return;
+	if(!m_pEngineParticles && !m_pFlyParticles)
+		return;
 
 	Fvector vel;
 	PHGetLinearVell(vel);
@@ -590,13 +543,16 @@ void CCustomRocket::StartEngineParticles()
 
 	VERIFY(m_pEngineParticles);
 }
+
 void CCustomRocket::StopEngineParticles()
 {
-	if(m_pEngineParticles == NULL) return;
+	if(m_pEngineParticles == NULL)
+		return;
 	m_pEngineParticles->Stop();
 	m_pEngineParticles->SetAutoRemove(true);
 	m_pEngineParticles = NULL;
 }
+
 void CCustomRocket::StartFlyParticles()
 {
 	if(m_flyingSound._handle())
@@ -604,7 +560,8 @@ void CCustomRocket::StartFlyParticles()
 
 	VERIFY(m_pFlyParticles == NULL);
 
-	if(!m_sFlyParticles) return;
+	if(!m_sFlyParticles)
+		return;
 	m_pFlyParticles = CParticlesObject::Create(*m_sFlyParticles,FALSE);
 	
 	UpdateParticles();
@@ -613,42 +570,36 @@ void CCustomRocket::StartFlyParticles()
 	VERIFY(m_pFlyParticles);
 	VERIFY3(m_pFlyParticles->IsLooped(), "must be a looped particle system for rocket fly: %s", *m_sFlyParticles);
 }
+
 void CCustomRocket::StopFlyParticles()
 {
 	if(m_flyingSound._handle())
 		m_flyingSound.stop();
 
-	if(m_pFlyParticles == NULL) return;
+	if(m_pFlyParticles == NULL)
+		return;
 	m_pFlyParticles->Stop();
 	m_pFlyParticles->SetAutoRemove(true);
 	m_pFlyParticles = NULL;
 }
 
-void CCustomRocket::StartFlying				()
+void CCustomRocket::StartFlying()
 {
 	StartFlyParticles();
 	StartLights();
 }
-void CCustomRocket::StopFlying				()
+
+void CCustomRocket::StopFlying()
 {
 	StopFlyParticles();
 	StopLights();
 }
 
-void	CCustomRocket::OnEvent(NET_Packet& P, u16 type)
+void CCustomRocket::OnEvent(NET_Packet& P, u16 type)
 {
-	switch (type)
-	{
-	case GE_GRENADE_EXPLODE:
-		{
-			if (m_eState != eCollide && OnClient())
-			{
-				CCustomRocket::Contact(Position(), Direction());
-			};
-		}break;
-	}
 	inherited::OnEvent(P,type);
 };
+
 #ifdef DEBUG
 void	CCustomRocket::deactivate_physics_shell ()
 {

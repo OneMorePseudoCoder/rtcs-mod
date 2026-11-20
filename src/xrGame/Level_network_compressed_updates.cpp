@@ -22,7 +22,8 @@ void CLevel::ProcessCompressedUpdate(NET_Packet& P, u8 const compress_type)
 				next_size,
 				m_trained_stream
 			);
-		} else if (compress_type & eto_lzo_compression)
+		} 
+		else if (compress_type & eto_lzo_compression)
 		{
 			R_ASSERT(m_lzo_dictionary.data);
 			uncompressed_packet.B.count = sizeof(uncompressed_packet.B.data);
@@ -35,13 +36,13 @@ void CLevel::ProcessCompressedUpdate(NET_Packet& P, u8 const compress_type)
 				m_lzo_dictionary.data,
 				m_lzo_dictionary.size
 			);
-		} else
+		} 
+		else
 		{
 			NODEFAULT;
 		}
 		
-		VERIFY2(uncompressed_packet.B.count <= sizeof(uncompressed_packet.B.data),
-			"stack owerflow after decompressing");
+		VERIFY2(uncompressed_packet.B.count <= sizeof(uncompressed_packet.B.data), "stack owerflow after decompressing");
 
 		P.r_seek(P.r_tell() + next_size);
 		uncompressed_packet.r_seek(0);
@@ -50,7 +51,6 @@ void CLevel::ProcessCompressedUpdate(NET_Packet& P, u8 const compress_type)
 	}
 	Device.Statistic->netClientCompressor.End();
 
-	if (OnClient()) UpdateDeltaUpd(timeServer());
 	IClientStatistic pStat = Level().GetStatistic();
 	u32 dTime = 0;
 	

@@ -3,11 +3,8 @@
 #include "telekinetic_object.h"
 #include "../../../xrphysics/PhysicsShell.h"
 #include "../../../xrphysics/MathUtils.h"
-//#include "../../PHInterpolation.h"
-//#include "../../PHElement.h"
 #include "../../level.h"
 #include "../../gameobject.h"
-
 
 #define KEEP_IMPULSE_UPDATE 200
 #define FIRE_TIME			3000
@@ -26,13 +23,10 @@ CTelekineticObject::~CTelekineticObject()
 
 }
 
-
-
 bool CTelekineticObject::init(CTelekinesis* tele,CPhysicsShellHolder *obj, float s, float h, u32 ttk, bool rot) 
 {
 	if(!can_activate(obj)) return false;
 
-	//state				= TS_Raise;
 	switch_state(TS_Raise);
 	object				= obj;
 	
@@ -45,13 +39,11 @@ bool CTelekineticObject::init(CTelekinesis* tele,CPhysicsShellHolder *obj, float
 	strength			= s;
 
 	time_fire_started	= 0;
-	//time_raise_started	= Device.dwTimeGlobal;
 
 	m_rotate			= rot;
 
 	if(object->m_pPhysicsShell)
 		object->m_pPhysicsShell->set_ApplyByGravity(FALSE);
-
 
 	return true;
 }
@@ -113,9 +105,7 @@ void CTelekineticObject::raise(float step)
 	float elem_size = float(object->m_pPhysicsShell->Elements().size());
 	dir.mul(elem_size*elem_size*strength);
 
-	if (OnServer()) 
-		(object->m_pPhysicsShell->get_ElementByStoreOrder(0))->applyGravityAccel(dir);
-
+	(object->m_pPhysicsShell->get_ElementByStoreOrder(0))->applyGravityAccel(dir);
 
 	update_hold_sound	();
 }
@@ -140,12 +130,8 @@ bool CTelekineticObject::time_fire_elapsed()
 	return false;
 }
 
-
 void CTelekineticObject::keep()
 {
-	// проверить время последнего обновления
-	//if (time_keep_updated + KEEP_IMPULSE_UPDATE > Device.dwTimeGlobal) return;
-	
 	if (!object || !object->m_pPhysicsShell || !object->m_pPhysicsShell->isActive()) return;
 
 	// проверить высоту
@@ -153,18 +139,19 @@ void CTelekineticObject::keep()
 
 	// установить dir в соответствие с текущей высотой
 	Fvector dir;
-	if (cur_h > target_height+ 0.6f)			dir.set(0.f,-1.0f,0.f);
-	else if (cur_h < target_height+ 0.6f)		dir.set(0.f,1.0f,0.f);
-	else {
+	if (cur_h > target_height+ 0.6f)
+		dir.set(0.f,-1.0f,0.f);
+	else if (cur_h < target_height+ 0.6f)
+		dir.set(0.f,1.0f,0.f);
+	else 
+	{
 		dir.set(Random.randF(-1.0f,1.0f), Random.randF(-1.0f,1.0f), Random.randF(-1.0f,1.0f));
 		dir.normalize_safe();
 	}
 
-	//float elem_size = float(object->m_pPhysicsShell->Elements().size());
 	dir.mul(5.0f);
 
-	if (OnServer()) 
-		(object->m_pPhysicsShell->get_ElementByStoreOrder(0))->applyGravityAccel(dir);
+	(object->m_pPhysicsShell->get_ElementByStoreOrder(0))->applyGravityAccel(dir);
 
 	// установить время последнего обновления
 	time_keep_updated = Device.dwTimeGlobal;
@@ -176,17 +163,15 @@ void CTelekineticObject::release()
 {
 	if (!object || !object->m_pPhysicsShell || !object->m_pPhysicsShell->isActive()) return;
 	
-	
 	Fvector dir_inv;
 	dir_inv.set(0.f,-1.0f,0.f);
 
-		// включить гравитацию
-		object->m_pPhysicsShell->set_ApplyByGravity(TRUE);
-		if (OnServer()) 
-		{
-		// приложить небольшую силу для того, чтобы объект начал падать
-		object->m_pPhysicsShell->applyImpulse(dir_inv, 0.5f * object->m_pPhysicsShell->getMass());
-	}
+	// включить гравитацию
+	object->m_pPhysicsShell->set_ApplyByGravity(TRUE);
+
+	// приложить небольшую силу для того, чтобы объект начал падать
+	object->m_pPhysicsShell->applyImpulse(dir_inv, 0.5f * object->m_pPhysicsShell->getMass());
+
 	//state = TS_None;
 	switch_state(TS_None);
 }
@@ -194,9 +179,9 @@ void CTelekineticObject::release()
 void CTelekineticObject::fire_t(const Fvector &target, float time)
 {
 	switch_state(TS_Fire);
-	//time_fire_started	= Device.dwTimeGlobal;
 
-	if (!object || !object->m_pPhysicsShell || !object->m_pPhysicsShell->isActive()) return;
+	if (!object || !object->m_pPhysicsShell || !object->m_pPhysicsShell->isActive())
+		return;
 
 	// включить гравитацию
 	object->m_pPhysicsShell->set_ApplyByGravity(TRUE);
@@ -211,31 +196,26 @@ void CTelekineticObject::fire_t(const Fvector &target, float time)
 
 	if (sound_hold._handle() && sound_hold._feedback()) 
 		sound_hold.stop();
-
 }
+
 void CTelekineticObject::fire(const Fvector &target, float power)
 {
-	//state				= TS_Fire;
 	switch_state(TS_Fire);
-	//time_fire_started	= Device.dwTimeGlobal;
 
-	if (!object || !object->m_pPhysicsShell || !object->m_pPhysicsShell->isActive()) return;
+	if (!object || !object->m_pPhysicsShell || !object->m_pPhysicsShell->isActive())
+		return;
 
 	// вычислить направление
 	Fvector dir;
 	dir.sub(target,object->Position());
 	dir.normalize();
 
-		// включить гравитацию
-		object->m_pPhysicsShell->set_ApplyByGravity(TRUE);
+	// включить гравитацию
+	object->m_pPhysicsShell->set_ApplyByGravity(TRUE);
 
-		if (OnServer()) 
-		{
-		// выполнить бросок
-			for (u32 i=0;i<object->m_pPhysicsShell->get_ElementsNumber();i++) 
-				object->m_pPhysicsShell->get_ElementByStoreOrder(u16(i))->applyImpulse(dir, power * 20.f * object->m_pPhysicsShell->getMass() / object->m_pPhysicsShell->Elements().size());
-			
-		};
+	// выполнить бросок
+	for (u32 i=0;i<object->m_pPhysicsShell->get_ElementsNumber();i++) 
+		object->m_pPhysicsShell->get_ElementByStoreOrder(u16(i))->applyImpulse(dir, power * 20.f * object->m_pPhysicsShell->getMass() / object->m_pPhysicsShell->Elements().size());
 };
 
 bool CTelekineticObject::check_height()
@@ -244,6 +224,7 @@ bool CTelekineticObject::check_height()
 	
 	return (object->Position().y > target_height);
 }
+
 bool CTelekineticObject::check_raise_time_out()
 {
 	if (time_raise_started + RAISE_MAX_TIME < Device.dwTimeGlobal)
@@ -268,7 +249,7 @@ void CTelekineticObject::rotate()
 	dir.random_dir();
 	dir.normalize();
 
-	if (OnServer()) object->m_pPhysicsShell->applyImpulse(dir, 2.5f * object->m_pPhysicsShell->getMass());
+	object->m_pPhysicsShell->applyImpulse(dir, 2.5f * object->m_pPhysicsShell->getMass());
 }
 
 bool CTelekineticObject::can_activate(CPhysicsShellHolder *obj)

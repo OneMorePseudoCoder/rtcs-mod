@@ -55,7 +55,7 @@ void CLevel::ClientReceive()
 		{
 		case M_SPAWN:			
 			{
-				if (!bReady) //!m_bGameConfigStarted || 
+				if (!bReady)
 				{
 					Msg ("! Unconventional M_SPAWN received : map_data[%s] | bReady[%s] | deny_m_spawn[%s]",
 						(map_data.m_map_sync_received) ? "true" : "false",
@@ -63,32 +63,16 @@ void CLevel::ClientReceive()
 						deny_m_spawn ? "true" : "false");
 					break;
 				}
-				/*/
-				cl_Process_Spawn(*P);
-				/*/
-				//Msg("--- Client received M_SPAWN message...");
 				game_events->insert		(*P);
 				if (g_bDebugEvents)		ProcessGameEvents();
-				//*/
 			}
 			break;
 		case M_EVENT:
-			/*if (!game_configured)
-			{
-				Msg("! WARNING: ignoring game event [%d] - game not configured...", m_type);
-				break;
-			}*/
-			//Msg("Client received M_EVENT message...");
 			game_events->insert		(*P);
 			if (g_bDebugEvents)		ProcessGameEvents();
 			break;
 		case M_EVENT_PACK:
 			{
-				/*if (!game_configured)
-				{
-					Msg("! WARNING: ignoring game event [%d] - game not configured...", m_type);
-					break;
-				}*/
 				NET_Packet	tmpP;
 				while (!P->r_eof())
 				{
@@ -108,7 +92,6 @@ void CLevel::ClientReceive()
 			{
 				Objects.net_Import		(P);
 
-				if (OnClient()) UpdateDeltaUpd(timeServer());
 				IClientStatistic pStat = Level().GetStatistic();
 				u32 dTime = 0;
 				
@@ -129,18 +112,11 @@ void CLevel::ClientReceive()
 			}break;
 		case M_CL_UPDATE:
 			{
-				/*if (!game_configured)
-				{
-					Msg("! WARNING: ignoring game event [%d] - game not configured...", m_type);
-					break;
-				}*/
-				if (OnClient()) break;
 				P->r_u16		(ID);
 				u32 Ping = P->r_u32();
 				CGameObject*	O	= smart_cast<CGameObject*>(Objects.net_Find		(ID));
 				if (0 == O)		break;
 				O->net_Import(*P);
-		//---------------------------------------------------
 				UpdateDeltaUpd(timeServer());
 				if (pObjects4CrPr.empty() && pActors4CrPr.empty())
 					break;
@@ -150,9 +126,6 @@ void CLevel::ClientReceive()
 				u32 dTime = 0;
 				if ((Level().timeServer() + Ping) < P->timeReceive)
 				{
-#ifdef DEBUG
-//					Msg("! TimeServer[%d] < TimeReceive[%d]", Level().timeServer(), P->timeReceive);
-#endif
 					dTime = Ping;
 				}
 				else					
@@ -162,26 +135,15 @@ void CLevel::ClientReceive()
 
 				O->CrPr_SetActivationStep(u32(physics_world()->StepsNum()) - NumSteps);
 				AddActor_To_Actors4CrPr(O);
-
 			}break;
 		case M_MOVE_PLAYERS:
 			{
-				/*if (!game_configured)
-				{
-					Msg("! WARNING: ignoring game event [%d] - game not configured...", m_type);
-					break;
-				}*/
 				game_events->insert		(*P);
 				if (g_bDebugEvents)		ProcessGameEvents();
 			}break;
 		// [08.11.07] Alexander Maniluk: added new message handler for moving artefacts.
 		case M_MOVE_ARTEFACTS:
 			{
-				/*if (!game_configured)
-				{
-					Msg("! WARNING: ignoring game event [%d] - game not configured...", m_type);
-					break;
-				}*/
 				u8 Count = P->r_u8();
 				for (u8 i=0; i<Count; ++i)
 				{
@@ -191,26 +153,15 @@ void CLevel::ClientReceive()
 					CArtefact * OArtefact = smart_cast<CArtefact*>(Objects.net_Find(ID));
 					if (!OArtefact)		break;
 					OArtefact->MoveTo(NewPos);
-					//destroy_physics_shell(OArtefact->PPhysicsShell());
 				};
-				/*NET_Packet PRespond;
-				PRespond.w_begin(M_MOVE_ARTEFACTS_RESPOND);
-				Send(PRespond, net_flags(TRUE, TRUE));*/
 			}break;
-		//------------------------------------------------
 		case M_CL_INPUT:
 			{
-				/*if (!game_configured)
-				{
-					Msg("! WARNING: ignoring game event [%d] - game not configured...", m_type);
-					break;
-				}*/
 				P->r_u16		(ID);
 				CObject*	O	= Objects.net_Find		(ID);
 				if (0 == O)		break;
 				O->net_ImportInput(*P);
 			}break;
-		//---------------------------------------------------
 		case M_SV_CONFIG_NEW_CLIENT:
 			InitializeClientGame	(*P);
 			break;
@@ -233,11 +184,6 @@ void CLevel::ClientReceive()
 			break;
 		case M_CHAT:
 			{
-				/*if (!game_configured)
-				{
-					Msg("! WARNING: ignoring game event [%d] - game not configured...", m_type);
-					break;
-				}*/
 				char	buffer[256];
 				P->r_stringZ(buffer);
 				Msg		("- %s",buffer);
@@ -245,11 +191,6 @@ void CLevel::ClientReceive()
 			break;
 		case M_GAMEMESSAGE:
 			{
-				/*if (!game_configured)
-				{
-					Msg("! WARNING: ignoring game event [%d] - game not configured...", m_type);
-					break;
-				}*/
 				if (!game) break;
 				game_events->insert		(*P);
 				if (g_bDebugEvents)		ProcessGameEvents();
@@ -317,43 +258,29 @@ void CLevel::ClientReceive()
 			{
 				Msg("- M_CHANGE_LEVEL_GAME Received");
 
-				if (OnClient())
+				const char* m_SO = m_caServerOptions.c_str();
+
+				m_SO = strchr(m_SO, '/'); if (m_SO) m_SO++;
+				m_SO = strchr(m_SO, '/'); 
+
+				shared_str LevelName;
+				shared_str LevelVersion;
+				shared_str GameType;
+
+				P->r_stringZ(LevelName);
+				P->r_stringZ(LevelVersion);
+				P->r_stringZ(GameType);
+
+				string4096 NewServerOptions = "";
+				xr_sprintf(NewServerOptions, "%s/%s/%s%s", LevelName.c_str(), GameType.c_str(), map_ver_string, LevelVersion.c_str());
+
+				if (m_SO)
 				{
-					MakeReconnect();
+					string4096 additional_options;
+					xr_strcat(NewServerOptions, sizeof(NewServerOptions), remove_version_option(m_SO, additional_options, sizeof(additional_options)));
 				}
-				else
-				{
-					const char* m_SO = m_caServerOptions.c_str();
-
-					m_SO = strchr(m_SO, '/'); if (m_SO) m_SO++;
-					m_SO = strchr(m_SO, '/'); 
-
-					shared_str LevelName;
-					shared_str LevelVersion;
-					shared_str GameType;
-
-					P->r_stringZ(LevelName);
-					P->r_stringZ(LevelVersion);
-					P->r_stringZ(GameType);
-
-					string4096 NewServerOptions = "";
-					xr_sprintf(NewServerOptions, "%s/%s/%s%s",
-						LevelName.c_str(),
-						GameType.c_str(),
-						map_ver_string,
-						LevelVersion.c_str()
-					);
-
-					if (m_SO)
-					{
-						string4096 additional_options;
-						xr_strcat(NewServerOptions, sizeof(NewServerOptions),
-							remove_version_option(m_SO, additional_options, sizeof(additional_options))
-						);
-					}
-					m_caServerOptions = NewServerOptions;
-					MakeReconnect();
-				};
+				m_caServerOptions = NewServerOptions;
+				MakeReconnect();
 			}break;
 		case M_CHANGE_SELF_NAME:
 			{

@@ -199,8 +199,6 @@ ICF static BOOL grenade_hit_callback(collide::rq_result& result, LPVOID params)
 	return				(ep.shoot_factor>0.01f);
 }
 
-
-
 float CExplosive::ExplosionEffect(collide::rq_results& storage, CExplosive*exp_obj,CPhysicsShellHolder*blasted_obj,  const Fvector &expl_centre, const float expl_radius) 
 {
 	
@@ -305,9 +303,8 @@ float CExplosive::TestPassEffect(const	Fvector	&source_p,	const	Fvector	&dir,flo
 void CExplosive::Explode()
 {
 	VERIFY(0xffff != Initiator());
-	VERIFY(m_explosion_flags.test(flReadyToExplode));//m_bReadyToExplode
+	VERIFY(m_explosion_flags.test(flReadyToExplode));
 	VERIFY(!physics_world()->Processing());
-	//m_bExploding = true;
 	m_explosion_flags.set(flExploding,TRUE);
 	cast_game_object()->processing_activate();
 
@@ -320,13 +317,12 @@ void CExplosive::Explode()
 		DBG_DrawPoint(pos,0.3f,D3DCOLOR_XRGB(255,0,0));
 	}
 #endif
-//	Msg("---------CExplosive Explode [%d] frame[%d]",cast_game_object()->ID(), Device.dwFrame);
+
 	OnBeforeExplosion();
 	//играем звук взрыва
 	Sound->play_at_pos(sndExplode, 0, pos, false);
 	
 	//показываем эффекты
-
 	m_wallmark_manager.PlaceWallmarks		(pos);
 
 	Fvector									vel;
@@ -354,29 +350,22 @@ void CExplosive::Explode()
 	//осколки
 	//////////////////////////////
 	//-------------------------------------
-	bool SendHits = false;
-	if (OnServer()) SendHits = true;
-	else SendHits = false;
 
-
-	for(int i = 0; i < m_iFragsNum; ++i){
+	for(int i = 0; i < m_iFragsNum; ++i)
+	{
 		frag_dir.random_dir	();
 		frag_dir.normalize	();
 		
 		CCartridge cartridge;
 		cartridge.param_s.kDist				= 1.f;
 		cartridge.param_s.kHit				= 1.f;
-//.		cartridge.param_s.kCritical			= 1.f;
 		cartridge.param_s.kImpulse			= 1.f;
 		cartridge.param_s.kAP				= 1.f;
 		cartridge.param_s.fWallmarkSize		= fWallmarkSize;
 		cartridge.bullet_material_idx		= GMLib.GetMaterialIdx(WEAPON_MATERIAL_NAME);
 		cartridge.m_flags.set				(CCartridge::cfTracer,FALSE);
 
-		Level().BulletManager().AddBullet(	pos, frag_dir, m_fFragmentSpeed,
-											m_fFragHit, m_fFragHitImpulse, Initiator(),
-											cast_game_object()->ID(), m_eHitTypeFrag, m_fFragsRadius, 
-											cartridge, 1.f, SendHits );
+		Level().BulletManager().AddBullet(pos, frag_dir, m_fFragmentSpeed, m_fFragHit, m_fFragHitImpulse, Initiator(), cast_game_object()->ID(), m_eHitTypeFrag, m_fFragsRadius, cartridge, 1.f, true);
 	}	
 
 	if (cast_game_object()->Remote()) return;
@@ -392,8 +381,6 @@ void CExplosive::Explode()
 	for (u32 o_it=0; o_it<ISpatialResult.size(); o_it++)
 	{
 		ISpatial*		spatial	= ISpatialResult[o_it];
-		//		feel_touch_new(spatial->dcast_CObject());
-
 		CPhysicsShellHolder	*pGameObject = smart_cast<CPhysicsShellHolder*>(spatial->dcast_CObject());
 		if(pGameObject && cast_game_object()->ID() != pGameObject->ID()) 
 			m_blasted_objects.push_back(pGameObject);
@@ -563,10 +550,8 @@ void CExplosive::OnEvent(NET_Packet& P, u16 type)
 	}
 }
 
-void CExplosive::ExplodeParams(const Fvector& pos, 
-								const Fvector& dir)
+void CExplosive::ExplodeParams(const Fvector& pos, const Fvector& dir)
 {
-	//m_bReadyToExplode = true;
 	m_explosion_flags.set	(flReadyToExplode,TRUE);
 	m_vExplodePos			= pos;
 	m_vExplodePos.y			+= 0.1f;// fake
@@ -575,11 +560,10 @@ void CExplosive::ExplodeParams(const Fvector& pos,
 
 void CExplosive::GenExplodeEvent (const Fvector& pos, const Fvector& normal)
 {
-	if (OnClient() || cast_game_object()->Remote()) return;
+	if (cast_game_object()->Remote())
+		return;
 
-//	if( m_bExplodeEventSent ) 
-//		return;
-	VERIFY(!m_explosion_flags.test(flExplodEventSent));//!m_bExplodeEventSent
+	VERIFY(!m_explosion_flags.test(flExplodEventSent));
 	VERIFY(0xffff != Initiator());
 
 	NET_Packet		P;

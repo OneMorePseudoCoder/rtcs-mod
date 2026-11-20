@@ -52,22 +52,9 @@ CInventory::CInventory()
 	
 	ReloadInv();
 
-	//u32 sz										= pSettings->r_s32		("inventory","slots_count");
-	//m_slots.resize								(sz+1); //first is [1]
-	
 	m_iActiveSlot								= NO_ACTIVE_SLOT;
 	m_iNextActiveSlot							= NO_ACTIVE_SLOT;
 	m_iPrevActiveSlot							= NO_ACTIVE_SLOT;
-
-	/*string256 temp;
-	for(u16 i=FirstSlot(); i<=LastSlot(); ++i ) 
-	{
-		xr_sprintf(temp, "slot_persistent_%d", i);
-		m_slots[i].m_bPersistent = !!pSettings->r_bool("inventory",temp);
-
-		xr_sprintf			(temp, "slot_active_%d", i);
-		m_slots[i].m_bAct	= !!pSettings->r_bool("inventory",temp);
-	};*/
 
 	m_bSlotsUseful								= true;
 	m_bBeltUseful								= false;
@@ -429,7 +416,8 @@ bool CInventory::Ruck(PIItem pIItem, bool strict_placement)
 			Activate(NO_ACTIVE_SLOT);
 
 		m_slots[pIItem->CurrSlot()].m_pIItem = NULL;
-	}else
+	}
+	else
 	{
 		//вещь была на поясе или вообще только поднята с земли
 		TIItemContainer::iterator it = std::find(m_belt.begin(), m_belt.end(), pIItem); 
@@ -454,12 +442,7 @@ bool CInventory::Ruck(PIItem pIItem, bool strict_placement)
 }
 
 void CInventory::Activate(u16 slot, bool bForce) 
-{	
-	if(!OnServer())
-	{
-		return;
-	}
-
+{
 	PIItem tmp_item = NULL;
 	if (slot != NO_ACTIVE_SLOT)
 		tmp_item = ItemFromSlot(slot);
@@ -473,16 +456,7 @@ void CInventory::Activate(u16 slot, bool bForce)
 
 	if (GetActiveSlot()==slot || (GetNextActiveSlot()==slot && !bForce))
 	{
-//		if (m_iNextActiveSlot != slot) {
-//			LPCSTR const name = smart_cast<CGameObject const*>(m_pOwner)->cName().c_str();
-//			if ( !xr_strcmp("jup_b43_stalker_assistant_pri6695", name) )
-//				LogStackTrace	("");
-//			Msg				( "[%6d][%s] CInventory::Activate changing next active slot to %d", Device.dwTimeGlobal, name, slot );
-//		}
 		m_iNextActiveSlot=slot;
-#ifdef DEBUG
-//		Msg("--- There's no need to activate slot [%d], next active slot is [%d]", slot, m_iNextActiveSlot);
-#endif
 		return;
 	}
 
@@ -491,21 +465,11 @@ void CInventory::Activate(u16 slot, bool bForce)
 	if (slot != NO_ACTIVE_SLOT && !m_slots[slot].CanBeActivated()) 
 		return;
 
-#ifdef DEBUG
-//	Msg("--- Activating slot [%d], inventory owner: [%s], Frame[%d]", slot, m_pOwner->Name(), Device.dwFrame);
-#endif // #ifdef DEBUG
-	
 	//активный слот не выбран
 	if (GetActiveSlot() == NO_ACTIVE_SLOT)
 	{
 		if (tmp_item)
 		{
-//			if ( m_iNextActiveSlot != slot) {
-//				LPCSTR const name = smart_cast<CGameObject const*>(m_pOwner)->cName().c_str();
-//				if ( !xr_strcmp("jup_b43_stalker_assistant_pri6695", name) )
-//					LogStackTrace	("");
-//				Msg				( "[%6d][%s] CInventory::Activate changing next active slot2 to %d", Device.dwTimeGlobal, name, slot );
-//			}
 			m_iNextActiveSlot		= slot;
 		}
 		else 
@@ -528,29 +492,14 @@ void CInventory::Activate(u16 slot, bool bForce)
 			R_ASSERT2(tempItem, active_item->object().cNameSect().c_str());
 			
 			tempItem->SendDeactivateItem();
-#ifdef DEBUG
-//			Msg("--- Inventory owner [%s]: send deactivate item [%s]", m_pOwner->Name(), active_item->NameItem());
-#endif // #ifdef DEBUG
-		} else //in case where weapon is going to destroy
+		} 
+		else //in case where weapon is going to destroy
 		{
 			if (tmp_item)
 				tmp_item->ActivateItem();
-			
-//!			if ( m_iActiveSlot != slot ) {
-//!				LPCSTR const name = smart_cast<CGameObject const*>(m_pOwner)->cName().c_str();
-//				if ( !xr_strcmp("jup_b43_stalker_assistant_pri6695", name) )
-//					LogStackTrace	("");
-//!				Msg				("[%6d][%s] CInventory::Activate changing active slot from %d to %d", Device.dwTimeGlobal, name, m_iActiveSlot, slot );
-//!			}
 
 			m_iActiveSlot		= slot;
 		}
-//		if ( m_iNextActiveSlot != slot ) {
-//			LPCSTR const name = smart_cast<CGameObject const*>(m_pOwner)->cName().c_str();
-//			if ( !xr_strcmp("jup_b43_stalker_assistant_pri6695", name) && !slot )
-//				LogStackTrace	("");
-//			Msg				( "[%6d][%s] CInventory::Activate changing next active slot3 to %d", Device.dwTimeGlobal, name, slot );
-//		}
 		m_iNextActiveSlot		= slot;
 	}
 }
@@ -595,33 +544,6 @@ bool CInventory::Action(u16 cmd, u32 flags)
 		};
 	};
 
-	if (g_pGameLevel && OnClient() && pActor) 
-	{
-		switch(cmd)
-		{
-		case kUSE:		break;
-		
-		case kDROP:		
-			{
-				SendActionEvent	(cmd, flags);
-				return			true;
-			}break;
-
-		case kWPN_NEXT:
-		case kWPN_RELOAD:
-		case kWPN_FIRE:
-		case kWPN_FUNC:
-		case kWPN_FIREMODE_NEXT:
-		case kWPN_FIREMODE_PREV:
-		case kWPN_ZOOM	 : 
-		case kTORCH:
-		case kNIGHT_VISION:
-			{
-				SendActionEvent(cmd, flags);
-			}break;
-		}
-	}
-
 	if (ActiveItem() && ActiveItem()->Action(cmd, flags)) 
 		return true;
 
@@ -662,9 +584,6 @@ bool CInventory::Action(u16 cmd, u32 flags)
 		break;
 	}
 
-	if (b_send_event && g_pGameLevel && OnClient() && pActor)
-		SendActionEvent(cmd, flags);
-
 	return false;
 }
 
@@ -681,61 +600,53 @@ void CInventory::ActiveWeapon( u16 slot )
 
 void CInventory::Update() 
 {
-	if( OnServer() )
+	if(m_iActiveSlot!=m_iNextActiveSlot)
 	{
-		if(m_iActiveSlot!=m_iNextActiveSlot)
+		CObject* pActor_owner = smart_cast<CObject*>(m_pOwner);
+		if (Level().CurrentViewEntity() == pActor_owner)
 		{
-			CObject* pActor_owner = smart_cast<CObject*>(m_pOwner);
-			if (Level().CurrentViewEntity() == pActor_owner)
-			{
-				if(	(m_iNextActiveSlot!=NO_ACTIVE_SLOT) && 
-					 ItemFromSlot(m_iNextActiveSlot)	&&
-					 !g_player_hud->allow_activation(ItemFromSlot(m_iNextActiveSlot)->cast_hud_item())
-				   )
-				   return;
-			}
-			if( ActiveItem() )
-			{
-				CHudItem* hi = ActiveItem()->cast_hud_item();
-				
-				if(!hi->IsHidden())
-				{
-					if(hi->GetState()==CHUDState::eIdle && hi->GetNextState()==CHUDState::eIdle)
-						hi->SendDeactivateItem();
-
-					UpdateDropTasks	();
-					return;
-				}
-			}
-			
-			if (GetNextActiveSlot() != NO_ACTIVE_SLOT)
-			{
-				PIItem tmp_next_active = ItemFromSlot(GetNextActiveSlot());
-				if (tmp_next_active)
-				{
-					if (IsSlotBlocked(tmp_next_active))
-					{
-						Activate(m_iActiveSlot);
-						return;
-					} else
-					{
-						tmp_next_active->ActivateItem();
-					}
-				}
-			}
-			
-//			if ( m_iActiveSlot != GetNextActiveSlot() ) {
-//				LPCSTR const name = smart_cast<CGameObject const*>(m_pOwner)->cName().c_str();
-//				if ( !xr_strcmp("jup_b43_stalker_assistant_pri6695", name) )
-//					LogStackTrace	("");
-//				Msg					("[%6d][%s] CInventory::Activate changing active slot from %d to next active slot %d", Device.dwTimeGlobal, name, m_iActiveSlot, GetNextActiveSlot() );
-//			}
-			m_iActiveSlot			= GetNextActiveSlot();
+			if ((m_iNextActiveSlot!=NO_ACTIVE_SLOT) && ItemFromSlot(m_iNextActiveSlot) && !g_player_hud->allow_activation(ItemFromSlot(m_iNextActiveSlot)->cast_hud_item()))
+			   return;
 		}
-		if((GetNextActiveSlot()!=NO_ACTIVE_SLOT) && ActiveItem() && ActiveItem()->cast_hud_item()->IsHidden())
-				ActiveItem()->ActivateItem();
+
+		if (ActiveItem())
+		{
+			CHudItem* hi = ActiveItem()->cast_hud_item();
+			
+			if (!hi->IsHidden())
+			{
+				if (hi->GetState() == CHUDState::eIdle && hi->GetNextState() == CHUDState::eIdle)
+					hi->SendDeactivateItem();
+
+				UpdateDropTasks();
+				return;
+			}
+		}
+		
+		if (GetNextActiveSlot() != NO_ACTIVE_SLOT)
+		{
+			PIItem tmp_next_active = ItemFromSlot(GetNextActiveSlot());
+			if (tmp_next_active)
+			{
+				if (IsSlotBlocked(tmp_next_active))
+				{
+					Activate(m_iActiveSlot);
+					return;
+				} 
+				else
+				{
+					tmp_next_active->ActivateItem();
+				}
+			}
+		}
+		
+		m_iActiveSlot = GetNextActiveSlot();
 	}
-	UpdateDropTasks	();
+
+	if ((GetNextActiveSlot() != NO_ACTIVE_SLOT) && ActiveItem() && ActiveItem()->cast_hud_item()->IsHidden())
+		ActiveItem()->ActivateItem();
+
+	UpdateDropTasks();
 }
 
 void CInventory::UpdateDropTasks()
@@ -774,13 +685,10 @@ void CInventory::UpdateDropItem(PIItem pIItem)
 		pIItem->SetDropManual(FALSE);
 		pIItem->DenyTrade();
 
-		if ( OnServer() ) 
-		{
-			NET_Packet					P;
-			pIItem->object().u_EventGen	(P, GE_OWNERSHIP_REJECT, pIItem->object().H_Parent()->ID());
-			P.w_u16						(u16(pIItem->object().ID()));
-			pIItem->object().u_EventSend(P);
-		}
+		NET_Packet					P;
+		pIItem->object().u_EventGen	(P, GE_OWNERSHIP_REJECT, pIItem->object().H_Parent()->ID());
+		P.w_u16						(u16(pIItem->object().ID()));
+		pIItem->object().u_EventSend(P);
 	}// dropManual
 }
 
@@ -789,13 +697,11 @@ PIItem CInventory::Same(const PIItem pIItem, bool bSearchRuck) const
 {
 	const TIItemContainer &list = bSearchRuck ? m_ruck : m_belt;
 
-	for(TIItemContainer::const_iterator it = list.begin(); list.end() != it; ++it) 
+	for (TIItemContainer::const_iterator it = list.begin(); list.end() != it; ++it) 
 	{
 		const PIItem l_pIItem = *it;
 		
-		if((l_pIItem != pIItem) && 
-				!xr_strcmp(l_pIItem->object().cNameSect(), 
-				pIItem->object().cNameSect())) 
+		if ((l_pIItem != pIItem) && !xr_strcmp(l_pIItem->object().cNameSect(), pIItem->object().cNameSect())) 
 			return l_pIItem;
 	}
 	return NULL;
@@ -1192,7 +1098,6 @@ bool CInventory::isBeautifulForActiveSlot	(CInventoryItem *pIItem)
 	return				(false);
 }
 
-//.#include "WeaponHUD.h"
 void CInventory::Items_SetCurrentEntityHud(bool current_entity)
 {
 	TIItemContainer::iterator it;
@@ -1211,8 +1116,6 @@ void CInventory::Items_SetCurrentEntityHud(bool current_entity)
 //call this only via Actor()->SetWeaponHideState()
 void CInventory::SetSlotsBlocked(u16 mask, bool bBlock)
 {
-	R_ASSERT(OnServer());
-
 	for(u16 i = FirstSlot(), ie = LastSlot(); i <= ie; ++i)
 	{
 		if(mask & (1<<i))
@@ -1227,7 +1130,8 @@ void CInventory::SetSlotsBlocked(u16 mask, bool bBlock)
 	if (bBlock)
 	{
 		TryDeactivateActiveSlot();	
-	} else
+	} 
+	else
 	{
 		TryActivatePrevSlot();
 	}

@@ -23,7 +23,6 @@ CShootingObject::CShootingObject(void)
 {
 	fShotTimeCounter							= 0;
  	fOneShotTime						= 0;
-	//fHitPower						= 0.0f;
 	fvHitPower.set					(0.0f,0.0f,0.0f,0.0f);
 	fvHitPowerCritical.set			(0.0f,0.0f,0.0f,0.0f);
 	m_fStartBulletSpeed				= 1000.f;
@@ -357,23 +356,25 @@ void CShootingObject::UpdateFlameParticles	()
 //подсветка от выстрела
 void CShootingObject::UpdateLight()
 {
-	if (light_render && light_time>0)		
+	if (light_render && light_time > 0)		
 	{
 		light_time -= Device.fTimeDelta;
-		if (light_time<=0) StopLight();
+		if (light_time <= 0)
+			StopLight();
 	}
 }
 
-void CShootingObject::StopLight			()
+void CShootingObject::StopLight()
 {
-	if(light_render){
+	if (light_render)
+	{
 		light_render->set_active(false);
 	}
 }
 
 void CShootingObject::RenderLight()
 {
-	if ( light_render && light_time>0 ) 
+	if (light_render && light_time > 0) 
 	{
 		Light_Render(get_CurrentFirePoint());
 	}
@@ -381,31 +382,7 @@ void CShootingObject::RenderLight()
 
 bool CShootingObject::SendHitAllowed		(CObject* pUser)
 {
-	if (Game().IsServerControlHits())
-		return OnServer();
-
-	if (OnServer())
-	{
-		if (smart_cast<CActor*>(pUser))
-		{
-			if (Level().CurrentControlEntity() != pUser)
-			{
-				return false;
-			}
-		}
-		return true;
-	}
-	else
-	{
-		if (smart_cast<CActor*>(pUser))
-		{
-			if (Level().CurrentControlEntity() == pUser)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
+	return true;
 };
 
 extern void random_dir(Fvector& tgt_dir, const Fvector& src_dir, float dispersion);

@@ -163,9 +163,6 @@ void CArtefact::UpdateCL		()
 
 void CArtefact::Interpolate()
 {
-	if (OnServer())
-		return;
-	
 	net_updateInvData* p = NetSync();
 	while (p->NET_IItem.size() > 1)	//in real no interpolation, just get latest state
 	{

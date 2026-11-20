@@ -146,22 +146,23 @@ void CCustomZone::Load(LPCSTR section)
 	if(pSettings->line_exist(section,"awake_particles")) 
 		m_sAwakingParticles = pSettings->r_string(section,"awake_particles");
 	
-
 	if(pSettings->line_exist(section,"entrance_small_particles")) 
 		m_sEntranceParticlesSmall = pSettings->r_string(section,"entrance_small_particles");
+	
 	if(pSettings->line_exist(section,"entrance_big_particles")) 
 		m_sEntranceParticlesBig = pSettings->r_string(section,"entrance_big_particles");
 
 	if(pSettings->line_exist(section,"hit_small_particles")) 
 		m_sHitParticlesSmall = pSettings->r_string(section,"hit_small_particles");
+	
 	if(pSettings->line_exist(section,"hit_big_particles")) 
 		m_sHitParticlesBig = pSettings->r_string(section,"hit_big_particles");
 
 	if(pSettings->line_exist(section,"idle_small_particles")) 
-		m_sIdleObjectParticlesBig = pSettings->r_string(section,"idle_big_particles");
+		m_sIdleObjectParticlesSmall = pSettings->r_string(section,"idle_small_particles");
 	
 	if(pSettings->line_exist(section,"idle_big_particles")) 
-		m_sIdleObjectParticlesSmall = pSettings->r_string(section,"idle_small_particles");
+		m_sIdleObjectParticlesBig = pSettings->r_string(section,"idle_big_particles");	
 	
 	if(pSettings->line_exist(section,"idle_particles_dont_stop"))
 		m_zone_flags.set(eIdleObjectParticlesDontStop, pSettings->r_bool(section,"idle_particles_dont_stop"));
@@ -171,7 +172,6 @@ void CCustomZone::Load(LPCSTR section)
 		m_actor_effector				= xr_new<CZoneEffector>();
 		m_actor_effector->Load			(pSettings->r_string(section,"postprocess"));
 	};
-
 
 	if(pSettings->line_exist(section,"bolt_entrance_particles")) 
 	{
@@ -1122,14 +1122,10 @@ void CCustomZone::OnStateSwitch	(EZoneState new_state)
 
 void CCustomZone::SwitchZoneState(EZoneState new_state)
 {
-	if (OnServer())
-	{
-		// !!! Just single entry for given state !!!
-		NET_Packet		P;
-		u_EventGen		(P,GE_ZONE_STATE_CHANGE,ID());
-		P.w_u8			(u8(new_state));
-		u_EventSend		(P);
-	};
+	NET_Packet		P;
+	u_EventGen		(P,GE_ZONE_STATE_CHANGE,ID());
+	P.w_u8			(u8(new_state));
+	u_EventSend		(P);
 
 	m_iPreviousStateTime = m_iStateTime = 0;
 }
@@ -1140,8 +1136,7 @@ bool CCustomZone::Enable()
 
 	o_switch_2_fast();
 
-	for(OBJECT_INFO_VEC_IT it = m_ObjectInfoMap.begin(); 
-		m_ObjectInfoMap.end() != it; ++it) 
+	for(OBJECT_INFO_VEC_IT it = m_ObjectInfoMap.begin(); m_ObjectInfoMap.end() != it; ++it) 
 	{
 		CGameObject* pObject = (*it).object;
 		if (!pObject) continue;
@@ -1236,29 +1231,19 @@ u32	CCustomZone::ef_weapon_type() const
 	return	(m_ef_weapon_type);
 }
 
-void CCustomZone::CreateHit	(	u16 id_to, 
-								u16 id_from, 
-								const Fvector& hit_dir, 
-								float hit_power, 
-								s16 bone_id, 
-								const Fvector& pos_in_bone, 
-								float hit_impulse, 
-								ALife::EHitType hit_type)
+void CCustomZone::CreateHit(u16 id_to, u16 id_from, const Fvector& hit_dir, float hit_power, s16 bone_id, const Fvector& pos_in_bone, float hit_impulse, ALife::EHitType hit_type)
 {
-	if (OnServer())
-	{
-		if(m_owner_id != u32(-1) )
-			id_from	= (u16)m_owner_id;
+	if (m_owner_id != u32(-1) )
+		id_from	= (u16)m_owner_id;
 
-		NET_Packet			l_P;
-		Fvector hdir		= hit_dir;
-		SHit Hit			= SHit(hit_power, hdir, this, bone_id, pos_in_bone, hit_impulse, hit_type, 0.0f, false);		
-		Hit.GenHeader		(GE_HIT, id_to);
-		Hit.whoID			= id_from;
-		Hit.weaponID		= this->ID();
-		Hit.Write_Packet	(l_P);
-		u_EventSend			(l_P);
-	};
+	NET_Packet			l_P;
+	Fvector hdir		= hit_dir;
+	SHit Hit			= SHit(hit_power, hdir, this, bone_id, pos_in_bone, hit_impulse, hit_type, 0.0f, false);		
+	Hit.GenHeader		(GE_HIT, id_to);
+	Hit.whoID			= id_from;
+	Hit.weaponID		= this->ID();
+	Hit.Write_Packet	(l_P);
+	u_EventSend			(l_P);
 }
 
 void CCustomZone::net_Relcase(CObject* O)

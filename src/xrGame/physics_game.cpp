@@ -5,32 +5,24 @@
 #include "gamepersistent.h"
 #include "../xrphysics/Extendedgeom.h"
 #include "PhysicsGamePars.h"
-//#include "PhysicsCommon.h"
 #include "../xrphysics/PhysicsExternalCommon.h"
 #include "PhSoundPlayer.h"
 #include "PhysicsShellHolder.h"
 #include "PHCommander.h"
 #include "../xrphysics/MathUtils.h"
 #include "../xrphysics/iPHWorld.h"
-//#include "../xrphysics/physicsshell.h"
 
 #include "phreqcomparer.h"
 
 #include "../Include/xrRender/FactoryPtr.h"
 #include "../Include/xrRender/WallMarkArray.h"
-//#ifdef	DEBUG
-//#include "phdebug.h"
-//#endif
-///////////////////////////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////////////////////////
+
 static const float PARTICLE_EFFECT_DIST=70.f;
 static const float SOUND_EFFECT_DIST=70.f;
-const float			mass_limit										= 10000.f;//some conventional value used as evaluative param (there is no code restriction on mass)
-//////////////////////////////////////////////////////////////////////////////////
+const float mass_limit = 10000.f;
 static const float SQUARE_PARTICLE_EFFECT_DIST=PARTICLE_EFFECT_DIST*PARTICLE_EFFECT_DIST;
 static const float SQUARE_SOUND_EFFECT_DIST=SOUND_EFFECT_DIST*SOUND_EFFECT_DIST;
-class CPHParticlesPlayCall :
-		public CPHAction
+class CPHParticlesPlayCall : public CPHAction
 {
 LPCSTR ps_name;
 protected:
@@ -121,23 +113,12 @@ private:
 	}
 };
 
-//class CPHLiquidParticlesComparer :
-//	public CPHReqComparerV
-//{
-//	virtual bool			compare							(const	CPHReqComparerV* v)					const	{return v->compare(this);}
-//	virtual bool			compare							(const	CPHOnesConditionSelfCmpTrue* v)		const	{return true;}
-//	
-//};
-
-class CPHWallMarksCall :
-	public CPHAction
+class CPHWallMarksCall : public CPHAction
 {
-	//ref_shader pWallmarkShader;
 	wm_shader pWallmarkShader;
 	Fvector pos;
 	CDB::TRI* T;
 public:
-	//CPHWallMarksCall(const Fvector &p,CDB::TRI* Tri,ref_shader s)
 	CPHWallMarksCall(const Fvector &p,CDB::TRI* Tri,const wm_shader &s)
 	{
 		pWallmarkShader=s;
@@ -182,23 +163,13 @@ static void play_object( dxGeomUserData* data, SGameMtlPair* mtl_pair, const dCo
 template<class Pars>
 IC bool play_liquid_particle_criteria(dxGeomUserData &data, float vel_cret )
 {
-
-	if(  vel_cret > Pars::vel_cret_particles )
+	if (vel_cret > Pars::vel_cret_particles)
 		return true;
 
 	bool controller = !!data.ph_object && data.ph_object->CastType() == CPHObject::tpCharacter;
 
 	return  !controller && vel_cret>Pars::vel_cret_particles / 4.f;
-
-	
-	//return false;
-	//if( !data.ph_ref_object || !data.ph_ref_object->ObjectPPhysicsShell() )
-	//	return false;
-	//if( data.ph_ref_object->ObjectPPhysicsShell()->HasTracedGeoms() )
-	//	return false;
-
 }
-
 
 template<class Pars>
 void play_particles(float vel_cret, dxGeomUserData* data,  const dContactGeom* c, bool b_invert_normal, const SGameMtl* static_mtl, LPCSTR ps_name )
@@ -223,35 +194,11 @@ void play_particles(float vel_cret, dxGeomUserData* data,  const dContactGeom* c
 template<class Pars>
 void  TContactShotMark(CDB::TRI* T,dContactGeom* c)
 {
-	
-	
-	//dBodyID b=dGeomGetBody(c->g1);
-	//dxGeomUserData* data =0;
-	//bool b_invert_normal=false;
-	//if(!b) 
-	//{
-	//	b=dGeomGetBody(c->g2);
-	//	data=dGeomGetUserData(c->g2);
-	//	b_invert_normal=true;
-	//}
-	//else
-	//{
-	//	data=dGeomGetUserData(c->g1);
-	//}
-	//if(!b) 
-	//	return;
-
-	//dVector3 vel;
-	//dMass m;
-	//dBodyGetMass(b,&m);
-	//dBodyGetPointVel(b,c->pos[0],c->pos[1],c->pos[2],vel);
-	//float vel_cret=_abs(dDOT(vel,c->normal))* _sqrt(m.mass);
 	dxGeomUserData* data	=0;
 	float vel_cret			=0;
 	bool b_invert_normal	=false;
 	if(!ContactShotMarkGetEffectPars( c, data, vel_cret, b_invert_normal ))
 		return;
-	//float vel_cret= GetVelCret(c);
 
 	Fvector to_camera;to_camera.sub(cast_fv(c->pos),Device.vCameraPosition);
 	float square_cam_dist=to_camera.square_magnitude();
@@ -260,15 +207,12 @@ void  TContactShotMark(CDB::TRI* T,dContactGeom* c)
 		SGameMtlPair* mtl_pair		= GMLib.GetMaterialPair(T->material,data->material);
 		if(mtl_pair)
 		{
-			//if(vel_cret>Pars::vel_cret_wallmark && !mtl_pair->CollideMarks.empty())
 			if(vel_cret>Pars::vel_cret_wallmark && !mtl_pair->m_pCollideMarks->empty())
 			{
-				//ref_shader pWallmarkShader = mtl_pair->CollideMarks[::Random.randI(0,mtl_pair->CollideMarks.size())];
 				wm_shader WallmarkShader = mtl_pair->m_pCollideMarks->GenerateWallmark();
-				//ref_shader pWallmarkShader = mtl_pair->CollideMarks[::Random.randI(0,mtl_pair->CollideMarks.size())];
 				Level().ph_commander().add_call(xr_new<CPHOnesCondition>(),xr_new<CPHWallMarksCall>( *((Fvector*)c->pos),T,WallmarkShader));
 			}
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 			if(square_cam_dist<SQUARE_SOUND_EFFECT_DIST)
 			{
 			
@@ -294,8 +238,6 @@ void  TContactShotMark(CDB::TRI* T,dContactGeom* c)
 				}
 			}
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			if( square_cam_dist<SQUARE_PARTICLE_EFFECT_DIST && !mtl_pair->CollideParticles.empty() )
 			{
 				SGameMtl* static_mtl =  GMLib.GetMaterialByIdx(T->material);
