@@ -895,18 +895,22 @@ void CAI_Stalker::UpdateCL()
 	m_pPhysics_support->in_UpdateCL	();
 	STOP_PROFILE
 
-	if (g_Alive()) {
+	if (g_Alive()) 
+	{
 		START_PROFILE("stalker/client_update/sight_manager")
 		VERIFY						(!m_pPhysicsShell);
-		try {
+		try 
+		{
 			sight().update			();
 		}
-		catch(...) {
+		catch(...) 
+		{
 			sight().setup			(CSightAction(SightManager::eSightTypeCurrentDirection));
 			sight().update			();
 		}
 
-		Exec_Look					(client_update_fdelta());
+		Exec_Look					(Device.fTimeDelta);
+		Exec_Visibility				();
 		STOP_PROFILE
 
 		START_PROFILE("stalker/client_update/step_manager")
@@ -943,13 +947,13 @@ void CAI_Stalker::shedule_Update		( u32 DT )
 	START_PROFILE("stalker/schedule_update")
 	VERIFY2				(getEnabled()||PPhysicsShell(), *cName());
 
-	if (!CObjectHandler::planner().initialized()) {
+	if (!CObjectHandler::planner().initialized()) 
+	{
 		START_PROFILE("stalker/client_update/object_handler")
 		update_object_handler			();
 		STOP_PROFILE
 	}
-//	if (Position().distance_to(Level().CurrentEntity()->Position()) <= 50.f)
-//		Msg				("[%6d][SH][%s]",Device.dwTimeGlobal,*cName());
+
 	// Queue shrink
 	VERIFY				(_valid(Position()));
 	u32	dwTimeCL		= Level().timeServer()-NET_Latency;
@@ -961,20 +965,18 @@ void CAI_Stalker::shedule_Update		( u32 DT )
 	// *** general stuff
 	float dt			= float(DT)/1000.f;
 
-	if (g_Alive()) {
+	if (g_Alive()) 
+	{
 		animation().play_delayed_callbacks	();
 
 #ifndef USE_SCHEDULER_IN_AGENT_MANAGER
 		agent_manager().update			();
 #endif // USE_SCHEDULER_IN_AGENT_MANAGER
 
-//		bool			check = !!memory().enemy().selected();
-#if 0//def DEBUG
-		memory().visual().check_visibles();
-#endif
 		if ( false && g_mt_config.test(mtAiVision) )
 			Device.seqParallel.push_back(fastdelegate::FastDelegate0<>(this,&CCustomMonster::Exec_Visibility));
-		else {
+		else 
+		{
 			START_PROFILE("stalker/schedule_update/vision")
 			Exec_Visibility				();
 			STOP_PROFILE
@@ -997,8 +999,8 @@ void CAI_Stalker::shedule_Update		( u32 DT )
 	inherited::inherited::shedule_Update(DT);
 	STOP_PROFILE
 	
-	if (Remote())		{
-	} else {
+	if (!Remote())
+	{
 		// here is monster AI call
 		VERIFY							(_valid(Position()));
 		m_fTimeUpdateDelta				= dt;
