@@ -297,11 +297,7 @@ public:
 
     ICF void remove_from_seq_parallel(const fastdelegate::FastDelegate0<>& delegate)
     {
-        xr_vector<fastdelegate::FastDelegate0<> >::iterator I = std::find(
-                    seqParallel.begin(),
-                    seqParallel.end(),
-                    delegate
-                );
+        xr_vector<fastdelegate::FastDelegate0<>>::iterator I = std::find(seqParallel.begin(), seqParallel.end(), delegate);
         if (I != seqParallel.end())
             seqParallel.erase(I);
     }
@@ -320,8 +316,6 @@ private:
 extern ENGINE_API CRenderDevice Device;
 
 #define RDEVICE Device
-
-extern ENGINE_API bool g_bBenchmark;
 
 typedef fastdelegate::FastDelegate0<bool> LOADING_EVENT;
 extern ENGINE_API xr_list<LOADING_EVENT> g_loading_events;

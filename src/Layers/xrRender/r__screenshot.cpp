@@ -1,5 +1,4 @@
 #include "stdafx.h"
-//#include "../../xrEngine/xr_effgamma.h"
 #include "xr_effgamma.h"
 #include "dxRenderDeviceRender.h"
 #include "../xrRender/tga.h"
@@ -12,11 +11,14 @@ using namespace XRay::Media;
 
 #define	GAMESAVE_SIZE	128
 
-IC u32 convert				(float c)	{
+IC u32 convert(float c)	
+{
 	u32 C=iFloor(c);
-	if (C>255) C=255;
+	if (C > 255)
+		C = 255;
 	return C;
 }
+
 IC void MouseRayFromPoint	( Fvector& direction, int x, int y, Fmatrix& m_CamMat )
 {
 	int halfwidth		= Device.dwWidth/2;
@@ -45,7 +47,6 @@ void CRender::ScreenshotImpl	(ScreenshotMode mode, LPCSTR name, CMemoryWriter* m
 {
 	ID3DResource		*pSrcTexture;
 	// Фикс для скриншотилки
-	//HW.pBaseRT->GetResource(&pSrcTexture);
 	auto VP = HW.viewPortsRTZB.find(MAIN_VIEWPORT);
 	VP->second.baseRT->GetResource(&pSrcTexture);
 
@@ -68,25 +69,20 @@ void CRender::ScreenshotImpl	(ScreenshotMode mode, LPCSTR name, CMemoryWriter* m
 				desc.SampleDesc.Count = 1;
 				desc.Usage = D3D_USAGE_DEFAULT;
 				desc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
-				CHK_DX( HW.pDevice->CreateTexture2D( &desc, NULL, &pSrcSmallTexture ) );
-
-				//	D3DX10_TEXTURE_LOAD_INFO *pLoadInfo
+				CHK_DX( HW.pDevice->CreateTexture2D(&desc, NULL, &pSrcSmallTexture));
 
 #ifdef USE_DX11
-				CHK_DX(D3DX11LoadTextureFromTexture(HW.pContext, pSrcTexture,
-					NULL, pSrcSmallTexture ));
+				CHK_DX(D3DX11LoadTextureFromTexture(HW.pContext, pSrcTexture, NULL, pSrcSmallTexture));
 #else
-				CHK_DX(D3DX10LoadTextureFromTexture( pSrcTexture,
-					NULL, pSrcSmallTexture ));
+				CHK_DX(D3DX10LoadTextureFromTexture(pSrcTexture, NULL, pSrcSmallTexture));
 #endif
 
 				// save (logical & physical)
-				ID3DBlob*		saved	= 0;
+				ID3DBlob* saved = 0;
 #ifdef USE_DX11
-				HRESULT hr = D3DX11SaveTextureToMemory(HW.pContext, pSrcSmallTexture, D3DX11_IFF_DDS, &saved, 0);
+				HRESULT hr = D3DX11SaveTextureToMemory(HW.pContext, pSrcSmallTexture, D3DX11_IFF_DDS, &saved, D3DX11_CHANNEL_RED | D3DX11_CHANNEL_GREEN | D3DX11_CHANNEL_BLUE);
 #else
-				HRESULT hr					= D3DX10SaveTextureToMemory( pSrcSmallTexture, D3DX10_IFF_DDS, &saved, 0);
-				//HRESULT hr					= D3DXSaveTextureToFileInMemory (&saved,D3DXIFF_DDS,texture,0);
+				HRESULT hr = D3DX10SaveTextureToMemory(pSrcSmallTexture, D3DX10_IFF_DDS, &saved, D3DX10_CHANNEL_RED | D3DX10_CHANNEL_GREEN | D3DX10_CHANNEL_BLUE);
 #endif
 				if(hr==D3D_OK)
 				{
@@ -118,16 +114,12 @@ void CRender::ScreenshotImpl	(ScreenshotMode mode, LPCSTR name, CMemoryWriter* m
 				desc.SampleDesc.Count = 1;
 				desc.Usage = D3D_USAGE_DEFAULT;
 				desc.BindFlags = D3D_BIND_SHADER_RESOURCE;
-				CHK_DX( HW.pDevice->CreateTexture2D( &desc, NULL, &pSrcSmallTexture ) );
-
-				//	D3DX10_TEXTURE_LOAD_INFO *pLoadInfo
+				CHK_DX(HW.pDevice->CreateTexture2D(&desc, NULL, &pSrcSmallTexture));
 
 #ifdef USE_DX11
-				CHK_DX(D3DX11LoadTextureFromTexture(HW.pContext, pSrcTexture,
-					NULL, pSrcSmallTexture ));
+				CHK_DX(D3DX11LoadTextureFromTexture(HW.pContext, pSrcTexture, NULL, pSrcSmallTexture));
 #else
-				CHK_DX(D3DX10LoadTextureFromTexture( pSrcTexture,
-					NULL, pSrcSmallTexture ));
+				CHK_DX(D3DX10LoadTextureFromTexture(pSrcTexture, NULL, pSrcSmallTexture));
 #endif
 				// save (logical & physical)
 				ID3DBlob*		saved	= 0;
@@ -135,7 +127,6 @@ void CRender::ScreenshotImpl	(ScreenshotMode mode, LPCSTR name, CMemoryWriter* m
 				HRESULT hr	= D3DX11SaveTextureToMemory(HW.pContext, pSrcSmallTexture, D3DX11_IFF_DDS, &saved, 0);
 #else
 				HRESULT hr					= D3DX10SaveTextureToMemory( pSrcSmallTexture, D3DX10_IFF_DDS, &saved, 0);
-				//HRESULT hr					= D3DXSaveTextureToFileInMemory (&saved,D3DXIFF_DDS,texture,0);
 #endif
 				if(hr==D3D_OK)
 				{
@@ -147,7 +138,8 @@ void CRender::ScreenshotImpl	(ScreenshotMode mode, LPCSTR name, CMemoryWriter* m
 							fs->w				(saved->GetBufferPointer(),(u32)saved->GetBufferSize());
 							FS.w_close			(fs);
 						}
-					} else
+					} 
+					else
 					{
 						memory_writer->w		(saved->GetBufferPointer(),(u32)saved->GetBufferSize());
 					}
@@ -182,8 +174,7 @@ void CRender::ScreenshotImpl	(ScreenshotMode mode, LPCSTR name, CMemoryWriter* m
 #ifdef USE_DX11
 					CHK_DX				(D3DX11SaveTextureToMemory(HW.pContext, pSrcTexture, D3DX11_IFF_BMP, &saved, 0));
 #else
-					CHK_DX				(D3DX10SaveTextureToMemory( pSrcTexture, D3DX10_IFF_BMP, &saved, 0));
-					//		CHK_DX				(D3DXSaveSurfaceToFileInMemory (&saved,D3DXIFF_TGA,pFB,0,0));
+					CHK_DX				(D3DX10SaveTextureToMemory(pSrcTexture, D3DX10_IFF_BMP, &saved, 0));
 #endif
 					IWriter*		fs	= FS.w_open	("$screenshots$",buf); R_ASSERT(fs);
 					fs->w				(saved->GetBufferPointer(),(u32)saved->GetBufferSize());

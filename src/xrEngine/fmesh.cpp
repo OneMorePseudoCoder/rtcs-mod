@@ -1,9 +1,6 @@
 #include "stdafx.h"
 #pragma hdrstop
 
-#pragma warning(disable:4995)
-#include <d3dx9.h>
-#pragma warning(default:4995)
 #include "fmesh.h"
 
 void ogf_desc::Load(IReader& F)
@@ -16,6 +13,7 @@ void ogf_desc::Load(IReader& F)
     F.r_stringZ(modif_name);
     F.r(&modif_time, sizeof(modif_time));
 }
+
 void ogf_desc::Save(IWriter& F)
 {
     F.w_stringZ(source_file);

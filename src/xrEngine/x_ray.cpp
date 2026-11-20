@@ -161,12 +161,6 @@ SoundProcessor;
 ENGINE_API CApplication* pApp = NULL;
 static HWND logoWindow = NULL;
 
-int doLauncher();
-void doBenchmark(LPCSTR name);
-ENGINE_API bool g_bBenchmark = false;
-string512 g_sBenchmarkName;
-
-
 ENGINE_API string512 g_sLaunchOnExit_params;
 ENGINE_API string512 g_sLaunchOnExit_app;
 ENGINE_API string_path g_sLaunchWorkingFolder;
@@ -175,16 +169,15 @@ ENGINE_API string_path g_sLaunchWorkingFolder;
 void InitEngine()
 {
     Engine.Initialize();
-    while (!g_bIntroFinished) Sleep(100);
+    while (!g_bIntroFinished)
+		Sleep(100);
     Device.Initialize();
 }
 
 struct path_excluder_predicate
 {
-    explicit path_excluder_predicate(xr_auth_strings_t const* ignore) :
-        m_ignore(ignore)
-    {
-    }
+    explicit path_excluder_predicate(xr_auth_strings_t const* ignore) : m_ignore(ignore)
+    {}
     bool xr_stdcall is_allow_include(LPCSTR path)
     {
         if (!m_ignore)
@@ -196,16 +189,13 @@ struct path_excluder_predicate
 };
 
 template <typename T>
-void InitConfig(T& config, pcstr name, bool fatal = true,
-	bool readOnly = true, bool loadAtStart = true, bool saveAtEnd = true,
-	u32 sectCount = 0, const CInifile::allow_include_func_t& allowIncludeFunc = nullptr)
+void InitConfig(T& config, pcstr name, bool fatal = true, bool readOnly = true, bool loadAtStart = true, bool saveAtEnd = true, u32 sectCount = 0, const CInifile::allow_include_func_t& allowIncludeFunc = nullptr)
 {
 	string_path fname;
 	FS.update_path(fname, "$game_config$", name);
 	config = new CInifile(fname, readOnly, loadAtStart, saveAtEnd, sectCount, allowIncludeFunc);
 
-	CHECK_OR_EXIT(config->section_count() || !fatal,
-		make_string("Cannot find file %s.\nReinstalling application may fix this problem.", fname));
+	CHECK_OR_EXIT(config->section_count() || !fatal, make_string("Cannot find file %s.\nReinstalling application may fix this problem.", fname));
 }
 
 void InitSettings()
@@ -335,11 +325,13 @@ void Startup()
     // ...command line for auto start
     {
         LPCSTR pStartup = strstr(Core.Params, "-start ");
-        if (pStartup) Console->Execute(pStartup + 1);
+        if (pStartup)
+			Console->Execute(pStartup + 1);
     }
     {
         LPCSTR pStartup = strstr(Core.Params, "-load ");
-        if (pStartup) Console->Execute(pStartup + 1);
+        if (pStartup)
+			Console->Execute(pStartup + 1);
     }
 
     // Initialize APP
@@ -369,15 +361,11 @@ void Startup()
     // Destroying
     destroyInput();
 
-    if (!g_bBenchmark)
-        destroySettings();
+    destroySettings();
 
     LALib.OnDestroy();
 
-    if (!g_bBenchmark)
-        destroyConsole();
-    else
-        Console->Destroy();
+    destroyConsole();
 
     destroySound();
 
@@ -436,10 +424,8 @@ void RegisterWindowClass(HINSTANCE hInst)
 
 HWND CreateSplashWindow(HINSTANCE hInst)
 {
-    HWND hwndOwner = CreateWindow(c_szSplashClass, NULL, WS_POPUP,
-        0, 0, 0, 0, NULL, NULL, hInst, NULL);
-    return CreateWindowEx(WS_EX_LAYERED, c_szSplashClass, NULL, WS_POPUP | WS_VISIBLE,
-        0, 0, 0, 0, hwndOwner, NULL, hInst, NULL);
+    HWND hwndOwner = CreateWindow(c_szSplashClass, NULL, WS_POPUP, 0, 0, 0, 0, NULL, NULL, hInst, NULL);
+    return CreateWindowEx(WS_EX_LAYERED, c_szSplashClass, NULL, WS_POPUP | WS_VISIBLE, 0, 0, 0, 0, hwndOwner, NULL, hInst, NULL);
 }
 
 HWND WINAPI ShowSplash(HINSTANCE hInstance, int nCmdShow)
@@ -472,18 +458,16 @@ HWND WINAPI ShowSplash(HINSTANCE hInstance, int nCmdShow)
         splashHeight = img.GetHeight();
     }
 
-    //float temp_x_size = 860.f;
-    //float temp_y_size = 461.f;
     int scr_x = GetSystemMetrics(SM_CXSCREEN);
     int scr_y = GetSystemMetrics(SM_CYSCREEN);
 
     int pos_x = (scr_x / 2) - (splashWidth / 2);
     int pos_y = (scr_y / 2) - (splashHeight / 2);
 
-    //if (!RegClass(SplashProc, szClass, COLOR_WINDOW)) return FALSE;
     hWnd = CreateSplashWindow(hInstance);
 
-    if (!hWnd) return FALSE;
+    if (!hWnd)
+		return FALSE;
 
     HDC hdcScreen = GetDC(NULL);
     HDC hDC = CreateCompatibleDC(hdcScreen);
@@ -740,24 +724,7 @@ int APIENTRY WinMain_impl(HINSTANCE hInstance, HINSTANCE hPrevInstance, char* lp
 
         Engine.External.CreateRendererList();
 
-        LPCSTR benchName = "-batch_benchmark ";
-        if (strstr(lpCmdLine, benchName))
-        {
-            int sz = xr_strlen(benchName);
-            string64 b_name;
-            sscanf(strstr(Core.Params, benchName) + sz, "%[^ ] ", b_name);
-            doBenchmark(b_name);
-            return 0;
-        }
-
         Msg("command line %s", lpCmdLine);
-
-        if (strstr(lpCmdLine, "-launcher"))
-        {
-            int l_res = doLauncher();
-            if (l_res != 0)
-                return 0;
-        };
 
         if (strstr(Core.Params, "-r2a"))
             Console->Execute("renderer renderer_r2a");
@@ -870,12 +837,14 @@ void _InitializeFont(CGameFont*& F, LPCSTR section, u32 flags)
     if (pSettings->line_exist(section, "size"))
     {
         float sz = pSettings->r_float(section, "size");
-        if (flags&CGameFont::fsDeviceIndependent) F->SetHeightI(sz);
-        else F->SetHeight(sz);
+        if (flags&CGameFont::fsDeviceIndependent)
+			F->SetHeightI(sz);
+        else
+			F->SetHeight(sz);
     }
+
     if (pSettings->line_exist(section, "interval"))
         F->SetInterval(pSettings->r_fvector2(section, "interval"));
-
 }
 
 CApplication::CApplication()
@@ -1165,7 +1134,9 @@ void gen_logo_name(string_path& dest, LPCSTR level_name, int num)
 
 void CApplication::Level_Set(u32 L)
 {
-    if (L >= Levels.size()) return;
+    if (L >= Levels.size())
+		return;
+
     FS.get_path("$level$")->_set(Levels[L].folder);
 
     static string_path path;
@@ -1319,81 +1290,6 @@ BOOL IsPCAccessAllowed()
     FreeLibrary(hPCtrlChk);
 
     return bAllowed;
-}
-
-//launcher stuff----------------------------
-extern "C" 
-{
-    typedef int __cdecl LauncherFunc(int);
-}
-HMODULE hLauncher = NULL;
-LauncherFunc* pLauncher = NULL;
-
-void InitLauncher()
-{
-    if (hLauncher)
-        return;
-    hLauncher = LoadLibrary("xrLauncher.dll");
-    if (0 == hLauncher) R_CHK(GetLastError());
-    R_ASSERT2(hLauncher, "xrLauncher DLL raised exception during loading or there is no xrLauncher.dll at all");
-
-    pLauncher = (LauncherFunc*)GetProcAddress(hLauncher, "RunXRLauncher");
-    R_ASSERT2(pLauncher, "Cannot obtain RunXRLauncher function from xrLauncher.dll");
-};
-
-void FreeLauncher()
-{
-    if (hLauncher)
-    {
-        FreeLibrary(hLauncher);
-        hLauncher = NULL;
-        pLauncher = NULL;
-    };
-}
-
-int doLauncher()
-{
-    return 0;
-}
-
-void doBenchmark(LPCSTR name)
-{
-    g_bBenchmark = true;
-    string_path in_file;
-    FS.update_path(in_file, "$app_data_root$", name);
-    CInifile ini(in_file);
-    int test_count = ini.line_count("benchmark");
-    LPCSTR test_name, t;
-    shared_str test_command;
-    for (int i = 0; i < test_count; ++i)
-    {
-        ini.r_line("benchmark", i, &test_name, &t);
-        xr_strcpy(g_sBenchmarkName, test_name);
-
-        test_command = ini.r_string_wb("benchmark", test_name);
-        u32 cmdSize = test_command.size() + 1;
-        Core.Params = (char*)xr_realloc(Core.Params, cmdSize);
-        xr_strcpy(Core.Params, cmdSize, test_command.c_str());
-        xr_strlwr(Core.Params);
-
-        InitInput();
-        if (i)
-        {
-            InitEngine();
-        }
-
-        Engine.External.Initialize();
-
-        xr_strcpy(Console->ConfigFile, "user.ltx");
-        if (strstr(Core.Params, "-ltx "))
-        {
-            string64 c_name;
-            sscanf(strstr(Core.Params, "-ltx ") + 5, "%[^ ] ", c_name);
-            xr_strcpy(Console->ConfigFile, c_name);
-        }
-
-        Startup();
-    }
 }
 
 #pragma optimize("g", off)

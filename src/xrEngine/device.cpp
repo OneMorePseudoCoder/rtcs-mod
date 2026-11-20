@@ -8,11 +8,7 @@
 #define MMNOAUX
 #define MMNOMIXER
 #define MMNOJOY
-//#define OPT_Z
 #include <mmsystem.h>
-// d3dx9.h
-#include <d3dx9.h>
-#pragma warning(default:4995)
 
 #include "x_ray.h"
 #include "Render.h"
@@ -447,9 +443,6 @@ ENGINE_API BOOL bShowPauseString = TRUE;
 void CRenderDevice::Pause(BOOL bOn, BOOL bTimer, BOOL bSound, LPCSTR reason)
 {
     static int snd_emitters_ = -1;
-
-    if (g_bBenchmark)
-		return;
 
     if (bOn)
     {

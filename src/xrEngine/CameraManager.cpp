@@ -17,8 +17,10 @@
 #include "render.h"
 
 #pragma warning(disable:4995)
-#include <D3DX10Math.h>
+#include <DirectXMath.h>
 #pragma warning(default:4995)
+
+using namespace DirectX;
 
 float psCamInert = 0.f;
 float psCamSlideInert = 0.25f;
@@ -82,6 +84,7 @@ SPPInfo::SPPInfo()
     cm_influence = 0.0f;
     cm_interpolate = 0.0f;
 }
+
 void SPPInfo::normalize()
 {}
 
@@ -115,27 +118,13 @@ SPPInfo& SPPInfo::lerp(const SPPInfo& def, const SPPInfo& to, float factor)
     pp.duality.v += def.duality.v + (to.duality.v - def.duality.v) * factor;
     pp.gray += def.gray + (to.gray - def.gray) * factor;
     pp.blur += def.blur + (to.blur - def.blur) * factor;
-    pp.noise.intensity = to.noise.intensity;// + (to.noise.intensity - def.noise.intensity) * factor;
-    pp.noise.grain = to.noise.grain;// + (to.noise.grain - def.noise.grain) * factor;
-    pp.noise.fps = to.noise.fps; // + (to.noise.fps - def.noise.fps) * factor;
+    pp.noise.intensity = to.noise.intensity;
+    pp.noise.grain = to.noise.grain;
+    pp.noise.fps = to.noise.fps;
 
-    pp.color_base.set(
-        def.color_base.r + (to.color_base.r - def.color_base.r) * factor,
-        def.color_base.g + (to.color_base.g - def.color_base.g) * factor,
-        def.color_base.b + (to.color_base.b - def.color_base.b) * factor
-    );
-
-    pp.color_gray.set(
-        def.color_gray.r + (to.color_gray.r - def.color_gray.r) * factor,
-        def.color_gray.g + (to.color_gray.g - def.color_gray.g) * factor,
-        def.color_gray.b + (to.color_gray.b - def.color_gray.b) * factor
-    );
-
-    pp.color_add.set(
-        def.color_add.r + (to.color_add.r - def.color_add.r) * factor,
-        def.color_add.g + (to.color_add.g - def.color_add.g) * factor,
-        def.color_add.b + (to.color_add.b - def.color_add.b) * factor
-    );
+    pp.color_base.set(def.color_base.r + (to.color_base.r - def.color_base.r) * factor, def.color_base.g + (to.color_base.g - def.color_base.g) * factor, def.color_base.b + (to.color_base.b - def.color_base.b) * factor);
+    pp.color_gray.set(def.color_gray.r + (to.color_gray.r - def.color_gray.r) * factor, def.color_gray.g + (to.color_gray.g - def.color_gray.g) * factor, def.color_gray.b + (to.color_gray.b - def.color_gray.b) * factor);
+    pp.color_add.set(def.color_add.r + (to.color_add.r - def.color_add.r) * factor, def.color_add.g + (to.color_add.g - def.color_add.g) * factor, def.color_add.b + (to.color_add.b - def.color_add.b) * factor);
 
     pp.cm_tex1 = to.cm_tex1;
     pp.cm_tex2 = to.cm_tex2;
@@ -520,7 +509,8 @@ void CCameraManager::ApplyDeviceInternal(float _viewport_near)
     {
         Device.mFullTransform.mul(Device.mProject, Device.mView);
 		Device.m_pRender->SetCacheXform(Device.mView, Device.mProject);
-        D3DXMatrixInverse((D3DXMATRIX*)&Device.mInvFullTransform, 0, (D3DXMATRIX*)&Device.mFullTransform);
+        XMMATRIX camera_transform = XMLoadFloat4x4(reinterpret_cast<XMFLOAT4X4*>(&Device.mFullTransform));
+        XMMatrixInverse(0, camera_transform);
     }
 
     if (g_pGamePersistent && g_pGamePersistent->m_pMainMenu->IsActive())
